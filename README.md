@@ -13,6 +13,7 @@ This project is a fullstack application based on the MERN stack (MongoDB, Expres
 ### 2. Make a .env file in the backend folder. Make sure the file includes:
      MONGO_USER_URI=mongodb://mongo:27017/userDB
      PORT=5000
+     JWT_SECRET=superSecretKey123
 
 ### 3. Build and run with Docker by using this command:
      docker-compose up --build
@@ -26,6 +27,10 @@ This project is a fullstack application based on the MERN stack (MongoDB, Expres
 ### 4. Access the containers by going into either: 
      http://localhost:3000 (frontend)
      http://localhost:5000/api (backend)
+     
+     For MongoDB use MongoDB Compass and connect to:
+
+     localhost:27017
 
 ### 5. If you make changes to the project, simply run this command:
      docker-compose up
