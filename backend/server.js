@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectUserDB } from "./db/dbConnection.js";
-
+import userRoutes from "./routes/userRoutes.js"
 
 dotenv.config();
 const app = express();
@@ -12,6 +12,8 @@ app.use(cors());
 app.use(express.json());
 
 connectUserDB();
+
+app.use("/api/users",userRoutes)
 
 app.get("/api", (req, res) => {
   res.send({ message: "Hello from the backend!" });
