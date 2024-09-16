@@ -11,7 +11,7 @@ This project is a fullstack application based on the MERN stack (MongoDB, Expres
 ### 1. Clone the repository to your local machine.
 
 ### 2. Make a .env file in the backend folder. Make sure the file includes:
-     MONGO_USER_URI=mongodb://mongo:27017/userDB
+     MONGODB_URI=mongodb://mongo:27017/mainDB
      PORT=5000
      JWT_SECRET=superSecretKey123
 
