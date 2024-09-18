@@ -10,7 +10,7 @@ const mapSchema = new mongoose.Schema(
         type: String,
         required: true,
         },
-        campgain: {
+        campaign: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Campaign",
         required: true,
