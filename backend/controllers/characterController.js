@@ -1,10 +1,15 @@
 import Character from "../models/characterModel.js";
 
 export const createCharacter = async (req, res) => {
-  const { name, level, race, class: characterClass, background, imageURL, attributes, user } = req.body;
-
-  console.log("Request Body:", req.body);
-
+  const {
+    name,
+    level,
+    race,
+    class: characterClass,
+    background,
+    imageURL,
+    attributes,
+  } = req.body;
 
   try {
     const newCharacter = new Character({
@@ -15,7 +20,7 @@ export const createCharacter = async (req, res) => {
       background,
       imageURL,
       attributes,
-      user,
+      user: req.user.id,
     });
 
     const savedCharacter = await newCharacter.save();
@@ -30,10 +35,18 @@ export const deleteCharacter = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedCharacter = await Character.findByIdAndDelete(id);
-    if (!deletedCharacter) {
+    const character = await Character.findById(id);
+    if (!character) {
       return res.status(404).json({ message: "Character not found" });
     }
+
+    if (character.user.toString() !== req.user.id) {
+      return res
+        .status(401)
+        .json({ message: "Not authorized to delete this character" });
+    }
+
+    await Character.findByIdAndDelete(id);
     res.status(200).json({ message: "Character deleted successfully" });
   } catch (error) {
     console.log(error);
@@ -43,19 +56,37 @@ export const deleteCharacter = async (req, res) => {
 
 export const editCharacter = async (req, res) => {
   const { id } = req.params;
-  const { name, level, race, class: characterClass, background, imageURL, attributes } = req.body;
+  const {
+    name,
+    level,
+    race,
+    class: characterClass,
+    background,
+    imageURL,
+    attributes,
+  } = req.body;
 
   try {
-    const updatedCharacter = await Character.findByIdAndUpdate(
-      id,
-      { name, level, race, class: characterClass, background, imageURL, attributes },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedCharacter) {
+    const character = await Character.findById(id);
+    if (!character) {
       return res.status(404).json({ message: "Character not found" });
     }
 
+    if (character.user.toString() !== req.user.id) {
+      return res
+        .status(401)
+        .json({ message: "Not authorized to edit this character" });
+    }
+
+    character.name = name;
+    character.level = level;
+    character.race = race;
+    character.class = characterClass;
+    character.background = background;
+    character.imageURL = imageURL;
+    character.attributes = attributes;
+
+    const updatedCharacter = await character.save();
     res.status(200).json(updatedCharacter);
   } catch (error) {
     console.log(error);
