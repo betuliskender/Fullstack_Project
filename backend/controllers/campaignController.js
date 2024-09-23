@@ -56,13 +56,41 @@ export const deleteCampaign = async (req, res) => {
         .json({ message: "Could not find a campaign with that ID" });
     }
 
-    //Sletter alle characters fra kampagnen
+    // This deletes all the characters from the campaign
     await CampaignCharacter.deleteMany({ campaign: campaignId });
 
     res.status(200).json({ message: "Campaign deleted successfully" });
   } catch (error) {
     console.log("Error deleting the campaign", error);
     res.status(500).json({ message: "Failed to delete the campaign", error });
+  }
+};
+
+export const getCampaignById = async (req, res) => {
+  const { campaignId } = req.params;
+
+  try {
+    const campaign = await Campaign.findById(campaignId);
+
+    if (!campaign) {
+      return res
+        .status(404)
+        .json({ message: "Could not find a campaign with that ID" });
+    }
+    res.status(200).json(campaign);
+  } catch (error) {
+    console.log("Error getting the campaign", error);
+    res.status(500).json({ message: "Failed to get the campaign", error });
+  }
+};
+
+export const getAllCampaigns = async (req, res) => {
+  try {
+    const campaigns = await Campaign.find();
+    res.status(200).json(campaigns);
+  } catch (error) {
+    console.log("Error getting all campaigns", error);
+    res.status(500).json({ message: "Failed to get all campaigns", error });
   }
 };
 
@@ -104,7 +132,6 @@ export const changeCharacterInCampaign = async (req, res) => {
   const { newCharacterId } = req.body;
 
   try {
-
     // Cast campaignId og characterId til ObjectId
     const campaignObjectId = new mongoose.Types.ObjectId(campaignId);
     const characterObjectId = new mongoose.Types.ObjectId(characterId);
@@ -122,7 +149,7 @@ export const changeCharacterInCampaign = async (req, res) => {
         .json({ message: "Character not found in this campaign" });
     }
 
-    // Opdater karakteren til den nye karakter
+    // Update the character in the campaign to a new character
     campaignCharacter.character = newCharacterId;
     await campaignCharacter.save();
 
