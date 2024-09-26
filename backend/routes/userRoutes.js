@@ -6,14 +6,14 @@ import {
   handleValidationErrors,
 } from "../utility/validationMiddleware.js";
 
-const router = express.Router();
+const userRoutes = express.Router();
 
-router.post(
+userRoutes.post(
   "/register",
   validateUserRegistration,
   handleValidationErrors,
   registerUser
 );
-router.post("/login", validateUserLogin, login);
+userRoutes.post("/login", validateUserLogin, login);
 
-export default router;
+export default userRoutes;

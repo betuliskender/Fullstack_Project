@@ -1,18 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import FrontPage from "./components/Frontpage";
+import Character from "./components/Character";
+import Register from "./components/Register";
+import LogIn from "./components/LogIn";
+import Navbar from "./components/Navbar";
+import { AuthContext, AuthProvider } from "./utility/authContext";
+import ProfilePage from "./components/ProfilePage";
+import { useContext, useState } from "react";
 
 const App: React.FC = () => {
-  const [message, setMessage] = useState('');
+  const { setUser, setToken } = useContext(AuthContext); // Get setUser from context
 
-  useEffect(() => {
-    fetch('/api')
-      .then((response) => response.json())
-      .then((data) => setMessage(data.message));
-  }, []);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUser(null); // Remove user data on logout
+    setToken(null); // Remove token on logout
+  };
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
 
   return (
-    <div>
-      <h1>{message}</h1>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+        <Routes>
+          <Route path="/" element={<FrontPage />} />
+          <Route
+              path="/profile"
+              element={<ProfilePage isLoggedIn={isLoggedIn} />}
+            />
+          <Route path="/character" element={<Character isLoggedIn={isLoggedIn}/>} />
+          <Route path="/register" element={<Register/>} />
+          <Route path="/login" element={<LogIn onLogin={handleLogin}  />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
+    
   );
 };
 

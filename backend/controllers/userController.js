@@ -50,7 +50,7 @@ export const login = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ message: "Login successful", jwtToken });
+    res.status(200).json({ message: "Login successful", jwtToken, user: {firstName: user.firstName, lastName: user.lastName, email: user.email, userName: user.userName, _id: user._id} });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Could not login, server error", error });

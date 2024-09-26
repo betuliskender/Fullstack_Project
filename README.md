@@ -22,10 +22,10 @@ This project is a fullstack application based on the MERN stack (MongoDB, Expres
 - build Docker images for the frontend & backend.
 - start a MongoDB container
 - start a backend container on port 5000
-- start a frontend container on port 3000
+- start a frontend container on port 6173
 
 ### 4. Access the containers by going into either: 
-     http://localhost:3000 (frontend)
+     http://localhost:5173 (frontend)
      http://localhost:5000/api (backend)
      
      For MongoDB use MongoDB Compass and connect to:
