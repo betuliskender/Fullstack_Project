@@ -93,3 +93,30 @@ export const editCharacter = async (req, res) => {
     res.status(400).json({ message: "Could not update character", error });
   }
 };
+
+export const getAllCharacters = async (req, res) => {
+  try {
+    const characters = await Character.find();
+    res.status(200).json(characters);
+  } catch (error) {
+    console.log("Error getting characters", error);
+    res.status(500).json({ message: "Failed to get characters", error });
+  }
+};
+
+export const getCharacterById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const character = await Character.findById(id);
+
+    if (!character) {
+      return res.status(404).json({ message: "Character not found" });
+    }
+
+    res.status(200).json(character);
+  } catch (error) {
+    console.log("Error getting character", error);
+    res.status(500).json({ message: "Failed to get character", error });
+  }
+};

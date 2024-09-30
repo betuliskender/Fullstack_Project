@@ -3,6 +3,8 @@ import {
   createCharacter,
   deleteCharacter,
   editCharacter,
+  getAllCharacters,
+  getCharacterById
 } from "../controllers/characterController.js";
 import { authMiddleware } from "../utility/authMiddleware.js";
 
@@ -14,4 +16,12 @@ characterRoutes.delete("/:id", authMiddleware, deleteCharacter);
 
 characterRoutes.put("/:id", authMiddleware, editCharacter);
 
+characterRoutes.get("/:id", authMiddleware, getCharacterById);
+
+characterRoutes.get("/", authMiddleware, getAllCharacters);
+
 export default characterRoutes;
+
+
+
+

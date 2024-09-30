@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import { connectDB } from "./db/dbConnection.js";
 import userRoutes from "./routes/userRoutes.js";
 import characterRoutes from "./routes/characterRoutes.js";
+import campaignRoutes from "./routes/campaignRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -16,6 +18,8 @@ connectDB();
 
 app.use("/api/users", userRoutes);
 app.use("/api/characters", characterRoutes);
+app.use("/api/campaigns", campaignRoutes);
+app.use("/api/campaigns", sessionRoutes);
 
 app.get("/api", (req, res) => {
   res.send({ message: "Hello from the backend!" });
