@@ -52,6 +52,11 @@ export const typeDefs = gql`
     campaign: Campaign!
   }
 
+  type LoginResponse {
+  token: String!
+  user: User!
+  }
+
   # Query type for fetching data
   type Query {
     users: [User]
@@ -76,7 +81,7 @@ export const typeDefs = gql`
       password: String!
     ): User
 
-    login(email: String!, password: String!): String
+    login(email: String!, password: String!): LoginResponse!
 
     createCharacter(
       name: String!
