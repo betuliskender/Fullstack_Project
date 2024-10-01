@@ -1,4 +1,7 @@
 import express from "express";
+import {ApolloServer} from "apollo-server-express";
+import {typeDefs} from "./graphql/typeDefs.js";
+import resolvers from "./graphql/resolvers.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./db/dbConnection.js";
@@ -6,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import characterRoutes from "./routes/characterRoutes.js";
 import campaignRoutes from "./routes/campaignRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
+import authMiddleware from "./graphql/authMiddleware.js";
 
 dotenv.config();
 const app = express();
@@ -21,10 +25,22 @@ app.use("/api/characters", characterRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/campaigns", sessionRoutes);
 
-app.get("/api", (req, res) => {
-  res.send({ message: "Hello from the backend!" });
-});
+async function startServer() {
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => {
+      const auth = authMiddleware(req);
+      return { ...auth };
+    },
+  });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+  await server.start();
+  server.applyMiddleware({ app });
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}${server.graphqlPath}`);
+  });
+}
+
+startServer();
