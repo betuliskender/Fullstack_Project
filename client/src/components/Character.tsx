@@ -5,7 +5,7 @@ import { AuthContext } from "../utility/authContext";
 import { GETALLCHARACTERS } from "../graphql/queries";
 import { Character } from "../utility/types";
 import "../styles/character.css";
-import { deleteCharacter } from "../utility/apiservice";
+import { deleteCharacter, editCharacter } from "../utility/apiservice";
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
@@ -14,6 +14,8 @@ interface ProfilePageProps {
 const CharacterType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { token } = useContext(AuthContext);
   const [characters, setCharacters] = useState<Character[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentCharacter, setCurrentCharacter] = useState<Character | null>(null);
 
   const { loading, error, data, refetch } = useQuery(GETALLCHARACTERS, {
     context: {
@@ -35,8 +37,6 @@ const CharacterType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     }
   }, [data]);
 
-  console.log(characters);
-
   const handleDelete = async (id: string) => {
     try {
       if (token) {
@@ -48,6 +48,38 @@ const CharacterType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     } catch (error) {
       console.error("Error deleting character:", error);
     }
+  };
+
+  const handleEdit = (character: Character) => {
+    setCurrentCharacter(character);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setCurrentCharacter(null);
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (currentCharacter && token) {
+      try {
+        const updatedCharacter = await editCharacter(currentCharacter._id!, currentCharacter, token);
+        console.log("Character updated successfully:", updatedCharacter);
+        refetch();
+        handleModalClose();
+      } catch (error) {
+        console.error("Error updating character:", error);
+      }
+    }
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setCurrentCharacter((prevCharacter) => ({
+      ...prevCharacter!,
+      [name]: value,
+    }));
   };
 
 
@@ -82,10 +114,47 @@ const CharacterType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
             <p>Wisdom: {char.attributes.wisdom}</p>
             <p>Charisma: {char.attributes.charisma}</p>
             <button onClick={() => char._id && handleDelete(char._id)} className="delete-button">Delete</button>
+            <button onClick={() => handleEdit(char)} className="edit-button">Edit</button>
           </div>
         ))}
       </div>
+      {isModalOpen && currentCharacter && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={handleModalClose}>&times;</span>
+            <h2>Edit Character</h2>
+            <form onSubmit={handleFormSubmit}>
+              <label>
+                Name:
+                <input type="text" name="name" value={currentCharacter.name} onChange={handleInputChange} />
+              </label>
+              <label>
+                Level:
+                <input type="number" name="level" value={currentCharacter.level} onChange={handleInputChange} />
+              </label>
+              <label>
+                Race:
+                <input type="text" name="race" value={currentCharacter.race} onChange={handleInputChange} />
+              </label>
+              <label>
+                Class:
+                <input type="text" name="class" value={currentCharacter.class} onChange={handleInputChange} />
+              </label>
+              <label>
+                Background:
+                <input type="text" name="background" value={currentCharacter.background} onChange={handleInputChange} />
+              </label>
+              <label>
+                Image URL:
+                <input type="text" name="imageURL" value={currentCharacter.imageURL} onChange={handleInputChange} />
+              </label>
+              <button type="submit">Save</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+    
   );
 };
 
