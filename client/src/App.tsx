@@ -7,6 +7,14 @@ import Navbar from "./components/Navbar";
 import { AuthContext, AuthProvider } from "./utility/authContext";
 import ProfilePage from "./components/ProfilePage";
 import { useContext, useState } from "react";
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import CharacterForm from "./components/CharacterForm";
+
+
+const client = new ApolloClient({
+  uri: "http://localhost:5000/graphql", 
+  cache: new InMemoryCache()
+});
 
 const App: React.FC = () => {
   const { setUser, setToken } = useContext(AuthContext); // Get setUser from context
@@ -24,21 +32,24 @@ const App: React.FC = () => {
   };
 
   return (
-    <AuthProvider>
-      <Router>
-        <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-        <Routes>
-          <Route path="/" element={<FrontPage />} />
-          <Route
-              path="/profile"
-              element={<ProfilePage isLoggedIn={isLoggedIn} />}
-            />
-          <Route path="/character" element={<Character isLoggedIn={isLoggedIn}/>} />
-          <Route path="/register" element={<Register/>} />
-          <Route path="/login" element={<LogIn onLogin={handleLogin}  />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <ApolloProvider client={client}>
+      <AuthProvider>
+        <Router>
+          <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          <Routes>
+            <Route path="/" element={<FrontPage />} />
+            <Route
+                path="/profile"
+                element={<ProfilePage isLoggedIn={isLoggedIn} />}
+              />
+            <Route path="/character" element={<Character isLoggedIn={isLoggedIn}/>} />
+            <Route path="/create-character" element={<CharacterForm isLoggedIn={isLoggedIn} />} />
+            <Route path="/register" element={<Register/>} />
+            <Route path="/login" element={<LogIn onLogin={handleLogin}  />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ApolloProvider>
     
   );
 };

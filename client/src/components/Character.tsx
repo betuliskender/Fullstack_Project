@@ -1,217 +1,92 @@
-import React, { useState, ChangeEvent, FormEvent, useContext } from "react";
-import { createCharacter } from "../utility/apiservice";
-import { Character as CharacterType } from "../utility/types";
+import React, { useContext, useState, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
+import { GETALLCHARACTERS } from "../graphql/queries";
+import { Character } from "../utility/types";
+import "../styles/character.css";
+import { deleteCharacter } from "../utility/apiservice";
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
 }
 
-const Character: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
-  const { user, token } = useContext(AuthContext);
+const CharacterType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
+  const { token } = useContext(AuthContext);
+  const [characters, setCharacters] = useState<Character[]>([]);
 
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); //NY USESTATE :-)
-
-  const [character, setCharacter] = useState<CharacterType>({
-    name: "",
-    level: 1,
-    race: "",
-    class: "",
-    background: "",
-    imageURL: "",
-    attributes: {
-      strength: 0,
-      dexterity: 0,
-      constitution: 0,
-      intelligence: 0,
-      wisdom: 0,
-      charisma: 0,
+  const { loading, error, data, refetch } = useQuery(GETALLCHARACTERS, {
+    context: {
+      headers: {
+        Authorization: token ? `${token}` : "",
+      },
     },
-    user: user?._id || "",
   });
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name in character.attributes) {
-      setCharacter({
-        ...character,
-        attributes: {
-          ...character.attributes,
-          [name]: Number(value),
-        },
-      });
-    } else {
-      setCharacter({
-        ...character,
-        [name]: value,
-      });
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      refetch();
     }
-  };
+  }, [isLoggedIn, token, refetch]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (data && data.characters) {
+      setCharacters(data.characters);
+    }
+  }, [data]);
+
+  console.log(characters);
+
+  const handleDelete = async (id: string) => {
     try {
       if (token) {
-        await createCharacter(character, token); // Pass the token to the API service
-
-        setSuccessMessage("Character created successfully"); //NY USESTATE :-)
-
-        // Clear form - JEG CLEARER FORMEN HER :-)
-        setCharacter({
-          name: "",
-          level: 1,
-          race: "",
-          class: "",
-          background: "",
-          imageURL: "",
-          attributes: {
-            strength: 0,
-            dexterity: 0,
-            constitution: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0,
-          },
-          user: user?._id || "",
-        });
-      } else {
-        console.error("Token is null or undefined");
-        // Handle the case where the token is null or undefined
+        console.log(`Deleting character with id: ${id}`);
+        await deleteCharacter(id, token);
+        console.log(`Character with id: ${id} deleted successfully`);
+        refetch();
       }
-      // Handle success (e.g., navigate to another page or show a success message)
     } catch (error) {
-      console.error("Error creating character:", error);
-      // Handle error (e.g., show an error message)
+      console.error("Error deleting character:", error);
     }
   };
 
+
+  if (!isLoggedIn || !token) {
+    return <p>You must be logged in to view characters.</p>;
+  }
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
   return (
-    <React.Fragment>
-      {isLoggedIn ? (
-        <div>
-          <h1>Character Management</h1>
-          {successMessage && <p style={{ color: "green" }}>{successMessage}</p>}
-          <form onSubmit={handleSubmit}>
-            <div>
-              <label>Name:</label>
-              <input
-                type="text"
-                name="name"
-                value={character.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Level:</label>
-              <input
-                type="number"
-                name="level"
-                value={character.level}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Race:</label>
-              <input
-                type="text"
-                name="race"
-                value={character.race}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Class:</label>
-              <input
-                type="text"
-                name="class"
-                value={character.class}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Background:</label>
-              <input
-                type="text"
-                name="background"
-                value={character.background}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Image URL:</label>
-              <input
-                type="text"
-                name="imageURL"
-                value={character.imageURL}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Strength:</label>
-              <input
-                type="number"
-                name="strength"
-                value={character.attributes.strength}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Dexterity:</label>
-              <input
-                type="number"
-                name="dexterity"
-                value={character.attributes.dexterity}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Constitution:</label>
-              <input
-                type="number"
-                name="constitution"
-                value={character.attributes.constitution}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Intelligence:</label>
-              <input
-                type="number"
-                name="intelligence"
-                value={character.attributes.intelligence}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Wisdom:</label>
-              <input
-                type="number"
-                name="wisdom"
-                value={character.attributes.wisdom}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label>Charisma:</label>
-              <input
-                type="number"
-                name="charisma"
-                value={character.attributes.charisma}
-                onChange={handleChange}
-              />
-            </div>
-            <button type="submit">Create Character</button>
-          </form>
-        </div>
-      ) : (
-        <div>
-          <h2>You need to login to see this page</h2>
-        </div>
-      )}
-    </React.Fragment>
+    <div>
+      <div className="header-container">
+        <h1>Characters</h1>
+        <Link to="/create-character">
+          <button className="create-button">Create New Character</button>
+        </Link>
+      </div>
+      <div className="character-grid">
+        {characters.map((char: Character) => (
+          <div key={char._id} className="character-card">
+            <h3>{char.name}</h3>
+            <img src={char.imageURL} alt={char.name} className="character-image" />
+            <p>Level: {char.level}</p>
+            <p>Race: {char.race}</p>
+            <p>Class: {char.class}</p>
+            <p>Background: {char.background}</p>
+            <p>Strength: {char.attributes.strength}</p>
+            <p>Dexterity: {char.attributes.dexterity}</p>
+            <p>Constitution: {char.attributes.constitution}</p>
+            <p>Intelligence: {char.attributes.intelligence}</p>
+            <p>Wisdom: {char.attributes.wisdom}</p>
+            <p>Charisma: {char.attributes.charisma}</p>
+            <button onClick={() => char._id && handleDelete(char._id)} className="delete-button">Delete</button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
-export default Character;
+export default CharacterType;

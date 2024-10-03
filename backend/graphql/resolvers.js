@@ -9,7 +9,7 @@ const resolvers = {
   Query: {
     characters: async (_, __, { user }) => {
       if (!user) throw new Error('Authentication required');
-      return await Character.find().populate("user");
+      return await Character.find({ user: user.id }).populate("user");
     },
     character: async (_, { id }, { user }) => {
       if (!user) throw new Error('Authentication required');
@@ -63,7 +63,7 @@ const resolvers = {
         throw new Error('Invalid password');
       }
     
-      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     
       return {
         token, 
@@ -78,7 +78,7 @@ const resolvers = {
         classType,
         level,
         attributes,
-        user: user.userId,
+        user: user.id,
       });
       return await newCharacter.save();
     },
@@ -112,6 +112,19 @@ const resolvers = {
         { new: true }
       );
       return updatedCharacter;
+    },
+
+    deleteCharacter: async (_, { id }, { user }) => {
+      if (!user) throw new Error('Authentication required');
+      const character = await Character.findById(id);
+      if (!character) {
+        throw new Error('Character not found');
+      }
+      if (character.user.toString() !== user.id) {
+        throw new Error('Not authorized to delete this character');
+      }
+      await Character.findByIdAndDelete(id);
+      return { message: 'Character deleted successfully' };
     },
 
     createCampaign: async (_, { name, description }, { user }) => {

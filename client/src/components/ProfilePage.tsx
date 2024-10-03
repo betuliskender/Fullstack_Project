@@ -7,8 +7,6 @@ interface ProfilePageProps {
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     const { user } = useContext(AuthContext);
-    console.log(user);
-
 
   return (
     <React.Fragment>

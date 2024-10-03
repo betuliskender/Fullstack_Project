@@ -23,7 +23,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       const token = data.jwtToken;
       const user: User = data.user; 
       console.log("JWT token:", token);
-      console.log("User data:", user);
 
       // Store the token temporarily
       setToken(token)

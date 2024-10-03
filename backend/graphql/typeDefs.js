@@ -2,7 +2,7 @@ import { gql } from "apollo-server-express";
 
 export const typeDefs = gql`
   type User {
-    id: ID!
+    _id: ID!
     firstName: String!
     lastName: String!
     userName: String!
@@ -11,7 +11,7 @@ export const typeDefs = gql`
   }
 
   type Character {
-    id: ID!
+    _id: ID!
     name: String!
     level: Int!
     race: String!
@@ -32,7 +32,7 @@ export const typeDefs = gql`
   }
 
   type Campaign {
-    id: ID!
+    _id: ID!
     name: String!
     description: String!
     characters: [Character]
@@ -40,13 +40,13 @@ export const typeDefs = gql`
   }
 
   type CampaignCharacter {
-    id: ID!
+    _id: ID!
     campaign: Campaign!
     character: Character!
   }
 
   type Session {
-    id: ID!
+    _id: ID!
     sessionDate: String!
     logEntry: String!
     campaign: Campaign!
@@ -60,16 +60,16 @@ export const typeDefs = gql`
   # Query type for fetching data
   type Query {
     users: [User]
-    user(id: ID!): User
+    user(_id: ID!): User
 
     characters: [Character]
-    character(id: ID!): Character
+    character(_id: ID!): Character
 
     campaigns: [Campaign]
-    campaign(id: ID!): Campaign
+    campaign(_id: ID!): Campaign
 
     sessions: [Session]
-    session(id: ID!): Session
+    session(_id: ID!): Session
   }
 
   type Mutation {
@@ -95,7 +95,7 @@ export const typeDefs = gql`
     ): Character
 
     editCharacter(
-      id: ID!
+      _id: ID!
       name: String
       level: Int
       race: String
@@ -105,13 +105,13 @@ export const typeDefs = gql`
       attributes: AttributesInput
     ): Character
 
-    deleteCharacter(id: ID!): Character
+    deleteCharacter(_id: ID!): Character
 
     createCampaign(name: String!, description: String!): Campaign
 
-    editCampaign(id: ID!, name: String, description: String): Campaign
+    editCampaign(_id: ID!, name: String, description: String): Campaign
 
-    deleteCampaign(id: ID!): Campaign
+    deleteCampaign(_id: ID!): Campaign
 
     addCharacterToCampaign(campaignId: ID!, characterId: ID!): CampaignCharacter
 
@@ -132,9 +132,9 @@ export const typeDefs = gql`
       logEntry: String!
     ): Session
 
-    editSession(id: ID!, sessionDate: String, logEntry: String): Session
+    editSession(_id: ID!, sessionDate: String, logEntry: String): Session
 
-    deleteSession(id: ID!): Session
+    deleteSession(_id: ID!): Session
   }
 
   input AttributesInput {
