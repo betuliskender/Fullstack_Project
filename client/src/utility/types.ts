@@ -37,3 +37,10 @@ export interface LoginResponse {
   user: User;
   jwtToken: string;
 }
+
+export interface Campaign {
+    _id?: string;
+    name: string;
+    description: string;
+    user: string;
+  }

@@ -86,7 +86,9 @@ export const getCampaignById = async (req, res) => {
 
 export const getAllCampaigns = async (req, res) => {
   try {
-    const campaigns = await Campaign.find();
+    const campaigns = await Campaign.find()
+    .populate("characters")
+    .populate("sessions");
     res.status(200).json(campaigns);
   } catch (error) {
     console.log("Error getting all campaigns", error);

@@ -9,6 +9,8 @@ import ProfilePage from "./components/ProfilePage";
 import { useContext, useState } from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import CharacterForm from "./components/CharacterForm";
+import CampaignType from "./components/Campaign";
+import CampaignForm from "./components/CampaignForm";
 
 
 const client = new ApolloClient({
@@ -44,6 +46,8 @@ const App: React.FC = () => {
               />
             <Route path="/character" element={<Character isLoggedIn={isLoggedIn}/>} />
             <Route path="/create-character" element={<CharacterForm isLoggedIn={isLoggedIn} />} />
+            <Route path="/campaign" element={<CampaignType isLoggedIn={isLoggedIn} />} />
+            <Route path="/create-campaign" element={<CampaignForm isLoggedIn={isLoggedIn} />} />
             <Route path="/register" element={<Register/>} />
             <Route path="/login" element={<LogIn onLogin={handleLogin}  />} />
           </Routes>

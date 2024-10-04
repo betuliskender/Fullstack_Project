@@ -43,6 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogout }) => {
         {isLoggedIn && (
           <>
             <Link to="/character">Character</Link>
+            <Link to="/campaign">Campaign</Link>
             <Link to="/profile">Profile</Link>
           </>
         )}
