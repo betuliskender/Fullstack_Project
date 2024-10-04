@@ -5,6 +5,7 @@ import { AuthContext } from "../utility/authContext";
 import { GET_ALL_CAMPAIGNS } from "../graphql/queries"; 
 import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
+import AddCharacterToCampaign from "./AddCharacterToCampaign";
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
@@ -110,6 +111,8 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
             >
               Edit
             </button>
+
+            <AddCharacterToCampaign campaignId={campaign._id!} />
           </div>
         ))}
       </div>

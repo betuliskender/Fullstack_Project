@@ -49,3 +49,16 @@ export const DELETE_CAMPAIGN = gql`
     }
   }
 `;
+
+export const ADD_CHARACTER_TO_CAMPAIGN = gql`
+  mutation AddCharacterToCampaign($campaignId: ID!, $characterId: ID!) {
+    addCharacterToCampaign(campaignId: $campaignId, characterId: $characterId) {
+      _id
+      name
+      characters {
+        _id
+        name
+      }
+    }
+  }
+`;

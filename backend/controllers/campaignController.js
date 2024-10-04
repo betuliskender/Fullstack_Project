@@ -106,28 +106,34 @@ export const addCharacterToCampaign = async (req, res) => {
 
     if (!campaign || !character) {
       return res.status(404).json({
-        message:
-          "Could not find a campaign or character with those credentials",
+        message: "Could not find a campaign or character with those credentials",
       });
     }
 
+    if (!campaign.characters.includes(character._id)) {
+      campaign.characters.push(character._id);
+    }
+
+    await campaign.save();
+
+    // Opret CampaignCharacter relation
     const campaignCharacter = new CampaignCharacter({
       campaign: campaign._id,
       character: character._id,
     });
 
     await campaignCharacter.save();
+
     res.status(201).json({
       message: "Character added to campaign successfully",
       campaignCharacter,
     });
   } catch (error) {
     console.log("Error adding the character to the campaign", error);
-    res
-      .status(500)
-      .json({ message: "Failed to add the character to the campaign", error });
+    res.status(500).json({ message: "Failed to add the character to the campaign", error });
   }
 };
+
 
 export const changeCharacterInCampaign = async (req, res) => {
   const { campaignId, characterId } = req.params;
