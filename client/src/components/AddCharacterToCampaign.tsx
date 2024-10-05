@@ -8,12 +8,21 @@ import { Character, Campaign } from "../utility/types";
 interface AddCharacterToCampaignProps {
   campaignId: string;
   allCampaigns: Campaign[]; // Pass alle kampagner som prop
+  refetchCampaigns: () => void; // Callback for at opdatere kampagnelisten
 }
 
-const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaignId, allCampaigns }) => {
+const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({
+  campaignId,
+  allCampaigns,
+  refetchCampaigns, // Henter callbacken
+}) => {
   const { token } = useContext(AuthContext);
-  const [selectedCharacter, setSelectedCharacter] = useState('');
-  const { loading: charactersLoading, data: charactersData, error } = useQuery(GETALLCHARACTERS, {
+  const [selectedCharacter, setSelectedCharacter] = useState("");
+  const {
+    loading: charactersLoading,
+    data: charactersData,
+    error,
+  } = useQuery(GETALLCHARACTERS, {
     context: {
       headers: {
         Authorization: token ? `${token}` : "",
@@ -22,7 +31,9 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaig
   });
 
   // Saml alle karakter-ID'er, der er tilføjet til en kampagne
-  const allAssignedCharacterIds = allCampaigns.flatMap(campaign => campaign.characters.map(c => c._id));
+  const allAssignedCharacterIds = allCampaigns.flatMap((campaign) =>
+    campaign.characters.map((c) => c._id)
+  );
 
   const handleCharacterSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCharacter(e.target.value);
@@ -33,11 +44,18 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaig
 
     if (selectedCharacter && token) {
       try {
-        const response = await addCharacterToCampaign(campaignId, selectedCharacter, token);
+        const response = await addCharacterToCampaign(
+          campaignId,
+          selectedCharacter,
+          token
+        );
         console.log(response.message);
 
         // Tøm dropdown-menuen
-        setSelectedCharacter('');
+        setSelectedCharacter("");
+
+        // Refetch kampagner for at opdatere visningen
+        refetchCampaigns();
       } catch (error) {
         console.error("Error adding character to campaign:", error);
       }

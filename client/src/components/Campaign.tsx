@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
-import {  GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries"; 
+import { GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries";
 import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
@@ -17,13 +17,16 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
 
-  const { loading, error, data, refetch } = useQuery(GET_CAMPAIGNS_WITH_CHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
+  const { loading, error, data, refetch } = useQuery(
+    GET_CAMPAIGNS_WITH_CHARACTERS,
+    {
+      context: {
+        headers: {
+          Authorization: token ? `${token}` : "",
+        },
       },
-    },
-  });
+    }
+  );
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -89,7 +92,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   return (
     <div>
       <div className="header-container">
-        <h1>Campaigns</h1>
+        <h1>Active Campaigns</h1>
         <Link to="/create-campaign">
           <button className="create-button">Create New Campaign</button>
         </Link>
@@ -99,6 +102,19 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           <div key={campaign._id} className="campaign-card">
             <h3>{campaign.name}</h3>
             <p>{campaign.description}</p>
+
+            {/* Vis tilknyttede karakterer */}
+            <h4>Characters in this campaign:</h4>
+            <ul>
+              {campaign.characters && campaign.characters.length > 0 ? (
+                campaign.characters.map((character) => (
+                  <li key={character._id}>{character.name}</li>
+                ))
+              ) : (
+                <p>No characters in this campaign.</p>
+              )}
+            </ul>
+
             <button
               onClick={() => campaign._id && handleDelete(campaign._id)}
               className="delete-button"
@@ -112,7 +128,11 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
               Edit
             </button>
 
-            <AddCharacterToCampaign campaignId={campaign._id!} allCampaigns={campaigns} />
+            <AddCharacterToCampaign
+              campaignId={campaign._id!}
+              allCampaigns={campaigns}
+              refetchCampaigns={refetch}
+            />
           </div>
         ))}
       </div>
