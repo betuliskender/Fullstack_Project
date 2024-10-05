@@ -7,6 +7,7 @@ import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 
+
 interface ProfilePageProps {
   isLoggedIn: boolean;
 }
@@ -100,39 +101,46 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
       <div className="campaign-grid">
         {campaigns.map((campaign: Campaign) => (
           <div key={campaign._id} className="campaign-card">
-            <h3>{campaign.name}</h3>
-            <p>{campaign.description}</p>
+            <div className="campaign-info">
+              <h3 className="campaign-title">{campaign.name}</h3>
+              <p className="campaign-description">{campaign.description}</p>
+            </div>
 
-            {/* Vis tilknyttede karakterer */}
-            <h4>Characters in this campaign:</h4>
-            <ul>
-              {campaign.characters && campaign.characters.length > 0 ? (
-                campaign.characters.map((character) => (
-                  <li key={character._id}>{character.name}</li>
-                ))
-              ) : (
-                <p>No characters in this campaign.</p>
-              )}
-            </ul>
+            <div className="campaign-characters">
+              <h4>Characters in this campaign:</h4>
+              <ul className="character-list">
+                {campaign.characters && campaign.characters.length > 0 ? (
+                  campaign.characters.map((character) => (
+                    <li key={character._id}>{character.name}</li>
+                  ))
+                ) : (
+                  <p>No characters in this campaign.</p>
+                )}
+              </ul>
 
-            <button
-              onClick={() => campaign._id && handleDelete(campaign._id)}
-              className="delete-button"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => handleEdit(campaign)}
-              className="edit-button"
-            >
-              Edit
-            </button>
+              <div className="add-character-section">
+                <AddCharacterToCampaign
+                  campaignId={campaign._id!}
+                  allCampaigns={campaigns}
+                  refetchCampaigns={refetch}
+                />
+              </div>
+            </div>
 
-            <AddCharacterToCampaign
-              campaignId={campaign._id!}
-              allCampaigns={campaigns}
-              refetchCampaigns={refetch}
-            />
+            <div className="button-group">
+              <button
+                onClick={() => campaign._id && handleDelete(campaign._id)}
+                className="delete-button"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => handleEdit(campaign)}
+                className="edit-button"
+              >
+                Edit
+              </button>
+            </div>
           </div>
         ))}
       </div>
