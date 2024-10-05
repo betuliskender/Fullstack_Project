@@ -138,3 +138,26 @@ export const addCharacterToCampaign = async (
     throw error;
   }
 };
+
+export const changeCharacterInCampaign = async (
+  campaignId: string,
+  characterId: string,
+  newCharacterId: string,
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/campaigns/${campaignId}/characters/${characterId}`,
+      { newCharacterId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error changing character in campaign:", error);
+    throw error;
+  }
+};

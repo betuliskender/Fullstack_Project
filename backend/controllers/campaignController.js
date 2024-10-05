@@ -140,16 +140,15 @@ export const changeCharacterInCampaign = async (req, res) => {
   const { newCharacterId } = req.body;
 
   try {
-    // Cast campaignId og characterId til ObjectId
+    // Cast campaignId, characterId, og newCharacterId til ObjectId
     const campaignObjectId = new mongoose.Types.ObjectId(campaignId);
     const characterObjectId = new mongoose.Types.ObjectId(characterId);
+    const newCharacterObjectId = new mongoose.Types.ObjectId(newCharacterId);
 
     const campaignCharacter = await CampaignCharacter.findOne({
       campaign: campaignObjectId,
       character: characterObjectId,
     });
-
-    console.log("CampaignCharacter result:", campaignCharacter);
 
     if (!campaignCharacter) {
       return res
@@ -158,7 +157,7 @@ export const changeCharacterInCampaign = async (req, res) => {
     }
 
     // Update the character in the campaign to a new character
-    campaignCharacter.character = newCharacterId;
+    campaignCharacter.character = newCharacterObjectId;
     await campaignCharacter.save();
 
     res.status(200).json({

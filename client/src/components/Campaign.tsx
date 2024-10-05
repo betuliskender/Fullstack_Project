@@ -2,11 +2,17 @@ import React, { useContext, useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
-import { GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries";
-import { deleteCampaign, editCampaign } from "../utility/apiservice";
-import { Campaign } from "../utility/types";
+import {
+  GET_CAMPAIGNS_WITH_CHARACTERS,
+  GETALLCHARACTERS,
+} from "../graphql/queries";
+import {
+  deleteCampaign,
+  editCampaign,
+  changeCharacterInCampaign,
+} from "../utility/apiservice";
+import { Campaign, Character } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
-
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
@@ -16,7 +22,14 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { token } = useContext(AuthContext);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
+  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
+    null
+  );
+  const [availableCharacters, setAvailableCharacters] = useState<Character[]>(
+    []
+  );
 
   const { loading, error, data, refetch } = useQuery(
     GET_CAMPAIGNS_WITH_CHARACTERS,
@@ -29,6 +42,14 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     }
   );
 
+  const { data: charactersData } = useQuery(GETALLCHARACTERS, {
+    context: {
+      headers: {
+        Authorization: token ? `${token}` : "",
+      },
+    },
+  });
+
   useEffect(() => {
     if (isLoggedIn && token) {
       refetch();
@@ -39,7 +60,13 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     if (data && data.campaigns) {
       setCampaigns(data.campaigns);
     }
-  }, [data]);
+  }, [data, refetch]);
+
+  useEffect(() => {
+    if (charactersData && charactersData.characters) {
+      setAvailableCharacters(charactersData.characters);
+    }
+  }, [charactersData]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -59,7 +86,15 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
+    setIsCharacterModalOpen(false); // Luk begge modaler
     setCurrentCampaign(null);
+    setCurrentCharacterId(null);
+  };
+
+  const handleCharacterEdit = (campaign: Campaign, characterId: string) => {
+    setCurrentCampaign(campaign);
+    setCurrentCharacterId(characterId);
+    setIsCharacterModalOpen(true); // Åbn modal til at ændre karakter
   };
 
   const handleFormSubmit = async (event: React.FormEvent) => {
@@ -71,6 +106,31 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         handleModalClose();
       } catch (error) {
         console.error("Error updating campaign:", error);
+      }
+    }
+  };
+
+  const handleCharacterChange = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const newCharacterId = (
+      form.elements.namedItem("newCharacterId") as HTMLSelectElement
+    ).value;
+
+    if (currentCampaign && currentCharacterId && token) {
+      try {
+        await changeCharacterInCampaign(
+          currentCampaign._id!,
+          currentCharacterId,
+          newCharacterId,
+          token
+        );
+        refetch();
+        handleModalClose();
+      } catch (error) {
+        console.error("Error changing character:", error);
       }
     }
   };
@@ -111,7 +171,17 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
               <ul className="character-list">
                 {campaign.characters && campaign.characters.length > 0 ? (
                   campaign.characters.map((character) => (
-                    <li key={character._id}>{character.name}</li>
+                    <li key={character._id}>
+                      {character.name}
+                      <button
+                        onClick={() =>
+                          character._id &&
+                          handleCharacterEdit(campaign, character._id)
+                        }
+                      >
+                        Edit Character
+                      </button>
+                    </li>
                   ))
                 ) : (
                   <p>No characters in this campaign.</p>
@@ -145,6 +215,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         ))}
       </div>
 
+      {/* Modal til at redigere kampagne */}
       {isModalOpen && currentCampaign && (
         <div className="modal">
           <div className="modal-content">
@@ -176,6 +247,39 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           </div>
         </div>
       )}
+
+      {/* Modal til at redigere karakter */}
+      {isCharacterModalOpen && currentCampaign && currentCharacterId && (
+  <div className="modal">
+    <div className="modal-content">
+      <span className="close" onClick={handleModalClose}>
+        &times;
+      </span>
+      <h2>Edit Character in Campaign</h2>
+      <form onSubmit={handleCharacterChange}>
+        <label>
+          Select new character:
+          <select name="newCharacterId">
+            {/* Filtrér karakterer, så kun de, der ikke er i kampagnen, vises */}
+            {availableCharacters
+              .filter(
+                (character) =>
+                  !currentCampaign.characters.some(
+                    (c) => c._id === character._id
+                  )
+              )
+              .map((character: Character) => (
+                <option key={character._id} value={character._id}>
+                  {character.name}
+                </option>
+              ))}
+          </select>
+        </label>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };
