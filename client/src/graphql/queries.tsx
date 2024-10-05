@@ -32,6 +32,21 @@ export const GET_ALL_CAMPAIGNS = gql`
   }
 `;
 
+export const GET_CAMPAIGNS_WITH_CHARACTERS = gql`
+  query GetCampaignsWithCharacters {
+    campaigns {
+      _id
+      name
+      description
+      characters {
+        _id
+        name
+      }
+    }
+  }
+`;
+
+
 export const CREATE_CAMPAIGN = gql`
   mutation CreateCampaign($name: String!, $description: String!) {
     createCampaign(name: $name, description: $description) {

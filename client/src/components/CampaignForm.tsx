@@ -13,10 +13,13 @@ const CampaignForm: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [campaign, setCampaign] = useState<Campaign>({
     name: "",
     description: "",
-    user: user?._id || "",  // Forbinder brugeren med kampagnen
+    user: user?._id || "",
+    characters: [],
   });
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setCampaign({
       ...campaign,
@@ -36,6 +39,7 @@ const CampaignForm: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           name: "",
           description: "",
           user: user?._id || "",
+          characters: [],
         });
       } else {
         console.error("Token is null or undefined");
@@ -54,11 +58,20 @@ const CampaignForm: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           <form onSubmit={handleSubmit}>
             <div>
               <label>Name:</label>
-              <input type="text" name="name" value={campaign.name} onChange={handleChange} />
+              <input
+                type="text"
+                name="name"
+                value={campaign.name}
+                onChange={handleChange}
+              />
             </div>
             <div>
               <label>Description:</label>
-              <textarea name="description" value={campaign.description} onChange={handleChange} />
+              <textarea
+                name="description"
+                value={campaign.description}
+                onChange={handleChange}
+              />
             </div>
             <button type="submit">Create Campaign</button>
           </form>

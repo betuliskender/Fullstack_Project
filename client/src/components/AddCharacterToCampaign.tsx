@@ -3,15 +3,16 @@ import { addCharacterToCampaign } from "../utility/apiservice"; // Importér API
 import { AuthContext } from "../utility/authContext";
 import { useQuery } from "@apollo/client";
 import { GETALLCHARACTERS } from "../graphql/queries";
-import { Character } from "../utility/types";
+import { Character, Campaign } from "../utility/types";
 
 interface AddCharacterToCampaignProps {
   campaignId: string;
+  allCampaigns: Campaign[]; // Pass alle kampagner som prop
 }
 
-const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaignId }) => {
-  const { token } = useContext(AuthContext); // Hent token fra context
-  const [selectedCharacter, setSelectedCharacter] = useState("");
+const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaignId, allCampaigns }) => {
+  const { token } = useContext(AuthContext);
+  const [selectedCharacter, setSelectedCharacter] = useState('');
   const { loading: charactersLoading, data: charactersData, error } = useQuery(GETALLCHARACTERS, {
     context: {
       headers: {
@@ -19,6 +20,9 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaig
       },
     },
   });
+
+  // Saml alle karakter-ID'er, der er tilføjet til en kampagne
+  const allAssignedCharacterIds = allCampaigns.flatMap(campaign => campaign.characters.map(c => c._id));
 
   const handleCharacterSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCharacter(e.target.value);
@@ -29,8 +33,11 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaig
 
     if (selectedCharacter && token) {
       try {
-        const response = await addCharacterToCampaign(campaignId, selectedCharacter, token); // Brug API-kaldet
+        const response = await addCharacterToCampaign(campaignId, selectedCharacter, token);
         console.log(response.message);
+
+        // Tøm dropdown-menuen
+        setSelectedCharacter('');
       } catch (error) {
         console.error("Error adding character to campaign:", error);
       }
@@ -40,13 +47,18 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({ campaig
   if (charactersLoading) return <p>Loading characters...</p>;
   if (error) return <p>Error loading characters: {error.message}</p>;
 
+  // Filtrer karakterer, der allerede er tilknyttet en hvilken som helst kampagne
+  const availableCharacters = charactersData.characters.filter(
+    (character: Character) => !allAssignedCharacterIds.includes(character._id)
+  );
+
   return (
     <div>
       <h3>Add a Character to Campaign</h3>
       <form onSubmit={handleSubmit}>
         <select value={selectedCharacter} onChange={handleCharacterSelect}>
           <option value="">Select a character</option>
-          {charactersData.characters.map((character: Character) => (
+          {availableCharacters.map((character: Character) => (
             <option key={character._id} value={character._id}>
               {character.name}
             </option>

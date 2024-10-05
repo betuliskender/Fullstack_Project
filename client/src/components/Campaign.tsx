@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
-import { GET_ALL_CAMPAIGNS } from "../graphql/queries"; 
+import {  GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries"; 
 import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
@@ -17,7 +17,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
 
-  const { loading, error, data, refetch } = useQuery(GET_ALL_CAMPAIGNS, {
+  const { loading, error, data, refetch } = useQuery(GET_CAMPAIGNS_WITH_CHARACTERS, {
     context: {
       headers: {
         Authorization: token ? `${token}` : "",
@@ -112,7 +112,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
               Edit
             </button>
 
-            <AddCharacterToCampaign campaignId={campaign._id!} />
+            <AddCharacterToCampaign campaignId={campaign._id!} allCampaigns={campaigns} />
           </div>
         ))}
       </div>
