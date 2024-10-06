@@ -180,6 +180,7 @@ export const removeCharacterFromCampaign = async (req, res) => {
   const { campaignId, characterId } = req.params;
 
   try {
+    // Fjern karakteren fra CampaignCharacter
     const campaignCharacter = await CampaignCharacter.findOneAndDelete({
       campaign: campaignId,
       character: characterId,
@@ -191,9 +192,21 @@ export const removeCharacterFromCampaign = async (req, res) => {
         .json({ message: "Character not found in this campaign" });
     }
 
-    res
-      .status(200)
-      .json({ message: "Character removed from campaign successfully" });
+    // Fjern karakteren fra characters-arrayet i Campaign
+    const campaign = await Campaign.findByIdAndUpdate(
+      campaignId,
+      { $pull: { characters: characterId } }, // Brug $pull til at fjerne karakteren fra arrayet
+      { new: true } // Returnér den opdaterede kampagne
+    );
+
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    res.status(200).json({
+      message: "Character removed from campaign successfully",
+      campaign,
+    });
   } catch (error) {
     console.log("Error removing character from campaign", error);
     res

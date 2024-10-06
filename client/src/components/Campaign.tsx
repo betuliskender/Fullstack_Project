@@ -9,6 +9,7 @@ import {
 import {
   deleteCampaign,
   editCampaign,
+  removeCharacterFromCampaign, // Importer den nye funktion
 } from "../utility/apiservice";
 import { Campaign, Character } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
@@ -37,6 +38,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           Authorization: token ? `${token}` : "",
         },
       },
+      fetchPolicy: "network-only",
     }
   );
 
@@ -84,6 +86,33 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     }
   };
 
+  const handleRemoveCharacter = async (campaignId: string, characterId: string) => {
+    try {
+      if (token) {
+        const response = await removeCharacterFromCampaign(campaignId, characterId, token);
+  
+        if (response.message) {
+          // Find den kampagne, vi opdaterer
+          setCampaigns((prevCampaigns) =>
+            prevCampaigns.map((campaign) =>
+              campaign._id === campaignId
+                ? {
+                    ...campaign,
+                    characters: campaign.characters.filter((character) => character._id !== characterId), // Fjern karakteren fra kampagnen
+                  }
+                : campaign
+            )
+          );
+        }
+  
+        // Valgfrit: Hvis du stadig vil bruge refetch efter fjernelsen
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Error removing character from campaign:", error);
+    }
+  };
+
   const handleEdit = (campaign: Campaign) => {
     setCurrentCampaign(campaign);
     setIsModalOpen(true);
@@ -91,7 +120,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setIsCharacterModalOpen(false);
+    setIsCharacterModalOpen(false); // Luk begge modaler
     setCurrentCampaign(null);
     setCurrentCharacterId(null);
   };
@@ -99,7 +128,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const handleCharacterEdit = (campaign: Campaign, characterId: string) => {
     setCurrentCampaign(campaign);
     setCurrentCharacterId(characterId);
-    setIsCharacterModalOpen(true);
+    setIsCharacterModalOpen(true); // Åbn modal til at ændre karakter
   };
 
   const handleFormSubmit = async (event: React.FormEvent) => {
@@ -160,6 +189,13 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
                         }
                       >
                         Edit Character
+                      </button>
+                      <button
+                        onClick={() =>
+                         character._id && handleRemoveCharacter(campaign._id!, character._id)
+                        }
+                      >
+                        Remove Character
                       </button>
                     </li>
                   ))

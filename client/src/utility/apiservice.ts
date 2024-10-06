@@ -161,3 +161,24 @@ export const changeCharacterInCampaign = async (
     throw error;
   }
 };
+
+export const removeCharacterFromCampaign = async (
+  campaignId: string,
+  characterId: string,
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/campaigns/${campaignId}/characters/${characterId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error removing character from campaign:", error);
+    throw error;
+  }
+};
