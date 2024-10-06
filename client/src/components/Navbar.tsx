@@ -1,66 +1,70 @@
 import React from "react";
-import { useContext } from "react";
-import "../styles/navbar.css";
-import {Link} from "react-router-dom"
-import { AuthContext } from "../utility/authContext";
-/**
- * Props interface for Navbar component
- */
+import { Link } from "react-router-dom";
+import { HStack, Button, useDisclosure } from "@chakra-ui/react";
+import ColorModeSwitch from "./ColorModeSwitch";
+import LogIn from "./LogIn"; // Import the LogIn modal component
+import RegisterModal from "./Register"; // Import the Register modal component
+
 interface NavbarProps {
-  isLoggedIn: boolean; // Indicates wether a user is logged in or not
+  isLoggedIn: boolean;
+  onLogin: () => void; // Callback function to handle login event
   onLogout: () => void; // Callback function to handle logout event
 }
 
-/**
- * Functional component representing the navigation bar
- * @param {NavbarProps} param Props for the Navbar component 
- * @returns TSX element representing the navigation bar
- */
-const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogout }) => {
-  const { user } = useContext(AuthContext); // Get user from context
-
-  const handleLogin = () => {
-    /**
-     * Redirects the user to the login page
-     */
-    window.location.href = "/login";
-  };
-
-  /**
-   * Redirects the user to the register page
-   */
-  const handleRegister = () => {
-    // Redirect to register page
-    window.location.href = "/register";
-  };
+const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
+  const { isOpen: isLoginOpen, onOpen: onLoginOpen, onClose: onLoginClose } = useDisclosure();
+  const { isOpen: isRegisterOpen, onOpen: onRegisterOpen, onClose: onRegisterClose } = useDisclosure();
 
   return (
-    <nav>
-      <div className="navbar-left">
-        <Link className="home" to="/">
-          Home
+    <HStack spacing={4} justify="space-between">
+      <HStack spacing={4}>
+        <Link to="/">
+          <Button colorScheme="teal" variant="ghost">
+            Home
+          </Button>
         </Link>
         {isLoggedIn && (
           <>
-            <Link to="/character">Character</Link>
-            <Link to="/profile">Profile</Link>
+            <Link to="/profile">
+              <Button colorScheme="teal" variant="ghost">
+                Profile
+              </Button>
+            </Link>
+            <Link to="/character">
+              <Button colorScheme="teal" variant="ghost">
+                Characters
+              </Button>
+            </Link>
           </>
         )}
-      </div>
-      <div className="navbar-right">
+      </HStack>
+      <HStack spacing={4}>
         {isLoggedIn ? (
+          
           <>
-            <span>{user?.firstName} {user?.lastName}</span>
-            <button onClick={onLogout}>Logout</button>
+            <Button colorScheme="teal" variant="solid" onClick={onLogout}>
+              Logout
+            </Button>
+            <ColorModeSwitch />
           </>
+          
         ) : (
-          <div className="login-container">
-            <button onClick={handleLogin}>Login</button>
-            <button onClick={handleRegister}>Register</button>
-          </div>
+          <>
+            <Button colorScheme="teal" variant="solid" onClick={onLoginOpen}>
+              Login
+            </Button>
+            <Button colorScheme="teal" variant="solid" onClick={onRegisterOpen}>
+              Register
+            </Button>
+            <ColorModeSwitch />
+            {/* Login Modal */}
+            <LogIn isOpen={isLoginOpen} onClose={onLoginClose} onLogin={onLogin} />
+            {/* Register Modal */}
+            <RegisterModal isOpen={isRegisterOpen} onClose={onRegisterClose} />
+          </>
         )}
-      </div>
-    </nav>
+      </HStack>
+    </HStack>
   );
 };
 

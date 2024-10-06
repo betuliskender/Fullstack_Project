@@ -1,8 +1,28 @@
 import React, { useState, ChangeEvent } from "react";
 import { registerUser } from "../utility/apiservice";
 import { User } from "../utility/types";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  Input,
+  FormControl,
+  FormLabel,
+  Text,
+  Spinner,
+} from "@chakra-ui/react";
 
-const Register: React.FC = () => {
+interface RegisterModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   const [user, setUser] = useState<User>({ firstName: "", lastName: "", userName: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,67 +60,80 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div>
-      <h1>Register</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>} {/* Display error messages */}
-      {successMessage && <p style={{ color: "green" }}>{successMessage}</p>} {/* Display success message */}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>First Name:</label>
-          <input
-            type="text"
-            name="firstName"
-            value={user.firstName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Last Name:</label>
-          <input
-            type="text"
-            name="lastName"
-            value={user.lastName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            name="userName"
-            value={user.userName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={user.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            name="password"
-            value={user.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
-    </div>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Register</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          {error && <Text color="red.500">{error}</Text>} {/* Display error messages */}
+          {successMessage && <Text color="green.500">{successMessage}</Text>} {/* Display success message */}
+          <form onSubmit={handleSubmit}>
+            <FormControl id="firstName" isRequired>
+              <FormLabel>First Name</FormLabel>
+              <Input
+                type="text"
+                name="firstName"
+                value={user.firstName}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id="lastName" isRequired>
+              <FormLabel>Last Name</FormLabel>
+              <Input
+                type="text"
+                name="lastName"
+                value={user.lastName}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id="userName" isRequired>
+              <FormLabel>Username</FormLabel>
+              <Input
+                type="text"
+                name="userName"
+                value={user.userName}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id="email" isRequired>
+              <FormLabel>Email</FormLabel>
+              <Input
+                type="email"
+                name="email"
+                value={user.email}
+                onChange={handleChange}
+              />
+            </FormControl>
+            <FormControl id="password" isRequired>
+              <FormLabel>Password</FormLabel>
+              <Input
+                type="password"
+                name="password"
+                value={user.password}
+                onChange={handleChange}
+              />
+            </FormControl>
+          </form>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button
+            colorScheme="blue"
+            mr={3}
+            onClick={handleSubmit}
+            isLoading={loading}
+            disabled={loading}
+          >
+            {loading ? <Spinner size="sm" /> : "Register"}
+          </Button>
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
 
-export default Register;
+export default RegisterModal;

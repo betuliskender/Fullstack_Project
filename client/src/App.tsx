@@ -1,24 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import FrontPage from "./components/Frontpage";
 import Character from "./components/Character";
-import Register from "./components/Register";
-import LogIn from "./components/LogIn";
+import ProfilePage from "./components/ProfilePage";
 import Navbar from "./components/Navbar";
 import { AuthContext, AuthProvider } from "./utility/authContext";
-import ProfilePage from "./components/ProfilePage";
+import { Grid, GridItem } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
-import CharacterForm from "./components/CharacterForm";
-
 
 const client = new ApolloClient({
-  uri: "http://localhost:5000/graphql", 
+  uri: "http://localhost:5000/graphql",
   cache: new InMemoryCache()
 });
 
 const App: React.FC = () => {
-  const { setUser, setToken } = useContext(AuthContext); // Get setUser from context
-
+  const { setUser, setToken } = useContext(AuthContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLogout = () => {
@@ -35,22 +31,39 @@ const App: React.FC = () => {
     <ApolloProvider client={client}>
       <AuthProvider>
         <Router>
-          <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-          <Routes>
-            <Route path="/" element={<FrontPage />} />
-            <Route
-                path="/profile"
-                element={<ProfilePage isLoggedIn={isLoggedIn} />}
-              />
-            <Route path="/character" element={<Character isLoggedIn={isLoggedIn}/>} />
-            <Route path="/create-character" element={<CharacterForm isLoggedIn={isLoggedIn} />} />
-            <Route path="/register" element={<Register/>} />
-            <Route path="/login" element={<LogIn onLogin={handleLogin}  />} />
-          </Routes>
+          <Grid
+            padding={4}
+            templateAreas={{
+              lg: `"nav nav"
+                   "main main"`,
+              base: `"nav" "main"`,
+            }}
+            templateColumns={{
+              lg: "200px 1fr",
+              base: "1fr",
+            }}
+          >
+            <GridItem area={"nav"}>
+              <Navbar isLoggedIn={isLoggedIn} onLogin={handleLogin} onLogout={handleLogout} />
+            </GridItem>
+            
+            <GridItem area={"main"}>
+              <Routes>
+                <Route path="/" element={<FrontPage />} />
+                <Route
+                  path="/profile"
+                  element={<ProfilePage isLoggedIn={isLoggedIn} />}
+                />
+                <Route
+                  path="/character"
+                  element={<Character isLoggedIn={isLoggedIn} />}
+                />
+              </Routes>
+            </GridItem>
+          </Grid>
         </Router>
       </AuthProvider>
     </ApolloProvider>
-    
   );
 };
 
