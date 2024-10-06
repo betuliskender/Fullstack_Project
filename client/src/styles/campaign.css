@@ -1,0 +1,119 @@
+/* campaign.css */
+.campaign-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: 20px; /* Mellemrum mellem kampagnekortene */
+    
+  }
+  
+  .campaign-card {
+    background-color: #f9f9f9;
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: transform 0.2s;
+  }
+  
+  .campaign-info {
+    margin-bottom: 20px;
+  }
+  
+  .campaign-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .campaign-description {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+  
+  .campaign-characters {
+    margin-bottom: 20px;
+  }
+  
+  .character-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .character-list li {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .character-list button {
+    background-color: #ff6666;
+    border: none;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .character-list button:hover {
+    background-color: #ff3333;
+  }
+  
+  .add-character-section {
+    margin-top: 20px;
+  }
+  
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .create-button {
+    background-color: #0a4b0c;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  
+  .create-button:hover {
+    background-color: #45a049;
+  }
+  
+  .delete-button {
+    background-color: #661414;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .delete-button:hover {
+    background-color: #ff3333;
+  }
+  
+  .edit-button {
+    background-color: #0a4b0c;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .edit-button:hover {
+    background-color: #45a049;
+  }
+  

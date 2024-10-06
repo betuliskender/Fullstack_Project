@@ -14,7 +14,7 @@ import {
 import { Campaign, Character } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal"; // Importér modalen
-
+import "../styles/campaign.css";
 interface ProfilePageProps {
   isLoggedIn: boolean;
 }
