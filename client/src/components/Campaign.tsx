@@ -9,10 +9,10 @@ import {
 import {
   deleteCampaign,
   editCampaign,
-  changeCharacterInCampaign,
 } from "../utility/apiservice";
 import { Campaign, Character } from "../utility/types";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
+import ChangeCharacterModal from "./ChangeCharacterModal"; // Importér modalen
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
@@ -27,9 +27,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
     null
   );
-  const [availableCharacters, setAvailableCharacters] = useState<Character[]>(
-    []
-  );
+  const [availableCharacters, setAvailableCharacters] = useState<Character[]>([]);
 
   const { loading, error, data, refetch } = useQuery(
     GET_CAMPAIGNS_WITH_CHARACTERS,
@@ -64,9 +62,16 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   useEffect(() => {
     if (charactersData && charactersData.characters) {
-      setAvailableCharacters(charactersData.characters);
+      setAvailableCharacters(
+        charactersData.characters.filter(
+          (character: Character) =>
+            !currentCampaign?.characters.some(
+              (c) => c._id === character._id
+            )
+        )
+      );
     }
-  }, [charactersData]);
+  }, [charactersData, currentCampaign]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -86,7 +91,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setIsCharacterModalOpen(false); // Luk begge modaler
+    setIsCharacterModalOpen(false);
     setCurrentCampaign(null);
     setCurrentCharacterId(null);
   };
@@ -94,7 +99,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const handleCharacterEdit = (campaign: Campaign, characterId: string) => {
     setCurrentCampaign(campaign);
     setCurrentCharacterId(characterId);
-    setIsCharacterModalOpen(true); // Åbn modal til at ændre karakter
+    setIsCharacterModalOpen(true);
   };
 
   const handleFormSubmit = async (event: React.FormEvent) => {
@@ -106,31 +111,6 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         handleModalClose();
       } catch (error) {
         console.error("Error updating campaign:", error);
-      }
-    }
-  };
-
-  const handleCharacterChange = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const newCharacterId = (
-      form.elements.namedItem("newCharacterId") as HTMLSelectElement
-    ).value;
-
-    if (currentCampaign && currentCharacterId && token) {
-      try {
-        await changeCharacterInCampaign(
-          currentCampaign._id!,
-          currentCharacterId,
-          newCharacterId,
-          token
-        );
-        refetch();
-        handleModalClose();
-      } catch (error) {
-        console.error("Error changing character:", error);
       }
     }
   };
@@ -250,36 +230,16 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
       {/* Modal til at redigere karakter */}
       {isCharacterModalOpen && currentCampaign && currentCharacterId && (
-  <div className="modal">
-    <div className="modal-content">
-      <span className="close" onClick={handleModalClose}>
-        &times;
-      </span>
-      <h2>Edit Character in Campaign</h2>
-      <form onSubmit={handleCharacterChange}>
-        <label>
-          Select new character:
-          <select name="newCharacterId">
-            {/* Filtrér karakterer, så kun de, der ikke er i kampagnen, vises */}
-            {availableCharacters
-              .filter(
-                (character) =>
-                  !currentCampaign.characters.some(
-                    (c) => c._id === character._id
-                  )
-              )
-              .map((character: Character) => (
-                <option key={character._id} value={character._id}>
-                  {character.name}
-                </option>
-              ))}
-          </select>
-        </label>
-        <button type="submit">Save</button>
-      </form>
-    </div>
-  </div>
-)}
+        <ChangeCharacterModal
+          isOpen={isCharacterModalOpen}
+          onClose={handleModalClose}
+          campaign={currentCampaign}
+          currentCharacterId={currentCharacterId}
+          availableCharacters={availableCharacters} // Send availableCharacters
+          refetchCampaigns={refetch}  // Send refetch-funktionen som prop
+          setCampaigns={setCampaigns}  // Send setCampaigns-funktionen som prop
+        />
+      )}
     </div>
   );
 };

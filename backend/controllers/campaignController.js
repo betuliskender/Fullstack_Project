@@ -160,9 +160,12 @@ export const changeCharacterInCampaign = async (req, res) => {
     campaignCharacter.character = newCharacterObjectId;
     await campaignCharacter.save();
 
+    // Find and return the updated campaign with populated characters
+    const updatedCampaign = await Campaign.findById(campaignId).populate('characters');
+
     res.status(200).json({
       message: "Character changed successfully in campaign",
-      campaignCharacter,
+      campaign: updatedCampaign,  // Return the updated campaign
     });
   } catch (error) {
     console.log("Error changing character in campaign", error);
@@ -171,6 +174,7 @@ export const changeCharacterInCampaign = async (req, res) => {
       .json({ message: "Failed to change character in campaign", error });
   }
 };
+
 
 export const removeCharacterFromCampaign = async (req, res) => {
   const { campaignId, characterId } = req.params;
