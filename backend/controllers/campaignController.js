@@ -140,7 +140,7 @@ export const changeCharacterInCampaign = async (req, res) => {
   const { newCharacterId } = req.body;
 
   try {
-    // Cast campaignId, characterId, og newCharacterId til ObjectId
+    // Cast IDs to ObjectId
     const campaignObjectId = new mongoose.Types.ObjectId(campaignId);
     const characterObjectId = new mongoose.Types.ObjectId(characterId);
     const newCharacterObjectId = new mongoose.Types.ObjectId(newCharacterId);
@@ -156,16 +156,22 @@ export const changeCharacterInCampaign = async (req, res) => {
         .json({ message: "Character not found in this campaign" });
     }
 
-    // Update the character in the campaign to a new character
+    // Update the character in the campaign character document
     campaignCharacter.character = newCharacterObjectId;
     await campaignCharacter.save();
+
+    // Also update the characters in the Campaign collection
+    await Campaign.updateOne(
+      { _id: campaignObjectId, 'characters': characterObjectId },
+      { $set: { 'characters.$': newCharacterObjectId } }
+    );
 
     // Find and return the updated campaign with populated characters
     const updatedCampaign = await Campaign.findById(campaignId).populate('characters');
 
     res.status(200).json({
       message: "Character changed successfully in campaign",
-      campaign: updatedCampaign,  // Return the updated campaign
+      campaign: updatedCampaign,
     });
   } catch (error) {
     console.log("Error changing character in campaign", error);
@@ -174,6 +180,7 @@ export const changeCharacterInCampaign = async (req, res) => {
       .json({ message: "Failed to change character in campaign", error });
   }
 };
+
 
 
 export const removeCharacterFromCampaign = async (req, res) => {
