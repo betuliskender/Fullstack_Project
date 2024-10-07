@@ -46,7 +46,6 @@ export const GET_CAMPAIGNS_WITH_CHARACTERS = gql`
   }
 `;
 
-
 export const CREATE_CAMPAIGN = gql`
   mutation CreateCampaign($name: String!, $description: String!) {
     createCampaign(name: $name, description: $description) {
@@ -77,3 +76,17 @@ export const ADD_CHARACTER_TO_CAMPAIGN = gql`
     }
   }
 `;
+
+export const GET_CAMPAIGN_BY_ID = gql`
+query Query($id: ID!) {
+  campaign(_id: $id) {
+    _id
+    name
+    description
+    characters {
+      _id
+      name
+    }
+  }
+}`;
+
