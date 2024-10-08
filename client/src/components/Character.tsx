@@ -4,7 +4,8 @@ import { AuthContext } from "../utility/authContext";
 import { GETALLCHARACTERS } from "../graphql/queries";
 import { Character } from "../utility/types";
 import { deleteCharacter, editCharacter } from "../utility/apiservice";
-import CharacterModal from "./CharacterModal";
+import CreateCharacterModal from "./CreateCharacterModal";
+import EditCharacterModal from "./EditCharacterModal"; // Import the new component
 import {
   Box,
   Button,
@@ -13,16 +14,7 @@ import {
   CardHeader,
   Heading,
   Image,
-  Modal,
   Text,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Input,
-  useDisclosure,
 } from "@chakra-ui/react";
 
 interface ProfilePageProps {
@@ -33,7 +25,7 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { token } = useContext(AuthContext);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [currentCharacter, setCurrentCharacter] = useState<Character | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
   const { loading, error, data, refetch } = useQuery(GETALLCHARACTERS, {
@@ -71,29 +63,20 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   const handleEdit = (character: Character) => {
     setCurrentCharacter(character);
-    onOpen();
+    setIsEditModalOpen(true); // Open the edit modal
   };
 
-  const handleFormSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (currentCharacter && token) {
+  const handleEditSubmit = async (updatedCharacter: Character) => {
+    if (token && updatedCharacter) {
       try {
-        const updatedCharacter = await editCharacter(currentCharacter._id!, currentCharacter, token);
-        console.log("Character updated successfully:", updatedCharacter);
+        const editedCharacter = await editCharacter(updatedCharacter._id!, updatedCharacter, token);
+        console.log("Character updated successfully:", editedCharacter);
         refetch();
-        onClose(); // Close the modal after successful update
+        setIsEditModalOpen(false); // Close the modal after successful update
       } catch (error) {
         console.error("Error updating character:", error);
       }
     }
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setCurrentCharacter((prevCharacter) => ({
-      ...prevCharacter!,
-      [name]: value,
-    }));
   };
 
   const handleCharacterCreated = (newCharacter: Character) => {
@@ -114,12 +97,11 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         <Button onClick={() => setModalOpen(true)} colorScheme="teal">Create New Character</Button>
       </Box>
 
-      {/* Character creation modal */}
-      <CharacterModal 
-        isOpen={modalOpen} 
-        onClose={() => setModalOpen(false)} 
-        isLoggedIn={isLoggedIn} 
-        onCharacterCreated={handleCharacterCreated} // Pass the callback
+      <CreateCharacterModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        isLoggedIn={isLoggedIn}
+        onCharacterCreated={handleCharacterCreated}
       />
 
       <Box mt={5} display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
@@ -158,72 +140,15 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         ))}
       </Box>
 
-      {/* Chakra Modal for editing a character */}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Edit Character</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {currentCharacter && (
-              <form onSubmit={handleFormSubmit}>
-                <Input
-                  placeholder="Name"
-                  name="name"
-                  value={currentCharacter.name}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-                <Input
-                  placeholder="Level"
-                  type="number"
-                  name="level"
-                  value={currentCharacter.level}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-                <Input
-                  placeholder="Race"
-                  name="race"
-                  value={currentCharacter.race}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-                <Input
-                  placeholder="Class"
-                  name="class"
-                  value={currentCharacter.class}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-                <Input
-                  placeholder="Background"
-                  name="background"
-                  value={currentCharacter.background}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-                <Input
-                  placeholder="Image URL"
-                  name="imageURL"
-                  value={currentCharacter.imageURL}
-                  onChange={handleInputChange}
-                  mb={3}
-                />
-              </form>
-            )}
-          </ModalBody>
-
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleFormSubmit}>
-              Save
-            </Button>
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <EditCharacterModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        currentCharacter={currentCharacter}
+        isLoggedIn={isLoggedIn}
+        onSubmit={handleEditSubmit}
+      />
     </Box>
   );
 };
 
-export default Characters; // Consider renaming to Characters for clarity
+export default Characters;

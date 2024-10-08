@@ -16,6 +16,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLogin, isOpen, onClose }) => 
   const [password, setPassword] = useState("");
   const { setLoggedIn, setUser, setToken } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,6 +38,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLogin, isOpen, onClose }) => 
       navigate("/profile");
     } catch (error) {
       console.error("Login failed:", error);
+      setErrorMessage("Incorrect email or password. Please try again.");
     }
   };
 
@@ -47,6 +49,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onLogin, isOpen, onClose }) => 
         <ModalHeader>Login</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
           <form onSubmit={handleSubmit}>
             <div className="email">
               <label htmlFor="email">Email</label>
