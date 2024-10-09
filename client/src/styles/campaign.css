@@ -38,7 +38,22 @@
   margin-bottom: 10px;
 }
 
-/* Stil til knappen-gruppe */
+/* Stil til edit-ikonet øverst i højre hjørne */
+.edit-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: #0a4b0c;
+  cursor: pointer;
+}
+
+.edit-icon:hover {
+  color: #45a049;
+  transform: scale(1.1); /* Forstør ikonet ved hover */
+}
+
+/* Stil til knappen-gruppe i bunden af kortet */
 .button-group {
   display: flex;
   justify-content: space-between;
@@ -47,19 +62,6 @@
   width: 90%; /* Justér bredde, så knapperne placeres korrekt */
   left: 50%;
   transform: translateX(-50%); /* Centrerer knapperne inde i kortet */
-}
-
-/* Stil til knappen "View" på venstre side */
-.button-group-left {
-  display: flex;
-  align-items: center;
-}
-
-/* Stil til knapperne "Delete" og "Edit" på højre side */
-.button-group-right {
-  display: flex;
-  flex-direction: column; /* Vertikal opstilling */
-  align-items: flex-end; /* Justér til højre */
 }
 
 /* Generel stil til alle knapper for et rustikt look */
@@ -99,19 +101,6 @@ button {
   transform: scale(1.05); /* Let forstørrelse ved hover */
 }
 
-/* Rustik stil til "Edit" knappen */
-.edit-button {
-  background: linear-gradient(145deg, #4b6d3c, #2e4725); /* Grøn farve med dybde */
-  color: #f2f2f2;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.edit-button:hover {
-  background: linear-gradient(145deg, #3f5d32, #22391c); /* Mørkere nuance ved hover */
-  transform: scale(1.05); /* Let forstørrelse ved hover */
-}
-
 /* Yderligere styling for at give knapperne et slidt look */
 button:active {
   transform: scale(0.95); /* Mindre ved klik for en tryk-effekt */
@@ -133,37 +122,4 @@ button:active {
 
 .create-button:hover {
   background-color: #45a049;
-}
-
-/* Karakterliste styling */
-.character-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-
-.character-list li {
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.character-list button {
-  background-color: #ff6666;
-  border: none;
-  padding: 5px 10px;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.character-list button:hover {
-  background-color: #ff3333;
-}
-
-/* Sektion til tilføjelse af karakterer */
-.add-character-section {
-  margin-top: 20px;
 }
