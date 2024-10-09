@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { Link, useNavigate } from "react-router-dom"; // Importér useNavigate
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
 import { GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries";
 import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
-import { FaCog } from 'react-icons/fa'; // Importér tandhjulsikonet fra react-icons
+import { FaCog } from "react-icons/fa";
 import "../styles/campaign.css";
 
 interface ProfilePageProps {
@@ -17,16 +17,19 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
-  const navigate = useNavigate(); // Brug useNavigate til at navigere til kampagnesiden
+  const navigate = useNavigate();
 
-  const { loading, error, data, refetch } = useQuery(GET_CAMPAIGNS_WITH_CHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
+  const { loading, error, data, refetch } = useQuery(
+    GET_CAMPAIGNS_WITH_CHARACTERS,
+    {
+      context: {
+        headers: {
+          Authorization: token ? `${token}` : "",
+        },
       },
-    },
-    fetchPolicy: "network-only",
-  });
+      fetchPolicy: "network-only",
+    }
+  );
 
   useEffect(() => {
     if (data && data.campaigns) {
@@ -57,7 +60,9 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setCurrentCampaign((prevCampaign) => (prevCampaign ? { ...prevCampaign, [name]: value } : null));
+    setCurrentCampaign((prevCampaign) =>
+      prevCampaign ? { ...prevCampaign, [name]: value } : null
+    );
   };
 
   const handleFormSubmit = async (event: React.FormEvent) => {
@@ -74,7 +79,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleCampaignClick = (campaignId: string) => {
-    navigate(`/campaign/${campaignId}`); // Naviger til den specifikke kampagneside
+    navigate(`/campaign/${campaignId}`);
   };
 
   if (!isLoggedIn || !token) {
@@ -95,11 +100,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
       <div className="campaign-grid">
         {campaigns.map((campaign: Campaign) => (
           <div key={campaign._id} className="campaign-card">
-            {/* Edit-ikon øverst i højre hjørne */}
-            <FaCog
-              className="edit-icon"
-              onClick={() => handleEdit(campaign)}
-            />
+            <FaCog className="edit-icon" onClick={() => handleEdit(campaign)} />
 
             <div className="campaign-info">
               <h3 className="campaign-title">{campaign.name}</h3>
@@ -107,15 +108,12 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
             </div>
 
             <div className="button-group">
-              {/* View-knap nederst i venstre hjørne */}
               <button
                 onClick={() => handleCampaignClick(campaign._id!)}
                 className="view-button"
               >
                 View
               </button>
-
-              {/* Delete-knap nederst i højre hjørne */}
               <button
                 onClick={() => handleDelete(campaign._id!)}
                 className="delete-button"
