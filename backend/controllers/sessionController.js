@@ -21,6 +21,11 @@ export const createSession = async (req, res) => {
     });
 
     const savedSession = await newSession.save();
+
+    // Tilføj den nye session til kampagnens sessions-array og gem ændringen
+    campaign.sessions.push(savedSession._id);
+    await campaign.save();
+
     res.status(201).json(savedSession);
   } catch (error) {
     console.log("Error creating session", error);

@@ -17,7 +17,10 @@ export const createCharacter = async (character: Character, token: string) => {
   }
 };
 
-export const deleteCharacter = async (id: string, token: string): Promise<{ message: string }> => {
+export const deleteCharacter = async (
+  id: string,
+  token: string
+): Promise<{ message: string }> => {
   try {
     const response = await axios.delete<{ message: string }>(
       `${API_URL}/characters/${id}`,
@@ -34,7 +37,11 @@ export const deleteCharacter = async (id: string, token: string): Promise<{ mess
   }
 };
 
-export const editCharacter = async (id: string, characterData: Character, token: string): Promise<Character> => {
+export const editCharacter = async (
+  id: string,
+  characterData: Character,
+  token: string
+): Promise<Character> => {
   try {
     const response = await axios.put<Character>(
       `${API_URL}/characters/${id}`,
@@ -52,14 +59,24 @@ export const editCharacter = async (id: string, characterData: Character, token:
   }
 };
 
-export const registerUser = async (userData: User): Promise<{ message: string }> => {
-  const response = await axios.post<{ message: string }>(`${API_URL}/users/register`, userData);
+export const registerUser = async (
+  userData: User
+): Promise<{ message: string }> => {
+  const response = await axios.post<{ message: string }>(
+    `${API_URL}/users/register`,
+    userData
+  );
   return response.data;
 };
 
-export const loginUser = async (credentials: LoginUser): Promise<LoginResponse> => {
+export const loginUser = async (
+  credentials: LoginUser
+): Promise<LoginResponse> => {
   try {
-    const response = await axios.post<LoginResponse>(`${API_URL}/users/login`, credentials);
+    const response = await axios.post<LoginResponse>(
+      `${API_URL}/users/login`,
+      credentials
+    );
     console.log("Response data:", response.data); // Log the response data
     return response.data; // Ensure the response contains the token and message
   } catch (error) {
@@ -68,7 +85,10 @@ export const loginUser = async (credentials: LoginUser): Promise<LoginResponse> 
   }
 };
 
-export const createCampaign = async (campaign: Campaign, token: string): Promise<Campaign> => {
+export const createCampaign = async (
+  campaign: Campaign,
+  token: string
+): Promise<Campaign> => {
   try {
     const response = await axios.post(`${API_URL}/campaigns`, campaign, {
       headers: {
@@ -82,7 +102,10 @@ export const createCampaign = async (campaign: Campaign, token: string): Promise
   }
 };
 
-export const deleteCampaign = async (id: string, token: string): Promise<{ message: string }> => {
+export const deleteCampaign = async (
+  id: string,
+  token: string
+): Promise<{ message: string }> => {
   try {
     const response = await axios.delete<{ message: string }>(
       `${API_URL}/campaigns/${id}`,
@@ -99,7 +122,11 @@ export const deleteCampaign = async (id: string, token: string): Promise<{ messa
   }
 };
 
-export const editCampaign = async (id: string, campaignData: Campaign, token: string): Promise<Campaign> => {
+export const editCampaign = async (
+  id: string,
+  campaignData: Campaign,
+  token: string
+): Promise<Campaign> => {
   try {
     const response = await axios.put<Campaign>(
       `${API_URL}/campaigns/${id}`,
@@ -179,6 +206,26 @@ export const removeCharacterFromCampaign = async (
     return response.data;
   } catch (error) {
     console.error("Error removing character from campaign:", error);
+    throw error;
+  }
+};
+
+export const createSession = async (
+  campaignId: string,
+  sessionData: { sessionDate: string; logEntry: string },
+  token: string
+) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/campaigns/${campaignId}/sessions`,
+      sessionData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating session:", error);
     throw error;
   }
 };

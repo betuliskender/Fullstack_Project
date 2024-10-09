@@ -15,6 +15,7 @@ const CampaignForm: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     description: "",
     user: user?._id || "",
     characters: [],
+    sessions: [],
   });
 
   const handleChange = (
@@ -40,6 +41,7 @@ const CampaignForm: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           description: "",
           user: user?._id || "",
           characters: [],
+          sessions: [],
         });
       } else {
         console.error("Token is null or undefined");

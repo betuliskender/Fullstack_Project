@@ -87,6 +87,11 @@ query Query($id: ID!) {
       _id
       name
     }
+    sessions {
+      _id
+      sessionDate
+      logEntry
+    }
   }
 }`;
 

@@ -9,26 +9,27 @@ interface AddCharacterToCampaignProps {
   campaignId: string;
   allCampaigns: Campaign[]; // Pass alle kampagner som prop
   refetchCampaigns: () => void; // Callback for at opdatere kampagnelisten
+  onCharacterAdded: (newCharacter: Character) => void; // Ny prop til opdatering af state
 }
 
 const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({
   campaignId,
   allCampaigns,
   refetchCampaigns, // Henter callbacken
+  onCharacterAdded, // Ny prop til at opdatere state
 }) => {
   const { token } = useContext(AuthContext);
   const [selectedCharacter, setSelectedCharacter] = useState("");
-  const {
-    loading: charactersLoading,
-    data: charactersData,
-    error,
-  } = useQuery(GETALLCHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
+  const { loading: charactersLoading, data: charactersData, error } = useQuery(
+    GETALLCHARACTERS,
+    {
+      context: {
+        headers: {
+          Authorization: token ? `${token}` : "",
+        },
       },
-    },
-  });
+    }
+  );
 
   // Saml alle karakter-ID'er, der er tilføjet til en kampagne
   const allAssignedCharacterIds = allCampaigns.flatMap((campaign) =>
@@ -50,6 +51,15 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({
           token
         );
         console.log(response.message);
+
+        // Find den nye karakter fra characterData
+        const newCharacter = charactersData.characters.find(
+          (character: Character) => character._id === selectedCharacter
+        );
+
+        if (newCharacter) {
+          onCharacterAdded(newCharacter); // Opdater kampagnens state med den nye karakter
+        }
 
         // Tøm dropdown-menuen
         setSelectedCharacter("");

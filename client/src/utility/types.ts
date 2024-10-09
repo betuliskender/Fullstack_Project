@@ -44,4 +44,12 @@ export interface Campaign {
   description: string;
   user: string;
   characters: Character[];
+  sessions: Session[];
+}
+
+export interface Session {
+  _id?: string;
+  sessionDate: string;
+  logEntry: string;
+  campaign: string;
 }
