@@ -229,3 +229,43 @@ export const createSession = async (
     throw error;
   }
 };
+
+export const editSession = async (
+  campaignId: string,
+  sessionId: string,
+  sessionData: { sessionDate: string; logEntry: string },
+  token: string
+) => {
+  try {
+    const response = await axios.put(
+      `${API_URL}/campaigns/${campaignId}/sessions/${sessionId}`,
+      sessionData,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error editing session:", error);
+    throw error;
+  }
+};
+
+export const deleteSession = async (
+  campaignId: string,
+  sessionId: string,
+  token: string
+) => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/campaigns/${campaignId}/sessions/${sessionId}`, // Fix here
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting session:", error);
+    throw error;
+  }
+};

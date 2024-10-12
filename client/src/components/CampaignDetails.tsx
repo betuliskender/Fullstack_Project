@@ -6,7 +6,8 @@ import { GET_CAMPAIGN_BY_ID, GETALLCHARACTERS } from "../graphql/queries";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./SessionForm";
-import { Campaign, Session,Character } from "../utility/types";
+import EditSessionModal from "./EditSessionModal";
+import { Campaign, Session, Character } from "../utility/types";
 import { removeCharacterFromCampaign } from "../utility/apiservice";
 
 const CampaignDetails = () => {
@@ -14,9 +15,11 @@ const CampaignDetails = () => {
   const { token } = useContext(AuthContext);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
+  const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
   const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
     null
   );
+  const [currentSession, setCurrentSession] = useState<Session | null>(null);
 
   const {
     loading: campaignLoading,
@@ -104,9 +107,42 @@ const CampaignDetails = () => {
     }
   };
 
+  const handleSessionEdit = (session: Session) => {
+    setCurrentSession(session); // Set the session to edit
+    setIsEditSessionModalOpen(true); // Open modal
+  };
+
+  const handleSessionUpdated = (updatedSession: Session) => {
+    setCampaign((prevCampaign) => {
+      if (!prevCampaign) return prevCampaign;
+
+      // Update the specific session in the campaign's sessions array
+      const updatedSessions = prevCampaign.sessions.map((session) =>
+        session._id === updatedSession._id ? updatedSession : session
+      );
+
+      return { ...prevCampaign, sessions: updatedSessions };
+    });
+  };
+
+  const handleSessionDeleted = (deletedSessionId: string) => {
+    setCampaign((prevCampaign) => {
+      if (!prevCampaign) return prevCampaign;
+
+      // Remove the deleted session from the sessions array
+      const updatedSessions = prevCampaign.sessions.filter(
+        (session) => session._id !== deletedSessionId
+      );
+
+      return { ...prevCampaign, sessions: updatedSessions };
+    });
+  };
+
   const handleModalClose = () => {
     setIsCharacterModalOpen(false);
+    setIsEditSessionModalOpen(false);
     setCurrentCharacterId(null);
+    setCurrentSession(null);
   };
 
   if (campaignLoading || charactersLoading)
@@ -156,28 +192,29 @@ const CampaignDetails = () => {
         onSessionCreated={handleSessionCreated}
       />
 
-<h3>Sessions for this campaign:</h3>
-{campaign?.sessions && campaign.sessions.length > 0 ? (
-  <ul>
-    {campaign.sessions.map((session) => {
-      // Konverter Unix-tidsstemplet til et heltal og derefter til en gyldig dato
-      const timestamp = parseInt(session.sessionDate, 10);
-      const formattedDate = !isNaN(timestamp)
-        ? new Date(timestamp).toLocaleDateString("en-GB")
-        : "Invalid Date";
+      <h3>Sessions for this campaign:</h3>
+      {campaign?.sessions && campaign.sessions.length > 0 ? (
+        <ul>
+          {campaign.sessions.map((session) => {
+            // Parse the sessionDate directly into a Date object
+            const timestamp = Number(session.sessionDate); // Convert to number (if it's a string)
+            const formattedDate = !isNaN(timestamp)
+              ? new Date(timestamp).toLocaleDateString("en-GB")
+              : "Invalid Date";
 
-      return (
-        <li key={session._id}>
-          <strong>Date:</strong> {formattedDate}
-          <br />
-          <strong>Log:</strong> {session.logEntry}
-        </li>
-      );
-    })}
-  </ul>
-) : (
-  <p>No sessions found for this campaign.</p>
-)}
+            return (
+              <li key={session._id}>
+                <strong>Date:</strong> {formattedDate}
+                <br />
+                <strong>Log:</strong> {session.logEntry}
+                <button onClick={() => handleSessionEdit(session)}>Edit</button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p>No sessions found for this campaign.</p>
+      )}
 
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
@@ -188,6 +225,16 @@ const CampaignDetails = () => {
           availableCharacters={charactersData?.characters || []}
           refetchCampaigns={() => {}}
           setCampaign={setCampaign}
+        />
+      )}
+      {isEditSessionModalOpen && currentSession && (
+        <EditSessionModal
+          isOpen={isEditSessionModalOpen}
+          onClose={handleModalClose}
+          campaign={campaign!}
+          session={currentSession}
+          onSessionUpdated={handleSessionUpdated}
+          onSessionDeleted={handleSessionDeleted}
         />
       )}
     </div>

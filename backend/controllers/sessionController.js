@@ -1,6 +1,7 @@
 import Session from "../models/sessionModel.js";
 import Campaign from "../models/campaignModel.js";
 
+// Create a new session
 export const createSession = async (req, res) => {
   const { campaignId } = req.params;
   const { sessionDate, logEntry } = req.body;
@@ -12,7 +13,8 @@ export const createSession = async (req, res) => {
       return res.status(404).json({ message: "No campaign found" });
     }
 
-    const currentSessionDate = sessionDate || new Date();
+    // Convert sessionDate to a Date object, defaulting to the current date if not provided
+    const currentSessionDate = sessionDate ? new Date(sessionDate) : new Date();
 
     const newSession = new Session({
       sessionDate: currentSessionDate,
@@ -22,7 +24,6 @@ export const createSession = async (req, res) => {
 
     const savedSession = await newSession.save();
 
-    // Tilføj den nye session til kampagnens sessions-array og gem ændringen
     campaign.sessions.push(savedSession._id);
     await campaign.save();
 
@@ -33,6 +34,7 @@ export const createSession = async (req, res) => {
   }
 };
 
+// Edit an existing session
 export const editSession = async (req, res) => {
   const { sessionId } = req.params;
   const { sessionDate, logEntry } = req.body;
@@ -44,7 +46,8 @@ export const editSession = async (req, res) => {
       return res.status(404).json({ message: "Session not found" });
     }
 
-    session.sessionDate = sessionDate || session.sessionDate;
+    // Convert sessionDate to a Date object only if provided
+    session.sessionDate = sessionDate ? new Date(sessionDate) : session.sessionDate;
     session.logEntry = logEntry || session.logEntry;
 
     const updatedSession = await session.save();
@@ -54,6 +57,7 @@ export const editSession = async (req, res) => {
     res.status(500).json({ message: "Failed to update session", error });
   }
 };
+
 
 export const deleteSession = async (req, res) => {
   const { sessionId } = req.params;
