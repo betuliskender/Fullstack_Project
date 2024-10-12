@@ -196,10 +196,12 @@ const CampaignDetails = () => {
       {campaign?.sessions && campaign.sessions.length > 0 ? (
         <ul>
           {campaign.sessions.map((session) => {
-            // Parse the sessionDate directly into a Date object
-            const timestamp = Number(session.sessionDate); // Convert to number (if it's a string)
+            // Check if sessionDate is a valid timestamp or a string
+            const timestamp = Number(session.sessionDate);
             const formattedDate = !isNaN(timestamp)
               ? new Date(timestamp).toLocaleDateString("en-GB")
+              : !isNaN(Date.parse(session.sessionDate))
+              ? new Date(session.sessionDate).toLocaleDateString("en-GB")
               : "Invalid Date";
 
             return (
