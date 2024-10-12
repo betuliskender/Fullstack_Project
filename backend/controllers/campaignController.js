@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Campaign from "../models/campaignModel.js";
 import CampaignCharacter from "../models/campaignCharacter.js";
 import Character from "../models/characterModel.js";
+import Session from "../models/sessionModel.js";
 
 export const createCampaign = async (req, res) => {
   const { name, description } = req.body;
@@ -58,6 +59,8 @@ export const deleteCampaign = async (req, res) => {
 
     // This deletes all the characters from the campaign
     await CampaignCharacter.deleteMany({ campaign: campaignId });
+
+    await Session.deleteMany({ campaign: campaignId });
 
     res.status(200).json({ message: "Campaign deleted successfully" });
   } catch (error) {
