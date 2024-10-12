@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { editSession, deleteSession } from "../utility/apiservice";
+import { editSession } from "../utility/apiservice";
 import { AuthContext } from "../utility/authContext";
 import { Campaign, Session } from "../utility/types";
 
@@ -9,7 +9,6 @@ interface EditSessionModalProps {
   campaign: Campaign;
   session: Session;
   onSessionUpdated: (updatedSession: Session) => void;
-  onSessionDeleted: (deletedSessionId: string) => void;
 }
 
 const EditSessionModal: React.FC<EditSessionModalProps> = ({
@@ -18,7 +17,6 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
   campaign,
   session,
   onSessionUpdated,
-  onSessionDeleted,
 }) => {
   const { token } = useContext(AuthContext);
 
@@ -59,19 +57,6 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
     }
   };
 
-  // Handle deleting a session
-  const handleDelete = async () => {
-    try {
-      if (token && campaign._id && session._id) {
-        await deleteSession(campaign._id, session._id, token);
-        onSessionDeleted(session._id); // Remove the session from the state
-        onClose();
-      }
-    } catch (error) {
-      console.error("Error deleting session:", error);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -100,9 +85,6 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
           </label>
           <button type="submit">Save Changes</button>
         </form>
-        <button onClick={handleDelete} className="delete-button">
-          Delete Session
-        </button>
       </div>
     </div>
   );

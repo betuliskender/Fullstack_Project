@@ -8,7 +8,7 @@ import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./SessionForm";
 import EditSessionModal from "./EditSessionModal";
 import { Campaign, Session, Character } from "../utility/types";
-import { removeCharacterFromCampaign } from "../utility/apiservice";
+import { removeCharacterFromCampaign, deleteSession } from "../utility/apiservice";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -49,8 +49,6 @@ const CampaignDetails = () => {
 
   useEffect(() => {
     if (campaignData && campaignData.campaign) {
-      console.log("Campaign data received:", campaignData);
-
       setCampaign(campaignData.campaign);
     }
   }, [campaignData]);
@@ -108,30 +106,36 @@ const CampaignDetails = () => {
   };
 
   const handleSessionEdit = (session: Session) => {
-    setCurrentSession(session); // Set the session to edit
-    setIsEditSessionModalOpen(true); // Open modal
+    setCurrentSession(session);
+    setIsEditSessionModalOpen(true);
+  };
+
+  const handleSessionDeleted = async (sessionId: string) => {
+    if (campaign && token) {
+      try {
+        await deleteSession(campaign._id!, sessionId, token);
+
+        setCampaign((prevCampaign) => {
+          if (!prevCampaign) return prevCampaign;
+
+          const updatedSessions = prevCampaign.sessions.filter(
+            (session) => session._id !== sessionId
+          );
+
+          return { ...prevCampaign, sessions: updatedSessions };
+        });
+      } catch (error) {
+        console.error("Error deleting session:", error);
+      }
+    }
   };
 
   const handleSessionUpdated = (updatedSession: Session) => {
     setCampaign((prevCampaign) => {
       if (!prevCampaign) return prevCampaign;
 
-      // Update the specific session in the campaign's sessions array
       const updatedSessions = prevCampaign.sessions.map((session) =>
         session._id === updatedSession._id ? updatedSession : session
-      );
-
-      return { ...prevCampaign, sessions: updatedSessions };
-    });
-  };
-
-  const handleSessionDeleted = (deletedSessionId: string) => {
-    setCampaign((prevCampaign) => {
-      if (!prevCampaign) return prevCampaign;
-
-      // Remove the deleted session from the sessions array
-      const updatedSessions = prevCampaign.sessions.filter(
-        (session) => session._id !== deletedSessionId
       );
 
       return { ...prevCampaign, sessions: updatedSessions };
@@ -143,6 +147,17 @@ const CampaignDetails = () => {
     setIsEditSessionModalOpen(false);
     setCurrentCharacterId(null);
     setCurrentSession(null);
+  };
+
+  const formatDate = (sessionDate: string) => {
+    // Handle both timestamps and string date formats
+    const timestamp = Number(sessionDate);
+    if (!isNaN(timestamp)) {
+      return new Date(timestamp).toLocaleDateString("en-GB"); // For timestamp
+    } else if (!isNaN(Date.parse(sessionDate))) {
+      return new Date(sessionDate).toLocaleDateString("en-GB"); // For string dates
+    }
+    return "Invalid Date"; // If date is invalid
   };
 
   if (campaignLoading || charactersLoading)
@@ -162,18 +177,10 @@ const CampaignDetails = () => {
         {campaign?.characters.map((character) => (
           <li key={character._id}>
             {character.name}
-            <button
-              onClick={() =>
-                character._id && handleCharacterEdit(character._id)
-              }
-            >
+            <button onClick={() => character._id && handleCharacterEdit(character._id)}>
               Edit Character
             </button>
-            <button
-              onClick={() =>
-                character._id && handleCharacterRemove(character._id)
-              }
-            >
+            <button onClick={() => character._id && handleCharacterRemove(character._id)}>
               Remove Character
             </button>
           </li>
@@ -195,24 +202,17 @@ const CampaignDetails = () => {
       <h3>Sessions for this campaign:</h3>
       {campaign?.sessions && campaign.sessions.length > 0 ? (
         <ul>
-          {campaign.sessions.map((session) => {
-            // Check if sessionDate is a valid timestamp or a string
-            const timestamp = Number(session.sessionDate);
-            const formattedDate = !isNaN(timestamp)
-              ? new Date(timestamp).toLocaleDateString("en-GB")
-              : !isNaN(Date.parse(session.sessionDate))
-              ? new Date(session.sessionDate).toLocaleDateString("en-GB")
-              : "Invalid Date";
-
-            return (
-              <li key={session._id}>
-                <strong>Date:</strong> {formattedDate}
-                <br />
-                <strong>Log:</strong> {session.logEntry}
-                <button onClick={() => handleSessionEdit(session)}>Edit</button>
-              </li>
-            );
-          })}
+          {campaign.sessions.map((session) => (
+            <li key={session._id}>
+              <strong>Date:</strong> {formatDate(session.sessionDate)}
+              <br />
+              <strong>Log:</strong> {session.logEntry}
+              <button onClick={() => handleSessionEdit(session)}>Edit</button>
+              <button onClick={() => session._id && handleSessionDeleted(session._id)}>
+                Delete
+              </button>
+            </li>
+          ))}
         </ul>
       ) : (
         <p>No sessions found for this campaign.</p>
@@ -236,7 +236,6 @@ const CampaignDetails = () => {
           campaign={campaign!}
           session={currentSession}
           onSessionUpdated={handleSessionUpdated}
-          onSessionDeleted={handleSessionDeleted}
         />
       )}
     </div>
