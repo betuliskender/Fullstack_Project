@@ -92,6 +92,10 @@ query Query($id: ID!) {
       sessionDate
       logEntry
     }
+    maps {
+      _id
+      imageURL
+    }
   }
 }`;
 

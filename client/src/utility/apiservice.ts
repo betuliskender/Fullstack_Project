@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Character, User, LoginUser, LoginResponse, Campaign } from "./types";
+import { Character, User, LoginUser, LoginResponse, Campaign, Map } from "./types";
 
 const API_URL = "http://localhost:5000/api";
 
@@ -266,6 +266,32 @@ export const deleteSession = async (
     return response.data;
   } catch (error) {
     console.error("Error deleting session:", error);
+    throw error;
+  }
+};
+
+export const uploadMapToCampaign = async (
+  campaignId: string,
+  file: File,
+  token: string
+): Promise<Map> => {
+  const formData = new FormData();
+  formData.append("mapImage", file);
+
+  try {
+    const response = await axios.post<Map>(
+      `${API_URL}/campaigns/${campaignId}/upload-map`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data", // Important for file upload
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading map:", error);
     throw error;
   }
 };

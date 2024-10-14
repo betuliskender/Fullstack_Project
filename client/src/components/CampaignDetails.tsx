@@ -7,8 +7,15 @@ import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./SessionForm";
 import EditSessionModal from "./EditSessionModal";
-import { Campaign, Session, Character } from "../utility/types";
-import { removeCharacterFromCampaign, deleteSession } from "../utility/apiservice";
+import MapUpload from "./MapUpload"; // Import MapUpload component
+import { Campaign, Session, Character, Map } from "../utility/types"; // Import Map type
+import {
+  removeCharacterFromCampaign,
+  deleteSession,
+} from "../utility/apiservice";
+import "../styles/campaignDetails.css"
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -52,6 +59,19 @@ const CampaignDetails = () => {
       setCampaign(campaignData.campaign);
     }
   }, [campaignData]);
+
+  const handleMapUploaded = (uploadedMap: Map) => {
+    // Update the campaign with the uploaded map and refetch the campaign
+    setCampaign((prevCampaign) => {
+      if (prevCampaign) {
+        return {
+          ...prevCampaign,
+          maps: [...(prevCampaign.maps ?? []), uploadedMap], // Add the new map to the maps array
+        };
+      }
+      return prevCampaign;
+    });
+  };
 
   const handleSessionCreated = (newSession: Session) => {
     setCampaign((prevCampaign) => {
@@ -150,7 +170,6 @@ const CampaignDetails = () => {
   };
 
   const formatDate = (sessionDate: string) => {
-    // Handle both timestamps and string date formats
     const timestamp = Number(sessionDate);
     if (!isNaN(timestamp)) {
       return new Date(timestamp).toLocaleDateString("en-GB"); // For timestamp
@@ -168,56 +187,104 @@ const CampaignDetails = () => {
     return <p>Error loading characters: {charactersError.message}</p>;
 
   return (
-    <div>
-      <h1>{campaign?.name}</h1>
-      <p>{campaign?.description}</p>
-
-      <h3>Characters in this campaign:</h3>
-      <ul>
-        {campaign?.characters.map((character) => (
-          <li key={character._id}>
-            {character.name}
-            <button onClick={() => character._id && handleCharacterEdit(character._id)}>
-              Edit Character
-            </button>
-            <button onClick={() => character._id && handleCharacterRemove(character._id)}>
-              Remove Character
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <AddCharacterToCampaign
-        campaignId={campaign ? campaign._id || "" : ""}
-        allCampaigns={campaign ? [campaign] : []}
-        refetchCampaigns={() => {}}
-        onCharacterAdded={handleCharacterAdded}
-      />
-
-      <SessionForm
-        campaign={campaign!}
-        onSessionCreated={handleSessionCreated}
-      />
-
-      <h3>Sessions for this campaign:</h3>
-      {campaign?.sessions && campaign.sessions.length > 0 ? (
+    <div className="campaign-details-container">
+      {/* Left side: Campaign Information */}
+      <div className="campaign-info">
+        <h1>{campaign?.name}</h1>
+        <p>{campaign?.description}</p>
+  
+        <h3>Characters in this campaign:</h3>
         <ul>
-          {campaign.sessions.map((session) => (
-            <li key={session._id}>
-              <strong>Date:</strong> {formatDate(session.sessionDate)}
-              <br />
-              <strong>Log:</strong> {session.logEntry}
-              <button onClick={() => handleSessionEdit(session)}>Edit</button>
-              <button onClick={() => session._id && handleSessionDeleted(session._id)}>
-                Delete
+          {campaign?.characters.map((character) => (
+            <li key={character._id}>
+              {character.name}
+              <button
+                onClick={() =>
+                  character._id && handleCharacterEdit(character._id)
+                }
+              >
+                Edit Character
+              </button>
+              <button
+                onClick={() =>
+                  character._id && handleCharacterRemove(character._id)
+                }
+              >
+                Remove Character
               </button>
             </li>
           ))}
         </ul>
-      ) : (
-        <p>No sessions found for this campaign.</p>
-      )}
-
+  
+        <AddCharacterToCampaign
+          campaignId={campaign ? campaign._id || "" : ""}
+          allCampaigns={campaign ? [campaign] : []}
+          refetchCampaigns={() => {}}
+          onCharacterAdded={handleCharacterAdded}
+        />
+  
+        {/* Session Form */}
+        <SessionForm
+          campaign={campaign!}
+          onSessionCreated={handleSessionCreated}
+        />
+  
+        <h3>Sessions for this campaign:</h3>
+        {campaign?.sessions && campaign.sessions.length > 0 ? (
+          <ul>
+            {campaign.sessions.map((session) => (
+              <li key={session._id}>
+                <strong>Date:</strong> {formatDate(session.sessionDate)}
+                <br />
+                <strong>Log:</strong> {session.logEntry}
+                <button onClick={() => handleSessionEdit(session)}>Edit</button>
+                <button
+                  onClick={() => session._id && handleSessionDeleted(session._id)}
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No sessions found for this campaign.</p>
+        )}
+  
+        {/* MapUpload Component */}
+        {campaign && token && (
+          <MapUpload
+            campaignId={campaign._id!}
+            token={token}
+            onMapUploaded={handleMapUploaded}
+          />
+        )}
+      </div>
+  
+      {/* Right side: Carousel for Maps */}
+      <div className="campaign-map">
+        <br></br>
+        {campaign?.maps && campaign.maps.length > 0 ? (
+          <Carousel
+            showThumbs={false} // Optional: hides thumbnail navigation
+            showStatus={false} // Optional: hides current slide status
+            infiniteLoop // Optional: loops through maps
+            dynamicHeight={false} // Optional: makes the carousel dynamic in height based on images
+          >
+            {campaign.maps.map((map) => (
+              <div key={map._id}>
+                <img
+                  src={`http://localhost:5000${map.imageURL}`} // Prepending the localhost URL
+                  alt="Campaign Map"
+                  style={{ width: "100%" }}
+                />
+              </div>
+            ))}
+          </Carousel>
+        ) : (
+          <p>No maps found for this campaign.</p>
+        )}
+      </div>
+  
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
           isOpen={isCharacterModalOpen}
@@ -239,7 +306,6 @@ const CampaignDetails = () => {
         />
       )}
     </div>
-  );
-};
+  );};
 
 export default CampaignDetails;

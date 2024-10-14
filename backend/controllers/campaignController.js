@@ -3,6 +3,7 @@ import Campaign from "../models/campaignModel.js";
 import CampaignCharacter from "../models/campaignCharacter.js";
 import Character from "../models/characterModel.js";
 import Session from "../models/sessionModel.js";
+import Map from "../models/mapModel.js";
 
 export const createCampaign = async (req, res) => {
   const { name, description } = req.body;
@@ -61,6 +62,8 @@ export const deleteCampaign = async (req, res) => {
     await CampaignCharacter.deleteMany({ campaign: campaignId });
 
     await Session.deleteMany({ campaign: campaignId });
+
+    await Map.deleteMany({ campaign: campaignId });
 
     res.status(200).json({ message: "Campaign deleted successfully" });
   } catch (error) {
@@ -222,5 +225,39 @@ export const removeCharacterFromCampaign = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to remove character from campaign", error });
+  }
+};
+
+export const uploadMapToCampaign = async (req, res) => {
+  const { campaignId } = req.params;
+
+  try {
+    // Check if the campaign exists
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    // Save map details to MongoDB
+    const newMap = new Map({
+      pinLocation: req.body.pinLocation || "", // Optional: Can add pin location if needed later
+      imageURL: `/uploads/${req.file.filename}`, // Save the uploaded file's URL
+      campaign: campaignId,
+      session: req.body.sessionId || null, // Optional: If you're uploading per session
+    });
+
+    const savedMap = await newMap.save();
+
+    // Update the campaign to reference the uploaded map
+    campaign.maps.push(savedMap._id); // Push the map's ObjectId into the maps array
+    await campaign.save();
+
+    res.status(201).json({
+      message: "Map uploaded successfully",
+      map: savedMap,
+    });
+  } catch (error) {
+    console.error("Error uploading map:", error);
+    res.status(500).json({ message: "Failed to upload map", error });
   }
 };

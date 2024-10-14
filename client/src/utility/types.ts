@@ -45,6 +45,7 @@ export interface Campaign {
   user: string;
   characters: Character[];
   sessions: Session[];
+  maps?: Map[];
 }
 
 export interface Session {
@@ -52,4 +53,12 @@ export interface Session {
   sessionDate: string;
   logEntry: string;
   campaign: string;
+}
+
+export interface Map {
+  _id?: string;
+  pinLocation?: string;
+  imageURL: string;
+  campaign: string;
+  session?: string;
 }

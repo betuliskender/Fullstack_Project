@@ -21,7 +21,7 @@ const resolvers = {
     },
     campaign: async (_, { _id }, { user }) => {
       if (!user) throw new Error('Authentication required');
-      return await Campaign.findById(_id).populate("characters").populate("sessions");
+      return await Campaign.findById(_id).populate("characters").populate("sessions").populate("maps");
     },
     sessions: async (_, __, { user }) => {
       if (!user) throw new Error('Authentication required');

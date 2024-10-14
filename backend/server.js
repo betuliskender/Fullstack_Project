@@ -24,6 +24,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/characters", characterRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/campaigns", sessionRoutes);
+app.use('/uploads', express.static('uploads'));
 
 async function startServer() {
   const server = new ApolloServer({
