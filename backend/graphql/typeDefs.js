@@ -37,6 +37,15 @@ export const typeDefs = gql`
     description: String!
     characters: [Character]
     sessions: [Session]
+    maps: [Map]
+  }
+
+  type Map {
+    _id: ID!
+    pinLocation: String
+    imageURL: String!
+    campaign: Campaign!
+    session: Session
   }
 
   type CampaignCharacter {

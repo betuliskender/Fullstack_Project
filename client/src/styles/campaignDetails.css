@@ -1,0 +1,20 @@
+.campaign-details-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .campaign-info {
+    flex: 1; /* Left side content */
+  }
+  
+  .campaign-map {
+    flex: 1; /* Right side map/carousel */
+  }
+  
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  

@@ -8,7 +8,9 @@ services:
     depends_on:
       - mongo
     env_file:
-      - ./backend/.env 
+      - ./backend/.env
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads  
 
   frontend:
     build: ./client

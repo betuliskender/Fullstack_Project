@@ -30,6 +30,11 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
                 Profile
               </Button>
             </Link>
+            <Link to="/campaign">
+              <Button colorScheme="teal" variant="ghost">
+                Campaign
+              </Button>
+            </Link>
             <Link to="/character">
               <Button colorScheme="teal" variant="ghost">
                 Characters

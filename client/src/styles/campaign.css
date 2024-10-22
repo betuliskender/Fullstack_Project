@@ -1,0 +1,125 @@
+/* campaign.css */
+
+/* Grid-styling for kampagnekort */
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px; /* Mellemrum mellem kampagnekortene */
+  justify-content: space-around;
+}
+
+/* Styling af individuelle kampagnekort */
+.campaign-card {
+  background-color: #f9f9f9;
+  width: 300px;
+  height: 350px; /* Fast højde for at sikre ensartede kort */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  transition: transform 0.2s;
+  position: relative; /* For at kunne bruge absolut positionering */
+}
+
+/* Information om kampagnen */
+.campaign-info {
+  margin-bottom: 20px;
+}
+
+.campaign-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.campaign-description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Stil til edit-ikonet øverst i højre hjørne */
+.edit-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: #0a4b0c;
+  cursor: pointer;
+}
+
+.edit-icon:hover {
+  color: #45a049;
+  transform: scale(1.1); /* Forstør ikonet ved hover */
+}
+
+/* Stil til knappen-gruppe i bunden af kortet */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  position: absolute; /* Fast positionering af knapperne */
+  bottom: 20px; /* Afstand fra bunden af kortet */
+  width: 90%; /* Justér bredde, så knapperne placeres korrekt */
+  left: 50%;
+  transform: translateX(-50%); /* Centrerer knapperne inde i kortet */
+}
+
+/* Generel stil til alle knapper for et rustikt look */
+button {
+  font-family: 'Georgia', serif; /* Bruger en serif-font for en vintage stil */
+  font-weight: bold;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* En let skygge for dybde */
+  border: 2px solid #4f3b30; /* Giver knappen en grov kant */
+  border-radius: 5px; /* En blød afrunding af hjørner */
+  transition: background-color 0.3s, transform 0.2s; /* Glat overgang ved hover */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6); /* Giver teksten en lidt slidt effekt */
+}
+
+/* Rustik stil til "View" knappen */
+.view-button {
+  background: linear-gradient(145deg, #6e8495, #3e4f61); /* Ujævn farve med gradient */
+  color: #f2f2f2;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.view-button:hover {
+  background: linear-gradient(145deg, #5c6d7e, #2f3f4e); /* Mørkere nuance ved hover */
+  transform: scale(1.05); /* Let forstørrelse ved hover */
+}
+
+/* Rustik stil til "Delete" knappen */
+.delete-button {
+  background: linear-gradient(145deg, #8b3a3a, #5a1e1e); /* En dyb rødbrun farve */
+  color: #f2f2f2;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: linear-gradient(145deg, #772d2d, #451414); /* Mørkere ved hover */
+  transform: scale(1.05); /* Let forstørrelse ved hover */
+}
+
+/* Yderligere styling for at give knapperne et slidt look */
+button:active {
+  transform: scale(0.95); /* Mindre ved klik for en tryk-effekt */
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5); /* Indvendig skygge for indtryk */
+}
+
+/* Styling til "Create New Campaign" knappen */
+.create-button {
+  background-color: #0a4b0c;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 5px;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.create-button:hover {
+  background-color: #45a049;
+}
