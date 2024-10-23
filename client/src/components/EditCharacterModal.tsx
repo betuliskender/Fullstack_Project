@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -26,7 +26,14 @@ const EditCharacterModal: React.FC<EditCharacterModalProps> = ({
   currentCharacter,
   onSubmit,
 }) => {
-  const [character, setCharacter] = useState<Character | null>(currentCharacter);
+  const [character, setCharacter] = useState<Character | null>(null);
+
+  // Sync character state with currentCharacter prop when it changes
+  useEffect(() => {
+    if (currentCharacter) {
+      setCharacter(currentCharacter);
+    }
+  }, [currentCharacter]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
