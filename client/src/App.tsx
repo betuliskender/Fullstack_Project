@@ -8,6 +8,7 @@ import { Grid, GridItem } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import CampaignType from "./components/Campaign";
+import CampaignDetails from "./components/CampaignDetails";
 
 const client = new ApolloClient({
   uri: "http://localhost:5000/graphql",
@@ -59,6 +60,7 @@ const App: React.FC = () => {
                   path="/character"
                   element={<Character isLoggedIn={isLoggedIn} />}/>
                 <Route path="/campaign" element={<CampaignType isLoggedIn={isLoggedIn} />} />
+                <Route path="/campaign/:id" element={<CampaignDetails />} />
               </Routes>
             </GridItem>
           </Grid>

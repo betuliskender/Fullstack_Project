@@ -2,6 +2,20 @@ import React, { useState, useContext, useEffect } from "react";
 import { editSession } from "../utility/apiservice";
 import { AuthContext } from "../utility/authContext";
 import { Campaign, Session } from "../utility/types";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
+} from "@chakra-ui/react";
 
 interface EditSessionModalProps {
   isOpen: boolean;
@@ -20,7 +34,7 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
 }) => {
   const { token } = useContext(AuthContext);
 
-  // Function to safely parse sessionDate
+  // Safely parse the sessionDate to display in the input field
   const parseSessionDate = (dateString: string | undefined) => {
     if (!dateString) return ""; // Return an empty string if no date is provided
     const parsedDate = new Date(dateString);
@@ -29,6 +43,7 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
 
   const [sessionDate, setSessionDate] = useState(parseSessionDate(session.sessionDate));
   const [logEntry, setLogEntry] = useState(session.logEntry);
+  const [isSaving, setIsSaving] = useState(false); // Track saving state
 
   // Keep the modal state updated whenever the session changes
   useEffect(() => {
@@ -39,7 +54,10 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
   // Handle saving session updates
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSaving(true); // Start saving state
+
     try {
+      console.log("Saving session..."); // Debugging line
       if (token && campaign._id && session._id) {
         const updatedSession = await editSession(
           campaign._id,
@@ -50,43 +68,63 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
 
         // Manually update the session in the state
         onSessionUpdated(updatedSession);
-        onClose();
+        setIsSaving(false); // Stop saving state
+        console.log("Session updated successfully"); // Debugging line
+        onClose(); // Close modal after saving
       }
     } catch (error) {
+      setIsSaving(false); // Stop saving if there's an error
       console.error("Error editing session:", error);
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal">
-      <div className="modal-content">
-        <span className="close" onClick={onClose}>
-          &times;
-        </span>
-        <h2>Edit Session</h2>
-        <form onSubmit={handleSave}>
-          <label>
-            Session Date:
-            <input
-              type="date"
-              value={sessionDate} // Safely handle date input
-              onChange={(e) => setSessionDate(e.target.value)} // Handle date change
-            />
-          </label>
-          <label>
-            Log Entry:
-            <textarea
-              value={logEntry}
-              onChange={(e) => setLogEntry(e.target.value)}
-              placeholder="Describe the events of this session..."
-            />
-          </label>
-          <button type="submit">Save Changes</button>
-        </form>
-      </div>
-    </div>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Edit Session</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <form onSubmit={handleSave}>
+            <FormControl mb={4}>
+              <FormLabel>Session Date:</FormLabel>
+              <Input
+                type="date"
+                value={sessionDate}
+                onChange={(e) => setSessionDate(e.target.value)}
+                required
+              />
+            </FormControl>
+
+            <FormControl mb={4}>
+              <FormLabel>Log Entry:</FormLabel>
+              <Textarea
+                value={logEntry}
+                onChange={(e) => setLogEntry(e.target.value)}
+                placeholder="Describe the events of this session..."
+                required
+              />
+            </FormControl>
+
+            <Button
+              colorScheme="teal"
+              type="submit"
+              isLoading={isSaving} // Show loading spinner while saving
+              loadingText="Saving..."
+              mr={3}
+            >
+              Save Changes
+            </Button>
+          </form>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button variant="ghost" onClick={onClose}>
+            Close
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
 

@@ -59,6 +59,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     try {
       if (token) {
         await deleteCampaign(id, token);
+        setCampaigns((prevCampaigns) => prevCampaigns.filter(campaign => campaign._id !== id));
         refetch();
       }
     } catch (error) {

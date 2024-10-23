@@ -5,7 +5,7 @@ import { AuthContext } from "../utility/authContext";
 import { GET_CAMPAIGN_BY_ID, GETALLCHARACTERS } from "../graphql/queries";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
-import SessionForm from "./SessionForm";
+import SessionForm from "./CreateSessionModal";
 import EditSessionModal from "./EditSessionModal";
 import MapUpload from "./MapUpload"; // Import MapUpload component
 import { Campaign, Session, Character, Map } from "../utility/types"; // Import Map type
@@ -13,9 +13,24 @@ import {
   removeCharacterFromCampaign,
   deleteSession,
 } from "../utility/apiservice";
-import "../styles/campaignDetails.css"
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import "../styles/campaignDetails.css";
+
+// Chakra UI imports
+import {
+  Box,
+  Button,
+  Heading,
+  Text,
+  UnorderedList,
+  ListItem,
+  useToast,
+  VStack,
+  HStack,
+  Divider,
+  IconButton,
+  Image,
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +42,8 @@ const CampaignDetails = () => {
     null
   );
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
+  const toast = useToast();
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
     loading: campaignLoading,
@@ -61,12 +78,11 @@ const CampaignDetails = () => {
   }, [campaignData]);
 
   const handleMapUploaded = (uploadedMap: Map) => {
-    // Update the campaign with the uploaded map and refetch the campaign
     setCampaign((prevCampaign) => {
       if (prevCampaign) {
         return {
           ...prevCampaign,
-          maps: [...(prevCampaign.maps ?? []), uploadedMap], // Add the new map to the maps array
+          maps: [...(prevCampaign.maps ?? []), uploadedMap],
         };
       }
       return prevCampaign;
@@ -118,6 +134,12 @@ const CampaignDetails = () => {
               (character) => character._id !== characterId
             ),
           });
+          toast({
+            title: "Character removed.",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
         }
       } catch (error) {
         console.error("Error removing character from campaign:", error);
@@ -143,6 +165,12 @@ const CampaignDetails = () => {
           );
 
           return { ...prevCampaign, sessions: updatedSessions };
+        });
+        toast({
+          title: "Session deleted.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
         });
       } catch (error) {
         console.error("Error deleting session:", error);
@@ -172,84 +200,120 @@ const CampaignDetails = () => {
   const formatDate = (sessionDate: string) => {
     const timestamp = Number(sessionDate);
     if (!isNaN(timestamp)) {
-      return new Date(timestamp).toLocaleDateString("en-GB"); // For timestamp
+      return new Date(timestamp).toLocaleDateString("en-GB");
     } else if (!isNaN(Date.parse(sessionDate))) {
-      return new Date(sessionDate).toLocaleDateString("en-GB"); // For string dates
+      return new Date(sessionDate).toLocaleDateString("en-GB");
     }
-    return "Invalid Date"; // If date is invalid
+    return "Invalid Date";
+  };
+
+  const goToNextSlide = () => {
+    if (campaign && campaign.maps) {
+      setCurrentSlide((prev) => (prev + 1) % (campaign?.maps?.length || 1));
+    }
+  };
+
+  const goToPreviousSlide = () => {
+    if (campaign && campaign.maps) {
+      setCurrentSlide((prev) =>
+        prev === 0 ? (campaign.maps?.length || 1) - 1 : prev - 1
+      );
+    }
   };
 
   if (campaignLoading || charactersLoading)
-    return <p>Loading campaign details...</p>;
+    return <Text>Loading campaign details...</Text>;
   if (campaignError)
-    return <p>Error loading campaign details: {campaignError.message}</p>;
+    return <Text>Error loading campaign details: {campaignError.message}</Text>;
   if (charactersError)
-    return <p>Error loading characters: {charactersError.message}</p>;
+    return <Text>Error loading characters: {charactersError.message}</Text>;
 
   return (
-    <div className="campaign-details-container">
+    <Box className="campaign-details-container" p={4}>
       {/* Left side: Campaign Information */}
-      <div className="campaign-info">
-        <h1>{campaign?.name}</h1>
-        <p>{campaign?.description}</p>
-  
-        <h3>Characters in this campaign:</h3>
-        <ul>
+      <VStack align="flex-start" spacing={4}>
+        <Heading as="h1">{campaign?.name}</Heading>
+        <Text>{campaign?.description}</Text>
+
+        <Heading as="h3" size="md">
+          Characters in this campaign:
+        </Heading>
+        <UnorderedList>
           {campaign?.characters.map((character) => (
-            <li key={character._id}>
+            <ListItem key={character._id}>
               {character.name}
-              <button
-                onClick={() =>
-                  character._id && handleCharacterEdit(character._id)
-                }
-              >
-                Edit Character
-              </button>
-              <button
-                onClick={() =>
-                  character._id && handleCharacterRemove(character._id)
-                }
-              >
-                Remove Character
-              </button>
-            </li>
+              <HStack spacing={2} mt={2}>
+                <Button
+                  size="sm"
+                  onClick={() =>
+                    character._id && handleCharacterEdit(character._id)
+                  }
+                >
+                  Edit Character
+                </Button>
+                <Button
+                  size="sm"
+                  colorScheme="red"
+                  onClick={() =>
+                    character._id && handleCharacterRemove(character._id)
+                  }
+                >
+                  Remove Character
+                </Button>
+              </HStack>
+            </ListItem>
           ))}
-        </ul>
-  
+        </UnorderedList>
+
         <AddCharacterToCampaign
           campaignId={campaign ? campaign._id || "" : ""}
           allCampaigns={campaign ? [campaign] : []}
           refetchCampaigns={() => {}}
           onCharacterAdded={handleCharacterAdded}
         />
-  
+
+        <Divider />
+
         {/* Session Form */}
         <SessionForm
           campaign={campaign!}
           onSessionCreated={handleSessionCreated}
         />
-  
-        <h3>Sessions for this campaign:</h3>
+
+        <Heading as="h3" size="md">
+          Sessions for this campaign:
+        </Heading>
         {campaign?.sessions && campaign.sessions.length > 0 ? (
-          <ul>
+          <UnorderedList>
             {campaign.sessions.map((session) => (
-              <li key={session._id}>
-                <strong>Date:</strong> {formatDate(session.sessionDate)}
-                <br />
-                <strong>Log:</strong> {session.logEntry}
-                <button onClick={() => handleSessionEdit(session)}>Edit</button>
-                <button
-                  onClick={() => session._id && handleSessionDeleted(session._id)}
-                >
-                  Delete
-                </button>
-              </li>
+              <ListItem key={session._id}>
+                <Text>
+                  <strong>Date:</strong> {formatDate(session.sessionDate)}
+                  <br />
+                  <strong>Log:</strong> {session.logEntry}
+                </Text>
+                <HStack spacing={2} mt={2}>
+                  <Button size="sm" onClick={() => handleSessionEdit(session)}>
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() =>
+                      session._id && handleSessionDeleted(session._id)
+                    }
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              </ListItem>
             ))}
-          </ul>
+
+          </UnorderedList>
         ) : (
-          <p>No sessions found for this campaign.</p>
+          <Text>No sessions found for this campaign.</Text>
         )}
-  
+
         {/* MapUpload Component */}
         {campaign && token && (
           <MapUpload
@@ -258,33 +322,46 @@ const CampaignDetails = () => {
             onMapUploaded={handleMapUploaded}
           />
         )}
-      </div>
-  
+      </VStack>
+
       {/* Right side: Carousel for Maps */}
-      <div className="campaign-map">
-        <br></br>
+      <VStack mt={8} spacing={4}>
         {campaign?.maps && campaign.maps.length > 0 ? (
-          <Carousel
-            showThumbs={false} // Optional: hides thumbnail navigation
-            showStatus={false} // Optional: hides current slide status
-            infiniteLoop // Optional: loops through maps
-            dynamicHeight={false} // Optional: makes the carousel dynamic in height based on images
-          >
-            {campaign.maps.map((map) => (
-              <div key={map._id}>
-                <img
-                  src={`http://localhost:5000${map.imageURL}`} // Prepending the localhost URL
-                  alt="Campaign Map"
-                  style={{ width: "100%" }}
-                />
-              </div>
-            ))}
-          </Carousel>
+          <Box position="relative" width="full">
+            <IconButton
+              icon={<ChevronLeftIcon />}
+              aria-label="Previous Map"
+              onClick={goToPreviousSlide}
+              position="absolute"
+              left="-40px" // Adjust this value to move the button outside the image
+              top="50%" // Center the button vertically relative to the image
+              transform="translateY(-50%)" // Adjust for perfect centerin
+              zIndex={2}
+            />
+            <Image
+              src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
+              alt="Campaign Map"
+              borderRadius="md"
+              boxSize="400px"
+              objectFit="cover"
+              mx="auto"
+            />
+            <IconButton
+              icon={<ChevronRightIcon />}
+              aria-label="Next Map"
+              onClick={goToNextSlide}
+              position="absolute"
+              right="-40px" // Adjust this value to move the button outside the image
+              top="50%" // Center the button vertically relative to the image
+              transform="translateY(-50%)" // Adjust for perfect centering
+              zIndex={2}
+            />
+          </Box>
         ) : (
-          <p>No maps found for this campaign.</p>
+          <Text>No maps found for this campaign.</Text>
         )}
-      </div>
-  
+      </VStack>
+
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
           isOpen={isCharacterModalOpen}
@@ -305,7 +382,8 @@ const CampaignDetails = () => {
           onSessionUpdated={handleSessionUpdated}
         />
       )}
-    </div>
-  );};
+    </Box>
+  );
+};
 
 export default CampaignDetails;
