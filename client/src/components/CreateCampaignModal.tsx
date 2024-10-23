@@ -91,7 +91,7 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ isOpen, onClose, isLogged
                 onChange={handleChange}
                 mb={3}
                 />
-                <Button type="submit" colorScheme="blue">
+                <Button colorScheme="blue" onClick={handleSubmit}>
                 Create Campaign
                 </Button>
             </form>

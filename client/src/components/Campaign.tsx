@@ -128,7 +128,7 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           <CardBody>
             <Text>{campaign.description}</Text>
             <Button onClick={() => handleCampaignClick(campaign._id!)} colorScheme="blue">View</Button>
-            <Button onClick={() => campaign._id && handleDelete(campaign._id!)} colorScheme="red">Delete</Button>
+            <Button onClick={() => campaign._id && handleDelete(campaign._id)} colorScheme="red">Delete</Button>
           </CardBody>
         </Card>
         ))}
@@ -142,75 +142,6 @@ const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
       onSubmit={handleEditSubmit}
       />
   </Box>
-
-      // <div>
-    //   <div className="header-container">
-    //     <h1>Active Campaigns</h1>
-    //     <Link to="/create-campaign">
-    //       <button className="create-button">Create New Campaign</button>
-    //     </Link>
-    //   </div>
-    //   <div className="campaign-grid">
-    //     {campaigns.map((campaign: Campaign) => (
-    //       <div key={campaign._id} className="campaign-card">
-    //         <FaCog className="edit-icon" onClick={() => handleEdit(campaign)} />
-
-    //         <div className="campaign-info">
-    //           <h3 className="campaign-title">{campaign.name}</h3>
-    //           <p className="campaign-description">{campaign.description}</p>
-    //         </div>
-
-    //         <div className="button-group">
-    //           <button
-    //             onClick={() => handleCampaignClick(campaign._id!)}
-    //             className="view-button"
-    //           >
-    //             View
-    //           </button>
-    //           <button
-    //             onClick={() => handleDelete(campaign._id!)}
-    //             className="delete-button"
-    //           >
-    //             Delete
-    //           </button>
-    //         </div>
-    //       </div>
-    //     ))}
-    //   </div>
-
-    //   {/* Modal til at redigere kampagne */}
-    //   {isEditModalOpen && currentCampaign && (
-    //     <div className="modal">
-    //       <div className="modal-content">
-    //         <span className="close" onClick={handleModalClose}>
-    //           &times;
-    //         </span>
-    //         <h2>Edit Campaign</h2>
-    //         <form onSubmit={handleFormSubmit}>
-    //           <label>
-    //             Name:
-    //             <input
-    //               type="text"
-    //               name="name"
-    //               value={currentCampaign.name}
-    //               onChange={handleInputChange}
-    //             />
-    //           </label>
-    //           <label>
-    //             Description:
-    //             <input
-    //               type="text"
-    //               name="description"
-    //               value={currentCampaign.description}
-    //               onChange={handleInputChange}
-    //             />
-    //           </label>
-    //           <button type="submit">Save</button>
-    //         </form>
-    //       </div>
-    //     </div>
-    //   )}
-    // </div>
   );
 };
 
