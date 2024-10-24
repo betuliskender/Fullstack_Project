@@ -24,7 +24,11 @@ interface MapUploadProps {
   onMapUploaded: (uploadedMap: Map) => void; // Callback when map is uploaded
 }
 
-const MapUpload: React.FC<MapUploadProps> = ({ campaignId, token, onMapUploaded }) => {
+const MapUpload: React.FC<MapUploadProps> = ({
+  campaignId,
+  token,
+  onMapUploaded,
+}) => {
   const [mapFile, setMapFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,7 +46,11 @@ const MapUpload: React.FC<MapUploadProps> = ({ campaignId, token, onMapUploaded 
     if (mapFile) {
       setIsUploading(true);
       try {
-        const uploadedMap = await uploadMapToCampaign(campaignId, mapFile, token);
+        const uploadedMap = await uploadMapToCampaign(
+          campaignId,
+          mapFile,
+          token
+        );
         onMapUploaded(uploadedMap); // Call the callback function with the uploaded map
         setMapFile(null); // Reset the file input state
         if (fileInputRef.current) {
@@ -67,10 +75,13 @@ const MapUpload: React.FC<MapUploadProps> = ({ campaignId, token, onMapUploaded 
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
-            <Heading as="h3" size="lg">Upload a Map for the Campaign</Heading>
+            <Heading as="h3" size="lg">
+              Upload a Map for the Campaign
+            </Heading>
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
+            {/* Flyt ModalFooter inde i form */}
             <form onSubmit={handleUpload}>
               <FormControl mb={4}>
                 <FormLabel htmlFor="map-upload">Select a map image</FormLabel>
@@ -87,19 +98,28 @@ const MapUpload: React.FC<MapUploadProps> = ({ campaignId, token, onMapUploaded 
                   Selected File: {mapFile.name}
                 </Text>
               )}
-              {isUploading && (
-                <Spinner size="sm" color="teal.500" mt={2} />
-              )}
+              {isUploading && <Spinner size="sm" color="teal.500" mt={2} />}
+
+              {/* Flyt ModalFooter ind i form-elementet */}
+              <ModalFooter>
+                <Button
+                  type="submit"
+                  colorScheme="teal"
+                  isLoading={isUploading}
+                  isDisabled={isUploading || !mapFile}
+                >
+                  Upload Map
+                </Button>
+                <Button
+                  colorScheme="gray"
+                  onClick={() => setIsModalOpen(false)}
+                  ml={3}
+                >
+                  Cancel
+                </Button>
+              </ModalFooter>
             </form>
           </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="teal" isLoading={isUploading} isDisabled={isUploading || !mapFile}>
-              Upload Map
-            </Button>
-            <Button colorScheme="gray" onClick={() => setIsModalOpen(false)} ml={3}>
-              Cancel
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
     </>
