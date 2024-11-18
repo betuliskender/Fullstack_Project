@@ -193,7 +193,6 @@ export const removeCharacterFromCampaign = async (req, res) => {
   const { campaignId, characterId } = req.params;
 
   try {
-    // Fjern karakteren fra CampaignCharacter
     const campaignCharacter = await CampaignCharacter.findOneAndDelete({
       campaign: campaignId,
       character: characterId,
@@ -205,15 +204,21 @@ export const removeCharacterFromCampaign = async (req, res) => {
         .json({ message: "Character not found in this campaign" });
     }
 
-    // Fjern karakteren fra characters-arrayet i Campaign
     const campaign = await Campaign.findByIdAndUpdate(
       campaignId,
-      { $pull: { characters: characterId } }, // Brug $pull til at fjerne karakteren fra arrayet
-      { new: true } // Returnér den opdaterede kampagne
+      { $pull: { characters: characterId } },
+      { new: true }
     );
 
     if (!campaign) {
       return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    // Fjern pins for karakteren fra alle maps i kampagnen
+    const maps = await Map.find({ campaign: campaignId });
+    for (const map of maps) {
+      map.pins = map.pins.filter((pin) => pin.character.toString() !== characterId);
+      await map.save();
     }
 
     res.status(200).json({
@@ -227,6 +232,7 @@ export const removeCharacterFromCampaign = async (req, res) => {
       .json({ message: "Failed to remove character from campaign", error });
   }
 };
+
 
 export const uploadMapToCampaign = async (req, res) => {
   const { campaignId } = req.params;

@@ -55,6 +55,7 @@ const CampaignDetails = () => {
     loading: campaignLoading,
     error: campaignError,
     data: campaignData,
+    refetch: refetchCampaign,
   } = useQuery(GET_CAMPAIGN_BY_ID, {
     variables: { id },
     context: {
@@ -132,16 +133,28 @@ const CampaignDetails = () => {
           characterId,
           token
         );
-
+  
         if (response.message) {
-          setCampaign({
-            ...campaign,
-            characters: campaign.characters.filter(
-              (character) => character._id !== characterId
-            ),
+          setCampaign((prevCampaign) => {
+            if (!prevCampaign) return null;
+  
+            // Fjern pins for karakteren
+            const updatedMaps = prevCampaign.maps?.map((map) => ({
+              ...map,
+              pins: map.pins ? map.pins.filter((pin) => pin.character?._id !== characterId) : [],
+            }));
+  
+            return {
+              ...prevCampaign,
+              characters: prevCampaign.characters.filter(
+                (character) => character._id !== characterId
+              ),
+              maps: updatedMaps || [],
+            };
           });
+  
           toast({
-            title: "Character removed.",
+            title: "Character removed successfully.",
             status: "success",
             duration: 3000,
             isClosable: true,
@@ -149,22 +162,27 @@ const CampaignDetails = () => {
         }
       } catch (error) {
         console.error("Error removing character from campaign:", error);
+        toast({
+          title: "Failed to remove character.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     }
   };
+  
 
   const handleMapClick = async (
     event: React.MouseEvent<HTMLImageElement>,
     mapId: string
   ) => {
     if (!campaign || !token) return;
-
+  
     const rect = event.currentTarget.getBoundingClientRect();
     const x = Number(((event.clientX - rect.left) / rect.width) * 100);
     const y = Number(((event.clientY - rect.top) / rect.height) * 100);
-
-    console.log({ mapId, x, y, selectedCharacter });
-
+  
     if (!selectedCharacter) {
       toast({
         title: "Please select a character before placing a pin.",
@@ -174,8 +192,9 @@ const CampaignDetails = () => {
       });
       return;
     }
-
+  
     try {
+      // Kald backend for at tilføje pin
       const updatedMap = await addPinToMap(
         campaign._id!,
         mapId,
@@ -184,19 +203,21 @@ const CampaignDetails = () => {
         token,
         selectedCharacter
       );
-
+  
+      // Opdater state manuelt for en hurtig UI-opdatering
       setCampaign((prevCampaign) => {
         if (!prevCampaign) return null;
-
-        const updatedMaps =
-          prevCampaign.maps &&
-          prevCampaign.maps.map((map) =>
-            map._id === updatedMap._id ? updatedMap : map
-          );
-        console.log("Updated Campaign Maps:", updatedMaps);
+  
+        const updatedMaps = prevCampaign.maps?.map((map) =>
+          map._id === updatedMap._id ? updatedMap : map
+        );
+  
         return { ...prevCampaign, maps: updatedMaps };
       });
-
+  
+      // Kald refetch for at sikre data konsistens
+      refetchCampaign();
+  
       toast({
         title: "Pin added successfully!",
         status: "success",
@@ -213,7 +234,9 @@ const CampaignDetails = () => {
       });
     }
   };
-
+  
+  
+  
   const handleSessionEdit = (session: Session) => {
     setCurrentSession(session);
     setIsEditSessionModalOpen(true);
@@ -428,45 +451,45 @@ const CampaignDetails = () => {
                   handleMapClick(event, campaign.maps[currentSlide]._id!)
                 }
               />
-              {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
-                <Box
-                key={index}
-                className="pin"
-                position="absolute"
-                left={`${pin.x}%`}
-                top={`${pin.y}%`}
-                transform="translate(-50%, -50%)"
-                bg="transparent"
-                borderRadius="50%"
-                width="30px"
-                height="30px"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-              >
-                {pin.character?.imageURL ? (
-                  <Image
-                    src={pin.character.imageURL}
-                    alt={pin.character.name || "Character"}
-                    borderRadius="50%"
-                    boxSize="30px"
-                    objectFit="cover"
-                    border="2px solid white"
-                  />
-                ) : (
-                  <Text
-                    fontSize="xs"
-                    color="white"
-                    bg="black"
-                    borderRadius="md"
-                    p={1}
-                    textAlign="center"
-                    maxWidth="50px"
-                  >
-                    {pin.character?.name || "Unknown"}
-                  </Text>
-                )}
-              </Box>
+              {campaign.maps[currentSlide]?.pins?.map((pin) => (
+  <Box
+    key={pin._id} // Brug pin._id som en unik nøgle
+    className="pin"
+    position="absolute"
+    left={`${pin.x}%`}
+    top={`${pin.y}%`}
+    transform="translate(-50%, -50%)"
+    bg="transparent"
+    borderRadius="50%"
+    width="30px"
+    height="30px"
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+  >
+    {pin.character?.imageURL ? (
+      <Image
+        src={pin.character.imageURL}
+        alt={pin.character.name || "Character"}
+        borderRadius="50%"
+        boxSize="30px"
+        objectFit="cover"
+        border="2px solid white"
+      />
+    ) : (
+      <Text
+        fontSize="xs"
+        color="white"
+        bg="black"
+        borderRadius="md"
+        p={1}
+        textAlign="center"
+        maxWidth="50px"
+      >
+        {pin.character?.name || "Unknown"}
+      </Text>
+    )}
+  </Box>
               ))}
             </Box>
             <IconButton

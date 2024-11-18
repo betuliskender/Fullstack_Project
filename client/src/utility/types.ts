@@ -62,6 +62,7 @@ export interface Map {
   campaign: string;
   session?: string;
   pins?: {
+    _id?: string;
     x: number;
     y: number;
     character?: {
