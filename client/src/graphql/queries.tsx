@@ -95,6 +95,15 @@ query Query($id: ID!) {
     maps {
       _id
       imageURL
+      pins {
+        x
+        y
+        character {
+          _id
+          name
+          imageURL
+        }
+      }
     }
   }
 }`;

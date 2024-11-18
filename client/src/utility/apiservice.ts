@@ -313,7 +313,7 @@ export const addPinToMap = async (
         },
       }
     );
-    return response.data; // Returner hele objektet, hvis du vil bruge det
+    return response.data;
   } catch (error) {
     console.error("Error adding pin to map:", error);
     throw error;

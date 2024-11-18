@@ -21,10 +21,17 @@ const resolvers = {
     },
     campaign: async (_, { _id }, { user }) => {
       if (!user) throw new Error("Authentication required");
+    
       return await Campaign.findById(_id)
         .populate("characters")
         .populate("sessions")
-        .populate("maps");
+        .populate({
+          path: "maps",
+          populate: {
+            path: "pins.character",
+            select: "_id name imageURL",
+          },
+        });
     },
     sessions: async (_, __, { user }) => {
       if (!user) throw new Error("Authentication required");
@@ -188,14 +195,24 @@ const resolvers = {
 
     addPinToMap: async (_, { mapId, x, y, characterId }, { user }) => {
       if (!user) throw new Error("Authentication required");
-
+    
       const map = await Map.findById(mapId);
       if (!map) throw new Error("Map not found");
-
+    
+      if (characterId) {
+        const characterExists = await Character.findById(characterId);
+        if (!characterExists) throw new Error("Character not found");
+      }
+    
       map.pins.push({ x, y, character: characterId });
       await map.save();
-
-      return map;
+    
+      const updatedMap = await Map.findById(mapId).populate({
+        path: "pins.character",
+        select: "_id name imageURL",
+      });
+    
+      return updatedMap;
     },
   },
 };

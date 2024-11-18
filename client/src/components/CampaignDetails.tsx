@@ -158,13 +158,13 @@ const CampaignDetails = () => {
     mapId: string
   ) => {
     if (!campaign || !token) return;
-  
+
     const rect = event.currentTarget.getBoundingClientRect();
     const x = Number(((event.clientX - rect.left) / rect.width) * 100);
     const y = Number(((event.clientY - rect.top) / rect.height) * 100);
 
     console.log({ mapId, x, y, selectedCharacter });
-  
+
     if (!selectedCharacter) {
       toast({
         title: "Please select a character before placing a pin.",
@@ -174,7 +174,7 @@ const CampaignDetails = () => {
       });
       return;
     }
-  
+
     try {
       const updatedMap = await addPinToMap(
         campaign._id!,
@@ -184,19 +184,19 @@ const CampaignDetails = () => {
         token,
         selectedCharacter
       );
-  
+
       setCampaign((prevCampaign) => {
         if (!prevCampaign) return null;
-  
+
         const updatedMaps =
           prevCampaign.maps &&
           prevCampaign.maps.map((map) =>
             map._id === updatedMap._id ? updatedMap : map
           );
-  
+        console.log("Updated Campaign Maps:", updatedMaps);
         return { ...prevCampaign, maps: updatedMaps };
       });
-  
+
       toast({
         title: "Pin added successfully!",
         status: "success",
@@ -430,16 +430,43 @@ const CampaignDetails = () => {
               />
               {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
                 <Box
-                  key={index}
-                  position="absolute"
-                  left={`${pin.x}%`}
-                  top={`${pin.y}%`}
-                  transform="translate(-50%, -50%)"
-                  bg="red"
-                  borderRadius="50%"
-                  width="10px"
-                  height="10px"
-                />
+                key={index}
+                className="pin"
+                position="absolute"
+                left={`${pin.x}%`}
+                top={`${pin.y}%`}
+                transform="translate(-50%, -50%)"
+                bg="transparent"
+                borderRadius="50%"
+                width="30px"
+                height="30px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                {pin.character?.imageURL ? (
+                  <Image
+                    src={pin.character.imageURL}
+                    alt={pin.character.name || "Character"}
+                    borderRadius="50%"
+                    boxSize="30px"
+                    objectFit="cover"
+                    border="2px solid white"
+                  />
+                ) : (
+                  <Text
+                    fontSize="xs"
+                    color="white"
+                    bg="black"
+                    borderRadius="md"
+                    p={1}
+                    textAlign="center"
+                    maxWidth="50px"
+                  >
+                    {pin.character?.name || "Unknown"}
+                  </Text>
+                )}
+              </Box>
               ))}
             </Box>
             <IconButton

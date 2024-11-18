@@ -61,5 +61,13 @@ export interface Map {
   imageURL: string;
   campaign: string;
   session?: string;
-  pins?: { x: number; y: number }[];
+  pins?: {
+    x: number;
+    y: number;
+    character?: {
+      _id: string;
+      name?: string;
+      imageURL?: string;
+    };
+  }[];
 }
