@@ -295,3 +295,27 @@ export const uploadMapToCampaign = async (
     throw error;
   }
 };
+export const addPinToMap = async (
+  campaignId: string,
+  mapId: string,
+  x: number,
+  y: number,
+  token: string,
+  characterId?: string
+): Promise<Map> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/campaigns/${campaignId}/maps/${mapId}/pins`,
+      { x, y, characterId },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data; // Returner hele objektet, hvis du vil bruge det
+  } catch (error) {
+    console.error("Error adding pin to map:", error);
+    throw error;
+  }
+};

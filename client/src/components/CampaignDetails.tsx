@@ -7,8 +7,8 @@ import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./CreateSessionModal";
 import EditSessionModal from "./EditSessionModal";
-import MapUpload from "./MapUpload"; // Import MapUpload component
-import { Campaign, Session, Character, Map } from "../utility/types"; // Import Map type
+import MapUpload from "./MapUpload";
+import { Campaign, Session, Character, Map } from "../utility/types";
 import {
   removeCharacterFromCampaign,
   deleteSession,
@@ -29,8 +29,10 @@ import {
   Divider,
   IconButton,
   Image,
+  Select,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { addPinToMap } from "../utility/apiservice";
 
 const CampaignDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,8 +44,12 @@ const CampaignDetails = () => {
     null
   );
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
-  const toast = useToast();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
+    null
+  );
+
+  const toast = useToast();
 
   const {
     loading: campaignLoading,
@@ -147,6 +153,67 @@ const CampaignDetails = () => {
     }
   };
 
+  const handleMapClick = async (
+    event: React.MouseEvent<HTMLImageElement>,
+    mapId: string
+  ) => {
+    if (!campaign || !token) return;
+  
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Number(((event.clientX - rect.left) / rect.width) * 100);
+    const y = Number(((event.clientY - rect.top) / rect.height) * 100);
+
+    console.log({ mapId, x, y, selectedCharacter });
+  
+    if (!selectedCharacter) {
+      toast({
+        title: "Please select a character before placing a pin.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+  
+    try {
+      const updatedMap = await addPinToMap(
+        campaign._id!,
+        mapId,
+        x,
+        y,
+        token,
+        selectedCharacter
+      );
+  
+      setCampaign((prevCampaign) => {
+        if (!prevCampaign) return null;
+  
+        const updatedMaps =
+          prevCampaign.maps &&
+          prevCampaign.maps.map((map) =>
+            map._id === updatedMap._id ? updatedMap : map
+          );
+  
+        return { ...prevCampaign, maps: updatedMaps };
+      });
+  
+      toast({
+        title: "Pin added successfully!",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error adding pin:", error);
+      toast({
+        title: "Failed to add pin.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
   const handleSessionEdit = (session: Session) => {
     setCurrentSession(session);
     setIsEditSessionModalOpen(true);
@@ -230,7 +297,6 @@ const CampaignDetails = () => {
 
   return (
     <Box className="campaign-details-container" p={4}>
-      {/* Left side: Campaign Information */}
       <VStack align="flex-start" spacing={4}>
         <Heading as="h1">{campaign?.name}</Heading>
         <Text>{campaign?.description}</Text>
@@ -238,6 +304,19 @@ const CampaignDetails = () => {
         <Heading as="h3" size="md">
           Characters in this campaign:
         </Heading>
+
+        {/* Dropdown for selecting a character */}
+        <Select
+          placeholder="Select a character"
+          onChange={(e) => setSelectedCharacter(e.target.value)}
+        >
+          {campaign?.characters.map((character) => (
+            <option key={character._id} value={character._id}>
+              {character.name}
+            </option>
+          ))}
+        </Select>
+
         <UnorderedList>
           {campaign?.characters.map((character) => (
             <ListItem key={character._id}>
@@ -308,7 +387,6 @@ const CampaignDetails = () => {
                 </HStack>
               </ListItem>
             ))}
-
           </UnorderedList>
         ) : (
           <Text>No sessions found for this campaign.</Text>
@@ -333,27 +411,45 @@ const CampaignDetails = () => {
               aria-label="Previous Map"
               onClick={goToPreviousSlide}
               position="absolute"
-              left="-40px" // Adjust this value to move the button outside the image
-              top="50%" // Center the button vertically relative to the image
-              transform="translateY(-50%)" // Adjust for perfect centerin
+              left="-40px"
+              top="50%"
+              transform="translateY(-50%)"
               zIndex={2}
             />
-            <Image
-              src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
-              alt="Campaign Map"
-              borderRadius="md"
-              boxSize="400px"
-              objectFit="cover"
-              mx="auto"
-            />
+            <Box position="relative" width="full" height="400px">
+              <Image
+                src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
+                alt="Campaign Map"
+                borderRadius="md"
+                boxSize="400px"
+                objectFit="cover"
+                onClick={(event) =>
+                  campaign.maps &&
+                  handleMapClick(event, campaign.maps[currentSlide]._id!)
+                }
+              />
+              {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
+                <Box
+                  key={index}
+                  position="absolute"
+                  left={`${pin.x}%`}
+                  top={`${pin.y}%`}
+                  transform="translate(-50%, -50%)"
+                  bg="red"
+                  borderRadius="50%"
+                  width="10px"
+                  height="10px"
+                />
+              ))}
+            </Box>
             <IconButton
               icon={<ChevronRightIcon />}
               aria-label="Next Map"
               onClick={goToNextSlide}
               position="absolute"
-              right="-40px" // Adjust this value to move the button outside the image
-              top="50%" // Center the button vertically relative to the image
-              transform="translateY(-50%)" // Adjust for perfect centering
+              right="-40px"
+              top="50%"
+              transform="translateY(-50%)"
               zIndex={2}
             />
           </Box>

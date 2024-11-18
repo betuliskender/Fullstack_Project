@@ -13,6 +13,7 @@ import {
   uploadMapToCampaign,
 } from "../controllers/campaignController.js";
 import { authMiddleware } from "../utility/authMiddleware.js";
+import Map from "../models/mapModel.js";
 
 const router = express.Router();
 
@@ -71,30 +72,33 @@ router.post(
   uploadMapToCampaign
 );
 
-router.post(
-  "/:campaignId/maps/:mapId/pins",
-  authMiddleware,
-  async (req, res) => {
-    const { mapId } = req.params;
-    const { x, y, characterId } = req.body;
+router.post("/:campaignId/maps/:mapId/pins", authMiddleware, async (req, res) => {
+  const { mapId, campaignId } = req.params;
+  const { x, y, characterId } = req.body;
 
-    try {
-      const map = await Map.findById(mapId);
-      if (!map) {
-        return res.status(404).json({ message: "Map not found" });
-      }
+  console.log("Request Params:", { campaignId, mapId });
+  console.log("Request Body:", { x, y, characterId });
 
-      map.pins.push({ x, y, character: characterId });
-      await map.save();
-
-      res
-        .status(201)
-        .json({ message: "Pin added successfully", pins: map.pins });
-    } catch (error) {
-      console.error("Error adding pin:", error);
-      res.status(500).json({ message: "Failed to add pin", error });
+  try {
+    if (!x || !y || typeof x !== "number" || typeof y !== "number") {
+      return res.status(400).json({ message: "Invalid pin coordinates" });
     }
+
+    const map = await Map.findById(mapId);
+    if (!map) {
+      return res.status(404).json({ message: "Map not found" });
+    }
+
+    map.pins.push({ x, y, character: characterId });
+    await map.save();
+
+    res
+      .status(201)
+      .json({ message: "Pin added successfully", pins: map.pins });
+  } catch (error) {
+    console.error("Error adding pin:", error);
+    res.status(500).json({ message: "Failed to add pin", error });
   }
-);
+});
 
 export default router;
