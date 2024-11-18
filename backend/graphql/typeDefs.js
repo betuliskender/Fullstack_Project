@@ -40,12 +40,19 @@ export const typeDefs = gql`
     maps: [Map]
   }
 
+  type Pin {
+    x: Float!
+    y: Float!
+    character: Character
+  }
+
   type Map {
     _id: ID!
     pinLocation: String
     imageURL: String!
     campaign: Campaign!
     session: Session
+    pins: [Pin]
   }
 
   type CampaignCharacter {
@@ -62,8 +69,8 @@ export const typeDefs = gql`
   }
 
   type LoginResponse {
-  token: String!
-  user: User!
+    token: String!
+    user: User!
   }
 
   # Query type for fetching data
@@ -79,6 +86,9 @@ export const typeDefs = gql`
 
     sessions: [Session]
     session(_id: ID!): Session
+
+    maps: [Map]
+    map(_id: ID!): Map
   }
 
   type Mutation {
@@ -144,6 +154,8 @@ export const typeDefs = gql`
     editSession(_id: ID!, sessionDate: String, logEntry: String): Session
 
     deleteSession(_id: ID!): Session
+
+    addPinToMap(mapId: ID!, x: Float!, y: Float!, characterId: ID): Map
   }
 
   input AttributesInput {

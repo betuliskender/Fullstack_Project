@@ -1,40 +1,54 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import User from '../models/userModel.js'; 
-import Character from '../models/characterModel.js'; 
-import Campaign from '../models/campaignModel.js'; 
-import Session from '../models/sessionModel.js'; 
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import User from "../models/userModel.js";
+import Character from "../models/characterModel.js";
+import Campaign from "../models/campaignModel.js";
+import Session from "../models/sessionModel.js";
 
 const resolvers = {
   Query: {
     characters: async (_, __, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Character.find({ user: user.id }).populate("user");
     },
     character: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Character.findById(id).populate("user");
     },
     campaigns: async (_, __, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Campaign.find().populate("characters").populate("sessions");
     },
     campaign: async (_, { _id }, { user }) => {
-      if (!user) throw new Error('Authentication required');
-      return await Campaign.findById(_id).populate("characters").populate("sessions").populate("maps");
+      if (!user) throw new Error("Authentication required");
+      return await Campaign.findById(_id)
+        .populate("characters")
+        .populate("sessions")
+        .populate("maps");
     },
     sessions: async (_, __, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Session.find().populate("campaign");
     },
     session: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Session.findById(id).populate("campaign");
+    },
+    maps: async (_, __, { user }) => {
+      if (!user) throw new Error("Authentication required");
+      return await Map.find().populate("campaign").populate("session");
+    },
+    map: async (_, { id }, { user }) => {
+      if (!user) throw new Error("Authentication required");
+      return await Map.findById(id).populate("campaign").populate("session");
     },
   },
 
   Mutation: {
-    registerUser: async (_, { firstName, lastName, userName, email, password }) => {
+    registerUser: async (
+      _,
+      { firstName, lastName, userName, email, password }
+    ) => {
       const existingUser = await User.findOne({ email });
       if (existingUser) throw new Error("User already exists");
 
@@ -55,24 +69,30 @@ const resolvers = {
     login: async (_, { email, password }) => {
       const user = await User.findOne({ email });
       if (!user) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
-    
+
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) {
-        throw new Error('Invalid password');
+        throw new Error("Invalid password");
       }
-    
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    
+
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
+
       return {
-        token, 
+        token,
         user,
       };
     },
 
-    createCharacter: async (_, { name, classType, level, attributes }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+    createCharacter: async (
+      _,
+      { name, classType, level, attributes },
+      { user }
+    ) => {
+      if (!user) throw new Error("Authentication required");
       const newCharacter = new Character({
         name,
         classType,
@@ -97,7 +117,7 @@ const resolvers = {
       },
       { user }
     ) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       const updatedCharacter = await Character.findByIdAndUpdate(
         id,
         {
@@ -115,20 +135,20 @@ const resolvers = {
     },
 
     deleteCharacter: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       const character = await Character.findById(id);
       if (!character) {
-        throw new Error('Character not found');
+        throw new Error("Character not found");
       }
       if (character.user.toString() !== user.id) {
-        throw new Error('Not authorized to delete this character');
+        throw new Error("Not authorized to delete this character");
       }
       await Character.findByIdAndDelete(id);
-      return { message: 'Character deleted successfully' };
+      return { message: "Character deleted successfully" };
     },
 
     createCampaign: async (_, { name, description }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       const newCampaign = new Campaign({
         name,
         description,
@@ -138,8 +158,12 @@ const resolvers = {
       return await newCampaign.save();
     },
 
-    createSession: async (_, { campaignId, sessionDate, logEntry }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+    createSession: async (
+      _,
+      { campaignId, sessionDate, logEntry },
+      { user }
+    ) => {
+      if (!user) throw new Error("Authentication required");
       const newSession = new Session({
         campaign: campaignId,
         sessionDate,
@@ -149,7 +173,7 @@ const resolvers = {
     },
 
     editSession: async (_, { id, sessionDate, logEntry }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Session.findByIdAndUpdate(
         id,
         { sessionDate, logEntry },
@@ -158,8 +182,20 @@ const resolvers = {
     },
 
     deleteSession: async (_, { id }, { user }) => {
-      if (!user) throw new Error('Authentication required');
+      if (!user) throw new Error("Authentication required");
       return await Session.findByIdAndDelete(id);
+    },
+
+    addPinToMap: async (_, { mapId, x, y, characterId }, { user }) => {
+      if (!user) throw new Error("Authentication required");
+
+      const map = await Map.findById(mapId);
+      if (!map) throw new Error("Map not found");
+
+      map.pins.push({ x, y, character: characterId });
+      await map.save();
+
+      return map;
     },
   },
 };
