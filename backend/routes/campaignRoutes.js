@@ -28,12 +28,12 @@ const storage = multer.diskStorage({
   },
 });
 
-// Configure Multer middleware
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
+  limits: { fileSize: 1024 * 1024 * 5 },
   fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png/; // Accept only image formats
+    const filetypes = /jpeg|jpg|png/;
     const extname = filetypes.test(
       path.extname(file.originalname).toLowerCase()
     );
@@ -64,7 +64,6 @@ router.delete(
 router.get("/:campaignId", authMiddleware, getCampaignById);
 router.get("/", authMiddleware, getAllCampaigns);
 
-// Route to upload a map to a campaign
 router.post(
   "/:campaignId/upload-map",
   authMiddleware,
@@ -89,12 +88,12 @@ router.post("/:campaignId/maps/:mapId/pins", authMiddleware, async (req, res) =>
       return res.status(404).json({ message: "Map not found" });
     }
 
+    map.pins = map.pins.filter((pin) => pin.character?.toString() !== characterId);
+
     map.pins.push({ x, y, character: characterId });
     await map.save();
 
-    res
-      .status(201)
-      .json({ message: "Pin added successfully", pins: map.pins });
+    res.status(201).json({ message: "Pin added successfully", pins: map.pins });
   } catch (error) {
     console.error("Error adding pin:", error);
     res.status(500).json({ message: "Failed to add pin", error });

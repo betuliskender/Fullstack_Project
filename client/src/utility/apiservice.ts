@@ -77,8 +77,7 @@ export const loginUser = async (
       `${API_URL}/users/login`,
       credentials
     );
-    console.log("Response data:", response.data); // Log the response data
-    return response.data; // Ensure the response contains the token and message
+    return response.data;
   } catch (error) {
     console.error("Login failed:", error);
     throw new Error("Login failed");
@@ -258,7 +257,7 @@ export const deleteSession = async (
 ) => {
   try {
     const response = await axios.delete(
-      `${API_URL}/campaigns/${campaignId}/sessions/${sessionId}`, // Fix here
+      `${API_URL}/campaigns/${campaignId}/sessions/${sessionId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -285,7 +284,7 @@ export const uploadMapToCampaign = async (
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data", // Important for file upload
+          "Content-Type": "multipart/form-data",
         },
       }
     );
@@ -302,7 +301,7 @@ export const addPinToMap = async (
   y: number,
   token: string,
   characterId?: string
-): Promise<Map> => {
+): Promise<{ pins: Map["pins"] }> => {
   try {
     const response = await axios.post(
       `${API_URL}/campaigns/${campaignId}/maps/${mapId}/pins`,
