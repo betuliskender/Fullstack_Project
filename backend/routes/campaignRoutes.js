@@ -93,7 +93,12 @@ router.post("/:campaignId/maps/:mapId/pins", authMiddleware, async (req, res) =>
     map.pins.push({ x, y, character: characterId });
     await map.save();
 
-    res.status(201).json({ message: "Pin added successfully", pins: map.pins });
+    const updatedMap = await Map.findById(mapId).populate({
+      path: "pins.character",
+      select: "_id name imageURL",
+    });
+
+    res.status(201).json({ message: "Pin added successfully", pins: updatedMap.pins });
   } catch (error) {
     console.error("Error adding pin:", error);
     res.status(500).json({ message: "Failed to add pin", error });

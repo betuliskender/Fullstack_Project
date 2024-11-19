@@ -443,9 +443,9 @@ const CampaignDetails = () => {
                   handleMapClick(event, campaign.maps[currentSlide]._id!)
                 }
               />
-              {campaign.maps[currentSlide]?.pins?.map((pin) => (
+              {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
                 <Box
-                  key={pin._id}
+                  key={pin._id || `${pin.x}-${pin.y}-${index}`}
                   className="pin"
                   position="absolute"
                   left={`${pin.x}%`}
