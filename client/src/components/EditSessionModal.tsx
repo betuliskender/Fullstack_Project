@@ -57,7 +57,6 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
     setIsSaving(true); // Start saving state
 
     try {
-      console.log("Saving session..."); // Debugging line
       if (token && campaign._id && session._id) {
         const updatedSession = await editSession(
           campaign._id,

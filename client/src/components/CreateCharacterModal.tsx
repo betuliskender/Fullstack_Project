@@ -19,7 +19,7 @@ interface CharacterModalProps {
   isOpen: boolean;
   onClose: () => void;
   isLoggedIn: boolean;
-  onCharacterCreated: (character: CharacterType) => void; // New prop
+  onCharacterCreated: (character: CharacterType) => void;
 }
 
 const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLoggedIn, onCharacterCreated }) => {

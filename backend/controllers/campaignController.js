@@ -122,7 +122,6 @@ export const addCharacterToCampaign = async (req, res) => {
 
     await campaign.save();
 
-    // Opret CampaignCharacter relation
     const campaignCharacter = new CampaignCharacter({
       campaign: campaign._id,
       character: character._id,
@@ -214,7 +213,6 @@ export const removeCharacterFromCampaign = async (req, res) => {
       return res.status(404).json({ message: "Campaign not found" });
     }
 
-    // Fjern pins for karakteren fra alle maps i kampagnen
     const maps = await Map.find({ campaign: campaignId });
     for (const map of maps) {
       map.pins = map.pins.filter((pin) => pin.character.toString() !== characterId);

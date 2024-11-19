@@ -5,7 +5,7 @@ import { GETALLCHARACTERS } from "../graphql/queries";
 import { Character } from "../utility/types";
 import { deleteCharacter, editCharacter } from "../utility/apiservice";
 import CreateCharacterModal from "./CreateCharacterModal";
-import EditCharacterModal from "./EditCharacterModal"; // Import the new component
+import EditCharacterModal from "./EditCharacterModal";
 import {
   Box,
   Button,

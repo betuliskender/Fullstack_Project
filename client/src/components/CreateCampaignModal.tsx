@@ -19,7 +19,7 @@ interface CampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
   isLoggedIn: boolean;
-  onCampaignCreated: (campaign: CampaignType) => void; // New prop
+  onCampaignCreated: (campaign: CampaignType) => void;
 }
 
 const CampaignModal: React.FC<CampaignModalProps> = ({ isOpen, onClose, isLoggedIn, onCampaignCreated }) => {
