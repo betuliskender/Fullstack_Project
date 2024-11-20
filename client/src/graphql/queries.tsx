@@ -6,8 +6,12 @@ export const GETALLCHARACTERS = gql`
       _id
       name
       level
-      race
-      class
+      race {
+        name
+        alignment
+        }
+      class {
+        name}
       background
       imageURL
       attributes {

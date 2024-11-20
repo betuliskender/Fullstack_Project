@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { startSession } from "mongoose";
 
 const characterSchema = new mongoose.Schema({
   name: {
@@ -10,12 +10,14 @@ const characterSchema = new mongoose.Schema({
     required: true,
   },
   race: {
-    type: String,
-    required: true,
+    name: { type: String, required: true },
+    traits: [{ type: String }],
+    languages: [{ type: String }]
   },
   class: {
-    type: String,
-    required: true,
+    name: { type: String, required: true },
+    proficiencies: [{ type: String }],
+    starting_equipment: [{ type: String }]
   },
   background: {
     type: String,

@@ -14,12 +14,24 @@ export const typeDefs = gql`
     _id: ID!
     name: String!
     level: Int!
-    race: String!
-    class: String!
+    race: Race!
+    class: Class!
     background: String!
     imageURL: String!
     attributes: Attributes
     user: User
+  }
+
+  type Race {
+    name: String!
+    traits: [String]
+    languages: [String]
+  }
+  
+  type Class {
+    name: String!
+    proficiencies: [String]
+    starting_equipment: [String]
   }
 
   type Attributes {
@@ -95,8 +107,8 @@ export const typeDefs = gql`
     createCharacter(
       name: String!
       level: Int!
-      race: String!
-      class: String!
+      race: RaceInput!
+      class: ClassInput!
       background: String!
       imageURL: String!
       userId: ID!
@@ -144,6 +156,18 @@ export const typeDefs = gql`
     editSession(_id: ID!, sessionDate: String, logEntry: String): Session
 
     deleteSession(_id: ID!): Session
+  }
+  
+  input RaceInput {
+    name: String!
+    traits: [String]
+    languages: [String]
+  }
+  
+  input ClassInput {
+    name: String!
+    proficiencies: [String]
+    starting_equipment: [String]
   }
 
   input AttributesInput {

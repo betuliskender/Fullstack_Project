@@ -120,8 +120,8 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
                 borderRadius="md"
               />
               <Text>Level: {char.level}</Text>
-              <Text>Race: {char.race}</Text>
-              <Text>Class: {char.class}</Text>
+              <Text>Race: {char.race.name}</Text>
+              <Text>Class: {char.class.name}</Text>
               <Text>Background: {char.background}</Text>
               <Text>Strength: {char.attributes.strength}</Text>
               <Text>Dexterity: {char.attributes.dexterity}</Text>
