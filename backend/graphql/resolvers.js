@@ -4,6 +4,8 @@ import User from '../models/userModel.js';
 import Character from '../models/characterModel.js'; 
 import Campaign from '../models/campaignModel.js'; 
 import Session from '../models/sessionModel.js'; 
+import Skill from '../models/skillModel.js';
+import Spell from '../models/spellModel.js';
 
 const resolvers = {
   Query: {
@@ -30,6 +32,18 @@ const resolvers = {
     session: async (_, { id }, { user }) => {
       if (!user) throw new Error('Authentication required');
       return await Session.findById(id).populate("campaign");
+    },
+    spell: async (_, { id }) => {
+      return await Spell.findById(id);
+    },
+    spells: async () => {
+      return await Spell.find();
+    },
+    skill: async (_, { id }) => {
+      return await Skill.findById(id);
+    },
+    skills: async () => {
+      return await Skill.find();
     },
   },
 

@@ -10,6 +10,10 @@ import characterRoutes from "./routes/characterRoutes.js";
 import campaignRoutes from "./routes/campaignRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import authMiddleware from "./graphql/authMiddleware.js";
+import spellRoutes from "./routes/spellRoutes.js";
+import { populateSpells } from "./db/spellSeeder.js";
+import { populateSkills } from "./db/skillSeeder.js";
+import skillRoutes from "./routes/skillRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -20,11 +24,16 @@ app.use(express.json());
 
 connectDB();
 
+populateSpells();
+populateSkills();
+
 app.use("/api/users", userRoutes);
 app.use("/api/characters", characterRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/campaigns", sessionRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/spells', spellRoutes);
+app.use('/api/skills', skillRoutes);
 
 async function startServer() {
   const server = new ApolloServer({

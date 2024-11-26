@@ -10,6 +10,23 @@ export const typeDefs = gql`
     characters: [Character]
   }
 
+  type Skill {
+    _id: ID!
+    name: String!
+    level: Int
+    desc: String
+    abilityScore: String
+  }
+
+  type Spell {
+    _id: ID!
+    name: String!
+    level: Int!
+    description: String!
+    damage: Int
+    duration: String
+  }
+
   type Character {
     _id: ID!
     name: String!
@@ -91,6 +108,12 @@ export const typeDefs = gql`
 
     sessions: [Session]
     session(_id: ID!): Session
+
+    spells: [Spell]
+    spell(_id: ID!): Spell
+
+    skills: [Skill]
+    skill(_id: ID!): Skill
   }
 
   type Mutation {

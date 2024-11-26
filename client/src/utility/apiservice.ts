@@ -295,3 +295,25 @@ export const uploadMapToCampaign = async (
     throw error;
   }
 };
+
+// get all skills
+export const getSkills = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/skills`);
+    return response.data;
+  } catch (error) {
+    console.error("Error getting skills:", error);
+    throw error;
+  }
+};
+
+// get all spells
+export const getSpells = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/spells`);
+    return response.data;
+  } catch (error) {
+    console.error("Error getting spells:", error);
+    throw error;
+  }
+};
