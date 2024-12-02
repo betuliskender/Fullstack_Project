@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, useContext } from "react";
-import { createCharacter } from "../utility/apiservice";
+import { addSpellsToCharacter, createCharacter } from "../utility/apiservice";
 import { Character as CharacterType } from "../utility/types";
 import { AuthContext } from "../utility/authContext";
 import {
@@ -21,8 +21,10 @@ import {
   Grid
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
-import { useQuery } from '@apollo/client';
-import { GET_ALL_SPELLS, GET_ALL_SKILLS } from '../graphql/queries';
+// import { useQuery } from '@apollo/client';
+// import { GET_ALL_SPELLS, GET_ALL_SKILLS } from '../graphql/queries';
+// import { GET_ALL_SKILLS } from '../graphql/queries';
+
 
 interface CharacterModalProps {
   isOpen: boolean;
@@ -34,8 +36,10 @@ interface CharacterModalProps {
 const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLoggedIn, onCharacterCreated }) => {
   const { user, token } = useContext(AuthContext);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { data: spellsData, loading: spellsLoading, error: spellsError } = useQuery(GET_ALL_SPELLS);
-  const { data: skillsData, loading: skillsLoading, error: skillsError } = useQuery(GET_ALL_SKILLS);
+  // const { data: spellsData, loading: spellsLoading, error: spellsError } = useQuery(GET_ALL_SPELLS);
+  // const { data: skillsData, loading: skillsLoading, error: skillsError } = useQuery(GET_ALL_SKILLS);
+  const [selectedSpells, setSelectedSpells] = useState<{ name: string; description: string }[]>([]);
+
 
   const [currentStep, setCurrentStep] = useState(1);
   const [character, setCharacter] = useState<CharacterType>({
@@ -80,6 +84,24 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
   } | null>(null);
   const [isTraitsVisible, setIsTraitsVisible] = useState(false);
   const [isClassDetailsVisible, setIsClassDetailsVisible] = useState(false);
+  const [classSpells, setClassSpells] = useState<{ index: string; name: string, desc: string }[]>([]);
+  const [classSpellsLoading, setClassSpellsLoading] = useState(false);
+
+  const fetchClassSpells = (classIndex: string) => {
+    setClassSpellsLoading(true);
+    fetch(`https://www.dnd5eapi.co/api/classes/${classIndex}/spells`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setClassSpells(data.results || []);
+      })
+      .catch((error) => console.error("Error fetching class spells:", error))
+      .finally(() => setClassSpellsLoading(false));
+  };
+  
+
 
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => prev - 1);
@@ -134,6 +156,17 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       .catch((error) => console.error("Error fetching race details:", error));
   };
   
+  const handleSpellClick = (spell: { name: string; desc: string }) => {
+    setSelectedSpells((prev) => {
+      // Toggle selection
+      const isSelected = prev.find((s) => s.name === spell.name);
+      if (isSelected) {
+        return prev.filter((s) => s.name !== spell.name);
+      } else {
+        return [...prev, { name: spell.name, description: spell.desc }];
+      }
+    });
+  };
   
 
   // Fetch selected class details
@@ -146,6 +179,8 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       .then((data) => {
         setSelectedClassDetails(data);
         setIsClassDetailsVisible(true);
+        fetchClassSpells(classIndex); // Fetch spells for the selected class
+
   
         // Update character state with class details
         setCharacter((prev) => ({
@@ -195,6 +230,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       if (token) {
         const newCharacter = await createCharacter(character, token);
         setSuccessMessage("Character created successfully");
+
+        // Save selected spells to the database
+        if (selectedSpells.length > 0) {
+          await addSpellsToCharacter(newCharacter._id, selectedSpells, token); // Adjust addSpellsToCharacter to accept spell objects
+        }
 
         setCharacter({
           name: "",
@@ -263,7 +303,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
                   </Select>
                   <Input placeholder="Background" name="background" value={character.background} onChange={handleChange} mb={3} />
                   <Input placeholder="Image URL" name="imageURL" value={character.imageURL} onChange={handleChange} mb={3} />
-                  {/* Other attribute inputs */}
                   <Input placeholder="Strength" type="number" name="strength" value={character.attributes.strength} onChange={handleChange} mb={3} />
                   <Input placeholder="Dexterity" type="number" name="dexterity" value={character.attributes.dexterity} onChange={handleChange} mb={3} />
                   <Input placeholder="Constitution" type="number" name="constitution" value={character.attributes.constitution} onChange={handleChange} mb={3} />
@@ -278,46 +317,39 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
                  <Heading as="h2" size="lg" mb={4}>
                    Select Spells
                  </Heading>
-                 {spellsLoading && (
-                   <Box textAlign="center" my={4}>
-                     <Spinner size="lg" />
-                     <Text>Loading Spells...</Text>
-                   </Box>
-                 )}
-                 {spellsError && (
-                   <Text color="red.500">Error loading spells: {spellsError.message}</Text>
-                 )}
-                 {spellsData && (
-                   <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
-                     {spellsData.spells.map((spell: { _id: string; name: string; level: number; damage: string; duration: string; description: string }) => (
-                       <Box
-                         key={spell._id}
-                         border="1px solid"
-                         borderColor="gray.200"
-                         borderRadius="md"
-                         p={4}
-                         shadow="md"
-                       >
-                         <Heading as="h3" size="md" mb={2}>
-                           {spell.name}
-                         </Heading>
-                         <Text fontSize="sm" color="gray.600">
-                           Level: {spell.level}
-                         </Text>
-                         <Text fontSize="sm" color="gray.600">
-                           Damage: {spell.damage}
-                         </Text>
-                         <Text fontSize="sm" color="gray.600">
-                           Duration: {spell.duration}
-                         </Text>
-                         <Text mt={2}>{spell.description}</Text>
-                       </Box>
-                     ))}
-                   </Grid>
-                 )}
+                 {classSpellsLoading && (
+                    <Box textAlign="center" my={4}>
+                      <Spinner size="lg" />
+                      <Text>Loading Class Spells...</Text>
+                    </Box>
+                  )}
+                  {!classSpellsLoading && classSpells.length > 0 && (
+                    <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
+                      {classSpells.map((spell) => (
+                        <Box
+                          key={spell.index}
+                          border="1px solid"
+                          borderColor={selectedSpells.some((s) => s.name === spell.name) ? "blue.500" : "gray.200"}
+                          borderRadius="md"
+                          p={4}
+                          shadow="md"
+                          cursor="pointer"
+                          onClick={() => handleSpellClick(spell)}
+                        >
+                          <Heading as="h3" size="md" mb={2}>
+                            {spell.name}
+                          </Heading>
+                          <Text fontSize="sm" color="gray.600">
+                            {spell.index}
+                          </Text>
+                        </Box>
+                      ))}
+                    </Grid>
+                  )}
+
                </Box>
               )}
-              {currentStep === 3 && (
+              {/* {currentStep === 3 && (
                 <Box>
                 <Heading as="h2" size="lg" mb={4}>
                   Select Skills
@@ -351,9 +383,9 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
                       </Box>
                     ))}
                   </Grid>
-                )}
-              </Box>
-              )}
+                )} */
+              /* </Box>
+              )} */}
 
               </ModalBody>
               <ModalFooter>

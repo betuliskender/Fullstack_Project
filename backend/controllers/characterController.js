@@ -1,4 +1,6 @@
 import Character from "../models/characterModel.js";
+import Spell from "../models/spellModel.js";
+import CharacterSpell from "../models/characterSpellModel.js";
 
 export const createCharacter = async (req, res) => {
   const {
@@ -118,5 +120,45 @@ export const getCharacterById = async (req, res) => {
   } catch (error) {
     console.log("Error getting character", error);
     res.status(500).json({ message: "Failed to get character", error });
+  }
+};
+
+export const addSpellsToCharacter = async (req, res) => {
+  const { characterId } = req.params;
+  const { spells } = req.body; // Array of spell objects with properties like name and level
+
+  try {
+    // Ensure the character exists
+    const character = await Character.findById(characterId);
+    if (!character) {
+      return res.status(404).json({ success: false, message: "Character not found" });
+    }
+
+    // Find corresponding spell IDs from the database
+    const spellNames = spells.map((spell) => spell.name);
+    const matchedSpells = await Spell.find({ name: { $in: spellNames } });
+
+    if (matchedSpells.length !== spells.length) {
+      return res.status(400).json({
+        success: false,
+        message: "One or more spells could not be matched with the database",
+      });
+    }
+
+    // Save relationships between the character and the matched spells
+    const characterSpellDocs = matchedSpells.map((spell) => ({
+      character: characterId,
+      spell: spell._id,
+    }));
+
+    await CharacterSpell.insertMany(characterSpellDocs);
+
+    return res.status(201).json({
+      success: true,
+      message: "Spells added to character successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

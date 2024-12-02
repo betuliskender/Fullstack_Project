@@ -317,3 +317,27 @@ export const getSpells = async () => {
     throw error;
   }
 };
+
+
+export const addSpellsToCharacter = async (
+  characterId: string,
+  spells: { name: string; }[],
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/characters/${characterId}/spells`,
+      { spells }, // Send spell data as expected by the backend
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include Bearer token for authentication
+        },
+      }
+    );
+    return response.data; // Return response data from the server
+  } catch (error) {
+    console.error("Error adding spells to character:", error);
+    throw error;
+  }
+};
+

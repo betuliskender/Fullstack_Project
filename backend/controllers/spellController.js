@@ -1,4 +1,6 @@
 import Spell from "../models/spellModel.js";
+import Character from "../models/characterModel.js";
+import CharacterSpell from "../models/characterSpellModel.js";
 
 // Get all spells
 export const getAllSpells = async (req, res) => {
