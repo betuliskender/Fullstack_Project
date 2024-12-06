@@ -14,6 +14,7 @@ import {
   deleteSession,
 } from "../utility/apiservice";
 import "../styles/campaignDetails.css";
+import RollDice from "./RollDice";
 
 // Chakra UI imports
 import {
@@ -415,6 +416,7 @@ const CampaignDetails = () => {
             onMapUploaded={handleMapUploaded}
           />
         )}
+        <RollDice />
       </VStack>
 
       {/* Right side: Carousel for Maps */}
