@@ -1,73 +1,74 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Box, Button, Heading, Text, VStack } from '@chakra-ui/react';
 
 const RollDice: React.FC = () => {
-  const [diceResult, setDiceResult] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [rollUuid, setRollUuid] = useState<string | null>(null); // Holds the roll's UUID
+  const [loading, setLoading] = useState(false); // Loading state for button feedback
+  const [error, setError] = useState<string | null>(null); // Error state for user feedback
 
-  const rollDice = async () => {
+
+  const postRoll = async () => {
     setLoading(true);
+    setError(null); // Clear any previous errors
     try {
-        const response = await axios.post(
+      const response = await axios.post(
         'https://dddice.com/api/1.0/roll',
         {
-            "dice": [
-        {
-            "type": "d20",
-            "theme": "dddice-bees"
-            
+          dice: [
+            { type: 'd20', theme: 'dddice-bees' },
+            { type: 'd20', theme: 'dddice-bees' },
+          ],
+          room: 'vd_4qCK', // Optional room configuration
         },
         {
-            "type": "d20",
-            "theme": "dddice-bees"
-
-        }
-    ],
-    "room": 'vd_4qCK',
-        },
-        {
-            headers: {
-            Authorization: `Bearer yHJV9qb1yP2bAVodJushLTkG4CYZ6phTE5VJtwi794386055`,
+          headers: {
+            Authorization: 'Bearer fPSwIQsN1huUaC7oEvjDcHqKwKnSbUUoeuu0vaWFb765b4c6',
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            },
+          },
         }
-        );
+      );
+      console.log(response.data)
 
-        // Save the result
-        setDiceResult(response.data.url); // Verify if 'url' is the correct field in the response
-        console.log('Dice roll result:', response.data);
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Error with dice roll:', error.response?.data || error.message);
-        } else {
-            console.error('Unexpected error:', error);
-        }
+      if (response.data?.data.uuid) {
+        setRollUuid(response.data.data.uuid); // Save the roll's UUID for visualization
+        console.log('Roll UUID:', response.data.data.uuid);
+      } else {
+        setError('No UUID found in response. Please check the API response.');
+      }
+    } catch (err: any) {
+      console.error('Error creating roll:', err);
+      setError('Failed to create roll. Please check your network or API key.');
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
+  };
 
   return (
-    <div>
-      <h2>Rul en terning</h2>
-      <button onClick={rollDice} disabled={loading}>
-        {loading ? 'Ruller...' : 'Rul D20'}
-      </button>
-      {diceResult && (
-        <div>
-          <h3>Resultat:</h3>
+    <Box textAlign="center" p={5}>
+      <Button
+        onClick={postRoll}
+        isLoading={loading}
+        colorScheme="blue"
+        size="lg"
+        mb={5}
+      >
+        {loading ? 'Rolling...' : 'Roll Dice'}
+      </Button>
+      {error && <Text color="red.500" mt={5}>{error}</Text>}
+      {rollUuid && (
+        <VStack mt={5}>
           <iframe
-            src={diceResult}
-            title="3D Terningekast"
-            width="500"
-            height="300"
+            src={`https://dddice.com/room/vd_4qCK/stream?key=fDO28LGEhKrldiJplxlRpFURa3BUfBcVwBGPscFW55aa64ee`}
+            title="Dice Roll Visualization"
+            width="600"
+            height="400"
             style={{ border: 'none' }}
           ></iframe>
-        </div>
+        </VStack>
       )}
-    </div>
+    </Box>
   );
 };
 
