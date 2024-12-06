@@ -10,11 +10,12 @@ const RollDice: React.FC = () => {
     const initDDDice = async () => {
       if (containerRef.current) {
         try {
-          const dddice = new ThreeDDice(containerRef.current, 'k3NXF0vdgun8kRloqu8YvGm0xYgouG3tRF01uA9H0fb96934', {
+          const dddice = new ThreeDDice(containerRef.current, 'CDEyUxmMWMM7gvKfcIBDwdoenX8r5eUqgeLqoCZDcc149869', {
+
           });
 
           await dddice.start();
-          await dddice.connect('3IwfNUU');
+          await dddice.connect('D_hH74E');
           diceInstanceRef.current = dddice;
           setIsReady(true);
         } catch (error) {
@@ -25,7 +26,6 @@ const RollDice: React.FC = () => {
 
     initDDDice();
 
-    // Ryd ressourcer ved unmount
     return () => {
       if (diceInstanceRef.current) {
         diceInstanceRef.current.stop();
@@ -41,25 +41,35 @@ const RollDice: React.FC = () => {
   };
 
   return (
-    <div>
-      <h2>3D Terningekast</h2>
-      <canvas ref={containerRef} style={{ width: '400px', height: '300px' }}></canvas>
-      <button
-        onClick={handleRollDice}
-        disabled={!isReady}
-        style={{
-          marginTop: '20px',
-          padding: '10px 20px',
-          fontSize: '16px',
-          backgroundColor: '#4CAF50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: isReady ? 'pointer' : 'not-allowed',
-        }}
-      >
-        Rul Terninger
-      </button>
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h2 style={{ color: '#fff', marginBottom: '10px' }}>3D Terningekast</h2>
+      <div style={{ display: 'inline-block', position: 'relative' }}>
+        <canvas
+          ref={containerRef}
+          style={{
+            width: '400px',
+            height: '300px',
+            borderRadius: '10px',
+            border: '1px solid #4CAF50',
+          }}
+        ></canvas>
+        <button
+          onClick={handleRollDice}
+          disabled={!isReady}
+          style={{
+            marginTop: '10px',
+            padding: '8px 16px',
+            fontSize: '14px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: isReady ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Roll Dice
+        </button>
+      </div>
     </div>
   );
 };
