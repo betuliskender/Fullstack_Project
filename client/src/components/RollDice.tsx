@@ -1,72 +1,65 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
+import { ThreeDDice } from 'dddice-js';
 
 const RollDice: React.FC = () => {
-  const [diceResult, setDiceResult] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const containerRef = useRef<HTMLCanvasElement>(null);
+  const diceInstanceRef = useRef<ThreeDDice | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
-  const rollDice = async () => {
-    setLoading(true);
-    try {
-        const response = await axios.post(
-        'https://dddice.com/api/1.0/roll',
-        {
-            "dice": [
-        {
-            "type": "d20",
-            "theme": "dddice-bees"
-            
-        },
-        {
-            "type": "d20",
-            "theme": "dddice-bees"
+  useEffect(() => {
+    const initDDDice = async () => {
+      if (containerRef.current) {
+        try {
+          const dddice = new ThreeDDice(containerRef.current, 'k3NXF0vdgun8kRloqu8YvGm0xYgouG3tRF01uA9H0fb96934', {
+          });
 
+          await dddice.start();
+          await dddice.connect('3IwfNUU');
+          diceInstanceRef.current = dddice;
+          setIsReady(true);
+        } catch (error) {
+          console.error('Fejl ved initialisering af DDDice:', error);
         }
-    ],
-    "room": 'vd_4qCK',
-        },
-        {
-            headers: {
-            Authorization: `Bearer yHJV9qb1yP2bAVodJushLTkG4CYZ6phTE5VJtwi794386055`,
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            },
-        }
-        );
+      }
+    };
 
-        // Save the result
-        setDiceResult(response.data.url); // Verify if 'url' is the correct field in the response
-        console.log('Dice roll result:', response.data);
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Error with dice roll:', error.response?.data || error.message);
-        } else {
-            console.error('Unexpected error:', error);
-        }
-    } finally {
-        setLoading(false);
+    initDDDice();
+
+    // Ryd ressourcer ved unmount
+    return () => {
+      if (diceInstanceRef.current) {
+        diceInstanceRef.current.stop();
+        diceInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleRollDice = () => {
+    if (diceInstanceRef.current) {
+      diceInstanceRef.current.roll([{ theme: 'dddice-bees', type: 'd20' }]);
     }
-};
-
+  };
 
   return (
     <div>
-      <h2>Rul en terning</h2>
-      <button onClick={rollDice} disabled={loading}>
-        {loading ? 'Ruller...' : 'Rul D20'}
+      <h2>3D Terningekast</h2>
+      <canvas ref={containerRef} style={{ width: '400px', height: '300px' }}></canvas>
+      <button
+        onClick={handleRollDice}
+        disabled={!isReady}
+        style={{
+          marginTop: '20px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          backgroundColor: '#4CAF50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: isReady ? 'pointer' : 'not-allowed',
+        }}
+      >
+        Rul Terninger
       </button>
-      {diceResult && (
-        <div>
-          <h3>Resultat:</h3>
-          <iframe
-            src={diceResult}
-            title="3D Terningekast"
-            width="500"
-            height="300"
-            style={{ border: 'none' }}
-          ></iframe>
-        </div>
-      )}
     </div>
   );
 };
