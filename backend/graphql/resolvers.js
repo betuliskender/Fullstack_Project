@@ -4,6 +4,8 @@ import User from "../models/userModel.js";
 import Character from "../models/characterModel.js";
 import Campaign from "../models/campaignModel.js";
 import Session from "../models/sessionModel.js";
+import Skill from "../models/skillModel.js";
+import Spell from "../models/spellModel.js";
 
 const resolvers = {
   Query: {
@@ -48,6 +50,18 @@ const resolvers = {
     map: async (_, { id }, { user }) => {
       if (!user) throw new Error("Authentication required");
       return await Map.findById(id).populate("campaign").populate("session");
+    },
+    spell: async (_, { id }) => {
+      return await Spell.findById(id);
+    },
+    spells: async () => {
+      return await Spell.find();
+    },
+    skill: async (_, { id }) => {
+      return await Skill.findById(id);
+    },
+    skills: async () => {
+      return await Skill.find();
     },
   },
 
@@ -195,34 +209,36 @@ const resolvers = {
 
     addPinToMap: async (_, { mapId, x, y, characterId }, { user }) => {
       if (!user) throw new Error("Authentication required");
-    
+
       const map = await Map.findById(mapId);
       if (!map) throw new Error("Map not found");
-    
+
       if (characterId) {
         const characterExists = await Character.findById(characterId);
         if (!characterExists) throw new Error("Character not found");
       }
-    
+
       // Fjern gamle pins for karakteren
       const originalPins = [...map.pins]; // For debugging
-      map.pins = map.pins.filter((pin) => pin.character.toString() !== characterId);
-    
+      map.pins = map.pins.filter(
+        (pin) => pin.character.toString() !== characterId
+      );
+
       console.log("Original Pins:", originalPins);
       console.log("Pins after removal:", map.pins);
-    
+
       // Tilføj nyt pin
       map.pins.push({ x, y, character: characterId });
       await map.save();
-    
+
       // Returner opdateret map med populering
       const updatedMap = await Map.findById(mapId).populate({
         path: "pins.character",
         select: "_id name imageURL",
       });
-    
+
       console.log("Updated Map after adding pin:", updatedMap);
-    
+
       return updatedMap;
     },
   },

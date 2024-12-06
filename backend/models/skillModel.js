@@ -8,15 +8,13 @@ const skillSchema = new mongoose.Schema(
         },
         level: {
         type: Number,
-        required: true,
         },
-        description: {
+        desc: {
         type: String,
-        required: true,
         },
-        damage: {
-        type: Number,
-        required: true,
+        abilityScore: {
+        type: String, // e.g., "DEX", "INT"
+        required: true, 
         },
     },
 

@@ -14,4 +14,7 @@ const characterSpellSchema = new mongoose.Schema(
         },
     },
 
-    );
+);
+const CharacterSpell = mongoose.model("CharacterSpell", characterSpellSchema);
+
+export default CharacterSpell;

@@ -10,16 +10,45 @@ export const typeDefs = gql`
     characters: [Character]
   }
 
+  type Skill {
+    _id: ID!
+    name: String!
+    level: Int
+    desc: String
+    abilityScore: String
+  }
+
+  type Spell {
+    _id: ID!
+    name: String!
+    level: Int!
+    description: String!
+    damage: Int
+    duration: String
+  }
+
   type Character {
     _id: ID!
     name: String!
     level: Int!
-    race: String!
-    class: String!
+    race: Race!
+    class: Class!
     background: String!
     imageURL: String!
     attributes: Attributes
     user: User
+  }
+
+  type Race {
+    name: String!
+    traits: [String]
+    languages: [String]
+  }
+  
+  type Class {
+    name: String!
+    proficiencies: [String]
+    starting_equipment: [String]
   }
 
   type Attributes {
@@ -89,6 +118,11 @@ export const typeDefs = gql`
 
     maps: [Map]
     map(_id: ID!): Map
+    spells: [Spell]
+    spell(_id: ID!): Spell
+
+    skills: [Skill]
+    skill(_id: ID!): Skill
   }
 
   type Mutation {
@@ -105,8 +139,8 @@ export const typeDefs = gql`
     createCharacter(
       name: String!
       level: Int!
-      race: String!
-      class: String!
+      race: RaceInput!
+      class: ClassInput!
       background: String!
       imageURL: String!
       userId: ID!
@@ -156,6 +190,18 @@ export const typeDefs = gql`
     deleteSession(_id: ID!): Session
 
     addPinToMap(mapId: ID!, x: Float!, y: Float!, characterId: ID): Map
+  }
+  
+  input RaceInput {
+    name: String!
+    traits: [String]
+    languages: [String]
+  }
+  
+  input ClassInput {
+    name: String!
+    proficiencies: [String]
+    starting_equipment: [String]
   }
 
   input AttributesInput {

@@ -6,8 +6,11 @@ export const GETALLCHARACTERS = gql`
       _id
       name
       level
-      race
-      class
+      race {
+        name
+        }
+      class {
+        name}
       background
       imageURL
       attributes {
@@ -21,6 +24,31 @@ export const GETALLCHARACTERS = gql`
     }
   }
 `;
+
+export const GET_ALL_SPELLS = gql`
+  query GetAllSpells {
+    spells {
+      _id
+      name
+      level
+      description
+      damage
+      duration
+    }
+  }
+`;
+
+export const GET_ALL_SKILLS = gql`
+  query GetAllSkills {
+    skills {
+      _id
+      name
+      abilityScore
+    }
+  }
+`;
+
+
 
 export const GET_ALL_CAMPAIGNS = gql`
   query GetAllCampaigns {

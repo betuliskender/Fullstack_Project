@@ -16,8 +16,10 @@ const spellSchema = new mongoose.Schema(
         },
         damage: {
         type: Number,
-        required: true,
         },
+        duration: {
+        type: String,
+        }
     },
 
     );

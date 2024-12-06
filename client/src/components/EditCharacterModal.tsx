@@ -73,21 +73,7 @@ const EditCharacterModal: React.FC<EditCharacterModalProps> = ({
                 value={character.level}
                 onChange={handleInputChange}
                 mb={3}
-              />
-              <Input
-                placeholder="Race"
-                name="race"
-                value={character.race}
-                onChange={handleInputChange}
-                mb={3}
-              />
-              <Input
-                placeholder="Class"
-                name="class"
-                value={character.class}
-                onChange={handleInputChange}
-                mb={3}
-              />
+              />            
               <Input
                 placeholder="Background"
                 name="background"

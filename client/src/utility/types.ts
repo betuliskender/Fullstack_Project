@@ -7,12 +7,31 @@ export interface Attributes {
   charisma: number;
 }
 
+export interface CreateRace {
+  name: string;
+  traits: string[];
+  languages: string[];
+}
+
+export interface Races {
+  name: string;
+}
+
+export interface CreateClass {
+  name: string;
+  proficiencies: string[];
+  starting_equipment: string[];
+}
+export interface Classes {
+  name: string;
+}
+
 export interface Character {
   _id?: string;
   name: string;
   level: number;
-  race: string;
-  class: string;
+  race: CreateRace;
+  class: CreateClass;
   background: string;
   imageURL: string;
   attributes: Attributes;
