@@ -31,6 +31,8 @@ import {
   IconButton,
   Image,
   Select,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { addPinToMap } from "../utility/apiservice";
@@ -310,9 +312,110 @@ const CampaignDetails = () => {
     return <Text>Error loading campaign details: {campaignError.message}</Text>;
   if (charactersError)
     return <Text>Error loading characters: {charactersError.message}</Text>;
-
+  
   return (
-    <Box className="campaign-details-container" p={4}>
+    <Grid
+      height="100vh"
+      templateAreas={{
+        base: `"main" "side"`,
+        lg: `"main side"`,
+      }}
+      templateColumns={{
+        base: "1fr",
+        lg: "3fr 1fr",
+      }}
+      templateRows="1fr"
+      gap={4}
+      p={4}
+    >
+      {/* Main Content Area */}
+      <GridItem area="main" p={4}>
+      <VStack mt={8} spacing={4}>
+        {campaign?.maps && campaign.maps.length > 0 ? (
+          <Box position="relative" width="full">
+            <IconButton
+              icon={<ChevronLeftIcon />}
+              aria-label="Previous Map"
+              onClick={goToPreviousSlide}
+              position="absolute"
+              left="-40px"
+              top="50%"
+              transform="translateY(-50%)"
+              zIndex={2}
+            />
+            <Box position="relative" width="full">
+              <Image
+                src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
+                alt="Campaign Map"
+                objectFit="cover"
+                borderRadius="md"
+                height="100%"
+                width="100%"
+                onClick={(event) =>
+                  campaign.maps &&
+                  handleMapClick(event, campaign.maps[currentSlide]._id!)
+                }
+              />
+              {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
+                <Box
+                  key={pin._id || `${pin.x}-${pin.y}-${index}`}
+                  className="pin"
+                  position="absolute"
+                  left={`${pin.x}%`}
+                  top={`${pin.y}%`}
+                  transform="translate(-50%, -50%)"
+                  bg="transparent"
+                  borderRadius="50%"
+                  width="50px"
+                  height="50px"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  {pin.character?.imageURL ? (
+                    <Image
+                      src={pin.character.imageURL}
+                      alt={pin.character.name || "Character"}
+                      borderRadius="50%"
+                      boxSize="50px"
+                      objectFit="cover"
+                      border="2px solid white"
+                    />
+                  ) : (
+                    <Text
+                      fontSize="xs"
+                      color="white"
+                      bg="black"
+                      borderRadius="md"
+                      p={1}
+                      textAlign="center"
+                      maxWidth="50px"
+                    >
+                      {pin.character?.name || "Unknown"}
+                    </Text>
+                  )}
+                </Box>
+              ))}
+            </Box>
+            <IconButton
+              icon={<ChevronRightIcon />}
+              aria-label="Next Map"
+              onClick={goToNextSlide}
+              position="absolute"
+              right="-40px"
+              top="50%"
+              transform="translateY(-50%)"
+              zIndex={2}
+            />
+          </Box>
+        ) : (
+          <Text>No maps found for this campaign.</Text>
+        )}
+      </VStack>
+      </GridItem>
+
+      {/* Right side: Carousel for Maps */}
+      <GridItem area="side" p={4}>
       <VStack align="flex-start" spacing={4}>
         <Heading as="h1">{campaign?.name}</Heading>
         <Text>{campaign?.description}</Text>
@@ -411,106 +514,24 @@ const CampaignDetails = () => {
         {/* MapUpload Component */}
         {campaign && token && (
           <MapUpload
-            campaignId={campaign._id!}
-            token={token}
-            onMapUploaded={handleMapUploaded}
+          campaignId={campaign._id!}
+          token={token}
+          onMapUploaded={handleMapUploaded}
           />
         )}
-        <RollDice />
       </VStack>
-
-      {/* Right side: Carousel for Maps */}
-      <VStack mt={8} spacing={4}>
-        {campaign?.maps && campaign.maps.length > 0 ? (
-          <Box position="relative" width="full">
-            <IconButton
-              icon={<ChevronLeftIcon />}
-              aria-label="Previous Map"
-              onClick={goToPreviousSlide}
-              position="absolute"
-              left="-40px"
-              top="50%"
-              transform="translateY(-50%)"
-              zIndex={2}
-            />
-            <Box position="relative" width="full" height="400px">
-              <Image
-                src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
-                alt="Campaign Map"
-                borderRadius="md"
-                boxSize="400px"
-                objectFit="cover"
-                onClick={(event) =>
-                  campaign.maps &&
-                  handleMapClick(event, campaign.maps[currentSlide]._id!)
-                }
-              />
-              {campaign.maps[currentSlide]?.pins?.map((pin, index) => (
-                <Box
-                  key={pin._id || `${pin.x}-${pin.y}-${index}`}
-                  className="pin"
-                  position="absolute"
-                  left={`${pin.x}%`}
-                  top={`${pin.y}%`}
-                  transform="translate(-50%, -50%)"
-                  bg="transparent"
-                  borderRadius="50%"
-                  width="30px"
-                  height="30px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  {pin.character?.imageURL ? (
-                    <Image
-                      src={pin.character.imageURL}
-                      alt={pin.character.name || "Character"}
-                      borderRadius="50%"
-                      boxSize="30px"
-                      objectFit="cover"
-                      border="2px solid white"
-                    />
-                  ) : (
-                    <Text
-                      fontSize="xs"
-                      color="white"
-                      bg="black"
-                      borderRadius="md"
-                      p={1}
-                      textAlign="center"
-                      maxWidth="50px"
-                    >
-                      {pin.character?.name || "Unknown"}
-                    </Text>
-                  )}
-                </Box>
-              ))}
-            </Box>
-            <IconButton
-              icon={<ChevronRightIcon />}
-              aria-label="Next Map"
-              onClick={goToNextSlide}
-              position="absolute"
-              right="-40px"
-              top="50%"
-              transform="translateY(-50%)"
-              zIndex={2}
-            />
-          </Box>
-        ) : (
-          <Text>No maps found for this campaign.</Text>
-        )}
-      </VStack>
+      <RollDice />
+      </GridItem>
 
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
-          isOpen={isCharacterModalOpen}
-          onClose={handleModalClose}
-          campaign={campaign}
-          currentCharacterId={currentCharacterId}
-          availableCharacters={charactersData?.characters || []}
-          refetchCampaigns={() => {}}
-          setCampaign={setCampaign}
+        isOpen={isCharacterModalOpen}
+        onClose={handleModalClose}
+        campaign={campaign}
+        currentCharacterId={currentCharacterId}
+        availableCharacters={charactersData?.characters || []}
+        refetchCampaigns={() => {}}
+        setCampaign={setCampaign}
         />
       )}
       {isEditSessionModalOpen && currentSession && (
@@ -522,7 +543,7 @@ const CampaignDetails = () => {
           onSessionUpdated={handleSessionUpdated}
         />
       )}
-    </Box>
+    </Grid>
   );
 };
 
