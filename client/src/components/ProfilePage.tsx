@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Box,
   Flex,
@@ -24,10 +24,14 @@ const ProfilePage: React.FC = () => {
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
   const toast = useToast();
 
-  // Redirect if not logged in
-  if (!token) {
+  useEffect(() => {
+    setIsLoggedIn(!!token);
+  }, [token]);
+
+  if (!isLoggedIn) {
     return (
       <Flex justify="center" align="center" h="100vh">
         <Box textAlign="center">
@@ -56,7 +60,6 @@ const ProfilePage: React.FC = () => {
     try {
       const form = new FormData();
 
-      // Tilføj kun ændrede felter
       if (formData.firstName && formData.firstName !== user?.firstName) {
         form.append("firstName", formData.firstName);
       }
@@ -70,7 +73,6 @@ const ProfilePage: React.FC = () => {
         form.append("profileImage", profileImage);
       }
 
-      // Send opdaterede felter, hvis der er ændringer
       if (form.has("firstName") || form.has("lastName") || form.has("email") || form.has("profileImage")) {
         if (token) {
           const updatedUser = await updateUser(form, token);
@@ -106,7 +108,7 @@ const ProfilePage: React.FC = () => {
       setIsUpdating(false);
     }
   };
-
+  
   return (
     <Flex justify="center" align="center" h="100vh">
       <Box
@@ -120,7 +122,7 @@ const ProfilePage: React.FC = () => {
         <VStack spacing={4} align="center">
           <Avatar
             size="xl"
-            src={user?.profileImage}
+            src={user?.profileImage ? `http://localhost:5000${user.profileImage}` : undefined}
             name={user?.firstName}
             bg="teal.500"
           />
@@ -128,7 +130,7 @@ const ProfilePage: React.FC = () => {
           <Text fontSize="lg">Welcome, {user?.firstName}</Text>
 
           <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            <FormControl id="firstName" isRequired>
+            <FormControl id="firstName">
               <FormLabel>First Name</FormLabel>
               <Input
                 type="text"
@@ -138,7 +140,7 @@ const ProfilePage: React.FC = () => {
               />
             </FormControl>
 
-            <FormControl id="lastName" isRequired mt={4}>
+            <FormControl id="lastName" mt={4}>
               <FormLabel>Last Name</FormLabel>
               <Input
                 type="text"
@@ -148,7 +150,7 @@ const ProfilePage: React.FC = () => {
               />
             </FormControl>
 
-            <FormControl id="email" isRequired mt={4}>
+            <FormControl id="email" mt={4}>
               <FormLabel>Email</FormLabel>
               <Input
                 type="email"
