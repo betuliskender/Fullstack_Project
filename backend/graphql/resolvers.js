@@ -63,6 +63,10 @@ const resolvers = {
     skills: async () => {
       return await Skill.find();
     },
+    user: async (_, __, { user }) => {
+      if (!user) throw new Error("Authentication required");
+      return await User.findById(user.id);
+    },
   },
 
   Mutation: {
