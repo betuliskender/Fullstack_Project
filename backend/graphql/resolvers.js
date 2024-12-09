@@ -218,8 +218,7 @@ const resolvers = {
         if (!characterExists) throw new Error("Character not found");
       }
 
-      // Fjern gamle pins for karakteren
-      const originalPins = [...map.pins]; // For debugging
+      const originalPins = [...map.pins];
       map.pins = map.pins.filter(
         (pin) => pin.character.toString() !== characterId
       );
@@ -227,11 +226,9 @@ const resolvers = {
       console.log("Original Pins:", originalPins);
       console.log("Pins after removal:", map.pins);
 
-      // Tilføj nyt pin
       map.pins.push({ x, y, character: characterId });
       await map.save();
 
-      // Returner opdateret map med populering
       const updatedMap = await Map.findById(mapId).populate({
         path: "pins.character",
         select: "_id name imageURL",
@@ -240,6 +237,18 @@ const resolvers = {
       console.log("Updated Map after adding pin:", updatedMap);
 
       return updatedMap;
+    },
+    updateUserProfile: async (_, { firstName, lastName, email, profileImage }, { user }) => {
+      if (!user) throw new Error("Authentication required");
+  
+      const updatedData = { firstName, lastName, email };
+      if (profileImage) updatedData.profileImage = profileImage;
+  
+      const updatedUser = await User.findByIdAndUpdate(user.id, updatedData, {
+        new: true,
+      });
+  
+      return updatedUser;
     },
   },
 };
