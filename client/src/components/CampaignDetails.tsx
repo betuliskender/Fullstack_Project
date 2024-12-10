@@ -31,6 +31,9 @@ import {
   IconButton,
   Image,
   Select,
+  Grid,
+  GridItem,
+  Flex,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { addPinToMap } from "../utility/apiservice";
@@ -310,116 +313,24 @@ const CampaignDetails = () => {
     return <Text>Error loading campaign details: {campaignError.message}</Text>;
   if (charactersError)
     return <Text>Error loading characters: {charactersError.message}</Text>;
-
+  
   return (
-    <Box className="campaign-details-container" p={4}>
-      <VStack align="flex-start" spacing={4}>
-        <Heading as="h1">{campaign?.name}</Heading>
-        <Text>{campaign?.description}</Text>
-
-        <Heading as="h3" size="md">
-          Characters in this campaign:
-        </Heading>
-
-        {/* Dropdown for selecting a character */}
-        <Select
-          placeholder="Select a character"
-          onChange={(e) => setSelectedCharacter(e.target.value)}
-        >
-          {campaign?.characters.map((character) => (
-            <option key={character._id} value={character._id}>
-              {character.name}
-            </option>
-          ))}
-        </Select>
-
-        <UnorderedList>
-          {campaign?.characters.map((character) => (
-            <ListItem key={character._id}>
-              {character.name}
-              <HStack spacing={2} mt={2}>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    character._id && handleCharacterEdit(character._id)
-                  }
-                >
-                  Edit Character
-                </Button>
-                <Button
-                  size="sm"
-                  colorScheme="red"
-                  onClick={() =>
-                    character._id && handleCharacterRemove(character._id)
-                  }
-                >
-                  Remove Character
-                </Button>
-              </HStack>
-            </ListItem>
-          ))}
-        </UnorderedList>
-
-        <AddCharacterToCampaign
-          campaignId={campaign ? campaign._id || "" : ""}
-          allCampaigns={campaign ? [campaign] : []}
-          refetchCampaigns={() => {}}
-          onCharacterAdded={handleCharacterAdded}
-        />
-
-        <Divider />
-
-        {/* Session Form */}
-        <SessionForm
-          campaign={campaign!}
-          onSessionCreated={handleSessionCreated}
-        />
-
-        <Heading as="h3" size="md">
-          Sessions for this campaign:
-        </Heading>
-        {campaign?.sessions && campaign.sessions.length > 0 ? (
-          <UnorderedList>
-            {campaign.sessions.map((session) => (
-              <ListItem key={session._id}>
-                <Text>
-                  <strong>Date:</strong> {formatDate(session.sessionDate)}
-                  <br />
-                  <strong>Log:</strong> {session.logEntry}
-                </Text>
-                <HStack spacing={2} mt={2}>
-                  <Button size="sm" onClick={() => handleSessionEdit(session)}>
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    colorScheme="red"
-                    onClick={() =>
-                      session._id && handleSessionDeleted(session._id)
-                    }
-                  >
-                    Delete
-                  </Button>
-                </HStack>
-              </ListItem>
-            ))}
-          </UnorderedList>
-        ) : (
-          <Text>No sessions found for this campaign.</Text>
-        )}
-
-        {/* MapUpload Component */}
-        {campaign && token && (
-          <MapUpload
-            campaignId={campaign._id!}
-            token={token}
-            onMapUploaded={handleMapUploaded}
-          />
-        )}
-        <RollDice />
-      </VStack>
-
-      {/* Right side: Carousel for Maps */}
+    <Grid
+      height="100vh"
+      templateAreas={{
+        base: `"main" "side"`,
+        lg: `"main side"`,
+      }}
+      templateColumns={{
+        base: "1fr",
+        lg: "3fr auto",
+      }}
+      templateRows="1fr"
+      gap={4}
+      p={4}
+    >
+      {/* Main Content Area */}
+      <GridItem area="main" p={4}>
       <VStack mt={8} spacing={4}>
         {campaign?.maps && campaign.maps.length > 0 ? (
           <Box position="relative" width="full">
@@ -433,13 +344,14 @@ const CampaignDetails = () => {
               transform="translateY(-50%)"
               zIndex={2}
             />
-            <Box position="relative" width="full" height="400px">
+            <Box position="relative" width="full">
               <Image
                 src={`http://localhost:5000${campaign.maps[currentSlide].imageURL}`}
                 alt="Campaign Map"
-                borderRadius="md"
-                boxSize="400px"
                 objectFit="cover"
+                borderRadius="md"
+                height="100%"
+                width="100%"
                 onClick={(event) =>
                   campaign.maps &&
                   handleMapClick(event, campaign.maps[currentSlide]._id!)
@@ -455,8 +367,8 @@ const CampaignDetails = () => {
                   transform="translate(-50%, -50%)"
                   bg="transparent"
                   borderRadius="50%"
-                  width="30px"
-                  height="30px"
+                  width="50px"
+                  height="50px"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
@@ -466,7 +378,7 @@ const CampaignDetails = () => {
                       src={pin.character.imageURL}
                       alt={pin.character.name || "Character"}
                       borderRadius="50%"
-                      boxSize="30px"
+                      boxSize="50px"
                       objectFit="cover"
                       border="2px solid white"
                     />
@@ -501,16 +413,139 @@ const CampaignDetails = () => {
           <Text>No maps found for this campaign.</Text>
         )}
       </VStack>
+      </GridItem>
+
+      {/* Right side: Carousel for Maps */}
+      <GridItem area="side" p={4}>
+      <VStack align="flex-start" spacing={4}>
+        <Heading maxWidth="30ch" overflowWrap="break-word"  as="h1">{campaign?.name}</Heading>
+        <Text maxWidth="50ch" overflowWrap="break-word">{campaign?.description}</Text>
+
+        <Heading as="h3" size="md">
+          Characters
+        </Heading>
+
+
+        <UnorderedList>
+          {campaign?.characters.map((character) => (
+            <ListItem key={character._id} mb={2}>
+              <Flex alignItems="center" justifyContent="space-between" gap={4} wrap="nowrap">
+                {/* Character Name */}
+                <Text isTruncated>{character.name}</Text>
+
+                {/* Buttons */}
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    onClick={() => character._id && handleCharacterEdit(character._id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() =>
+                      character._id && handleCharacterRemove(character._id)
+                    }
+                  >
+                    Remove
+                  </Button>
+                </HStack>
+              </Flex>
+            </ListItem>
+          ))}
+        </UnorderedList>
+
+
+
+        <AddCharacterToCampaign
+          campaignId={campaign ? campaign._id || "" : ""}
+          allCampaigns={campaign ? [campaign] : []}
+          refetchCampaigns={() => {}}
+          onCharacterAdded={handleCharacterAdded}
+        />
+
+        <Divider />
+
+        {/* Dropdown for selecting a character */}
+        <Select
+          placeholder="Select character to pin on the map"
+          onChange={(e) => setSelectedCharacter(e.target.value)}
+        >
+          {campaign?.characters.map((character) => (
+            <option key={character._id} value={character._id}>
+              {character.name}
+            </option>
+          ))}
+        </Select>
+
+        <Divider />
+
+        {/* Session Form */}
+        <SessionForm
+          campaign={campaign!}
+          onSessionCreated={handleSessionCreated}
+        />
+
+        <Heading as="h3" size="md">
+          Sessions for this campaign:
+        </Heading>
+        {campaign?.sessions && campaign.sessions.length > 0 ? (
+          <UnorderedList>
+            {campaign.sessions.map((session) => (
+              <ListItem key={session._id}>
+                <Flex alignItems="center" justifyContent="space-between" gap={4} wrap="nowrap">
+                <Text maxWidth="50ch" overflowWrap="break-word">
+                  <strong>Date:</strong> {formatDate(session.sessionDate)}
+                  <br />
+                  <strong>Log:</strong> {session.logEntry}
+                </Text>
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    onClick={() => handleSessionEdit(session)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() =>
+                      session._id && handleSessionDeleted(session._id)
+                    }
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              </Flex>
+              </ListItem>
+            ))}
+          </UnorderedList>
+        ) : (
+          <Text>No sessions found for this campaign.</Text>
+        )}
+
+        {/* MapUpload Component */}
+        {campaign && token && (
+          <MapUpload
+          campaignId={campaign._id!}
+          token={token}
+          onMapUploaded={handleMapUploaded}
+          />
+        )}
+      </VStack>
+      <RollDice />
+      </GridItem>
 
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
-          isOpen={isCharacterModalOpen}
-          onClose={handleModalClose}
-          campaign={campaign}
-          currentCharacterId={currentCharacterId}
-          availableCharacters={charactersData?.characters || []}
-          refetchCampaigns={() => {}}
-          setCampaign={setCampaign}
+        isOpen={isCharacterModalOpen}
+        onClose={handleModalClose}
+        campaign={campaign}
+        currentCharacterId={currentCharacterId}
+        availableCharacters={charactersData?.characters || []}
+        refetchCampaigns={() => {}}
+        setCampaign={setCampaign}
         />
       )}
       {isEditSessionModalOpen && currentSession && (
@@ -522,7 +557,7 @@ const CampaignDetails = () => {
           onSessionUpdated={handleSessionUpdated}
         />
       )}
-    </Box>
+    </Grid>
   );
 };
 
