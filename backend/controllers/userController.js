@@ -74,8 +74,8 @@ export const updateProfile = async (req, res) => {
 
     const updatedData = { firstName, lastName, email };
 
-    if (req.file) {
-      updatedData.profileImage = `/uploads/${req.file.filename}`;
+    if (req.file && req.file.path) {
+      updatedData.profileImage = req.file.path;
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
@@ -86,8 +86,12 @@ export const updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
+    console.error("Failed to update profile:", error);
     res.status(500).json({ message: "Failed to update profile", error });
   }
 };
