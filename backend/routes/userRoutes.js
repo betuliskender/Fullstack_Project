@@ -5,22 +5,26 @@ import {
   validateUserRegistration,
   handleValidationErrors,
 } from "../utility/validationMiddleware.js";
-import {authMiddleware} from "../utility/authMiddleware.js";
+import { authMiddleware } from "../utility/authMiddleware.js";
 import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 
 const userRoutes = express.Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "user-profiles",
+    allowed_formats: ["jpg", "png", "jpeg"],
+    public_id: (req, file) => `${Date.now()}-${file.originalname.split(" ").join("_")}`,
   },
 });
 
 const upload = multer({ storage });
 
+// Routes
 userRoutes.post(
   "/register",
   validateUserRegistration,
