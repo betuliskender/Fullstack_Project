@@ -3,6 +3,7 @@ services:
     build: ./backend
     ports:
       - "5000:5000"
+    command: npm start
     environment:
       - MONGODB_URI=mongodb://mongo:27017/mainDB
     depends_on:
@@ -16,6 +17,7 @@ services:
     build: ./client
     ports:
       - "5173:5173"
+    command: npm run dev
     depends_on:
       - backend
 
