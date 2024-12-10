@@ -1,5 +1,7 @@
 FROM node:16
 
+ENV MONGO_URI=$MONGO_URI
+
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -8,9 +10,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5000
-
-ARG MONGO_URI
-ENV MONGO_URI=${MONGO_URI}
+EXPOSE $PORT
 
 CMD ["npm", "start"]
