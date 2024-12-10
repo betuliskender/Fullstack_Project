@@ -1,7 +1,5 @@
 FROM node:16
 
-ENV MONGO_URI=$MONGO_URI
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
