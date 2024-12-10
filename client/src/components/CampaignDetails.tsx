@@ -486,7 +486,7 @@ const CampaignDetails = () => {
           campaign={campaign!}
           onSessionCreated={handleSessionCreated}
         />
- 
+  
         <Heading as="h3" size="md">
           Sessions for this campaign:
         </Heading>
