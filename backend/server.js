@@ -26,7 +26,7 @@ connectDB();
 
 populateSpells();
 populateSkills();
-
+ 
 app.use("/api/users", userRoutes);
 app.use("/api/characters", characterRoutes);
 app.use("/api/campaigns", campaignRoutes);
