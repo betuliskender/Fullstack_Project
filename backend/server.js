@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({
 
-  origin: ["https://fullstack-project-1-yz4i.onrender.com/" , "https://fullstack-project-psi.vercel.app", "http://localhost:5173"],
+  origin: ["https://fullstack-project-1-yz4i.onrender.com" , "https://fullstack-project-psi.vercel.app", "http://localhost:5173"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 
   credentials: true,
