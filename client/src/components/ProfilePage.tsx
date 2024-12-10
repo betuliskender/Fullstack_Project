@@ -25,7 +25,7 @@ const ProfilePage: React.FC = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!token);
-  const toast = useToast();
+  const toast = useToast(); 
 
   useEffect(() => {
     setIsLoggedIn(!!token);
