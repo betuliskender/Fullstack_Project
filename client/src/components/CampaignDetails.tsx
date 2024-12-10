@@ -494,13 +494,17 @@ const CampaignDetails = () => {
           <UnorderedList>
             {campaign.sessions.map((session) => (
               <ListItem key={session._id}>
-                <Text>
+                <Flex alignItems="center" justifyContent="space-between" gap={4} wrap="nowrap">
+                <Text maxWidth="50ch" overflowWrap="break-word">
                   <strong>Date:</strong> {formatDate(session.sessionDate)}
                   <br />
                   <strong>Log:</strong> {session.logEntry}
                 </Text>
-                <HStack spacing={2} mt={2}>
-                  <Button size="sm" onClick={() => handleSessionEdit(session)}>
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    onClick={() => handleSessionEdit(session)}
+                  >
                     Edit
                   </Button>
                   <Button
@@ -513,6 +517,7 @@ const CampaignDetails = () => {
                     Delete
                   </Button>
                 </HStack>
+              </Flex>
               </ListItem>
             ))}
           </UnorderedList>
