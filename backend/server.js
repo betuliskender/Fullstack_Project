@@ -39,9 +39,6 @@ async function startServer() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    persistedQueries: {
-      cache: "bounded",
-    },
     context: ({ req }) => {
       const auth = authMiddleware(req);
       return { ...auth };
