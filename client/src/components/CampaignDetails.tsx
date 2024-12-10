@@ -346,7 +346,7 @@ const CampaignDetails = () => {
             />
             <Box position="relative" width="full">
               <Image
-                src={`https://test-fullstack-5buo.onrender.com/${campaign.maps[currentSlide].imageURL}`}
+                src={`${campaign.maps[currentSlide].imageURL}`}
                 alt="Campaign Map"
                 objectFit="cover"
                 borderRadius="md"
