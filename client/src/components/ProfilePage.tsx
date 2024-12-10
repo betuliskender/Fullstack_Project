@@ -122,7 +122,7 @@ const ProfilePage: React.FC = () => {
         <VStack spacing={4} align="center">
           <Avatar
             size="xl"
-            src={user?.profileImage ? `${user.profileImage}` : undefined}
+            src={user?.profileImage || undefined}
             name={user?.firstName}
             bg="teal.500"
           />
