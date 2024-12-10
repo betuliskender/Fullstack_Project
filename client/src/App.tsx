@@ -11,7 +11,7 @@ import CampaignType from "./components/Campaign";
 import CampaignDetails from "./components/CampaignDetails";
 
 const client = new ApolloClient({
-  uri: "https://test-fullstack-5buo.onrender.com/graphql",
+  uri: "https://fullstack-project-dv3k.onrender.com/graphql",
   cache: new InMemoryCache()
 });
 

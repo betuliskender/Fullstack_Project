@@ -8,7 +8,7 @@ import {
   Map,
 } from "./types";
 
-const API_URL = "https://test-fullstack-5buo.onrender.com/api";
+const API_URL = "https://fullstack-project-dv3k.onrender.com/api";
 
 export const createCharacter = async (character: Character, token: string) => {
   try {
