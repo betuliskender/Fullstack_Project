@@ -501,7 +501,7 @@ const CampaignDetails = () => {
                   <strong>Log:</strong> {session.logEntry}
                 </Text>
                 <HStack spacing={2}>
-                  <Button
+                  <Button 
                     size="sm"
                     onClick={() => handleSessionEdit(session)}
                   >
