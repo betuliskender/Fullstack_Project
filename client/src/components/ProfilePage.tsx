@@ -28,6 +28,14 @@ const ProfilePage: React.FC = () => {
   const toast = useToast();
 
   useEffect(() => {
+    setFormData({
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+    });
+  }, [user]);
+
+  useEffect(() => {
     setIsLoggedIn(!!token);
   }, [token]);
 

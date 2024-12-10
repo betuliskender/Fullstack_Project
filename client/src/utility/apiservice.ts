@@ -102,7 +102,7 @@ export const updateUser = async (
         "Content-Type": "multipart/form-data",
       },
     });
-    return response.data;
+    return response.data.user;
   } catch (error) {
     console.error("Error updating user:", error);
     throw error;
