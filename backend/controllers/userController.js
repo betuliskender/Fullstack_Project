@@ -50,9 +50,44 @@ export const login = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ message: "Login successful", jwtToken, user: {firstName: user.firstName, lastName: user.lastName, email: user.email, userName: user.userName, _id: user._id} });
+    res.status(200).json({
+      message: "Login successful",
+      jwtToken,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        userName: user.userName,
+        _id: user._id,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Could not login, server error", error });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { firstName, lastName, email } = req.body;
+    const userId = req.user.id;
+
+    const updatedData = { firstName, lastName, email };
+
+    if (req.file) {
+      updatedData.profileImage = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update profile", error });
   }
 };

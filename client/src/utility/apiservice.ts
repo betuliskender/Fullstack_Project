@@ -91,6 +91,25 @@ export const loginUser = async (
   }
 };
 
+export const updateUser = async (
+  userData: FormData,
+  token: string
+): Promise<User> => {
+  try {
+    const response = await axios.put(`${API_URL}/users/profile`, userData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};
+
+
 export const createCampaign = async (
   campaign: Campaign,
   token: string

@@ -7,6 +7,7 @@ export const typeDefs = gql`
     lastName: String!
     userName: String!
     email: String!
+    profileImage: String
     characters: [Character]
   }
 
@@ -190,6 +191,13 @@ export const typeDefs = gql`
     deleteSession(_id: ID!): Session
 
     addPinToMap(mapId: ID!, x: Float!, y: Float!, characterId: ID): Map
+
+    updateUserProfile(
+    firstName: String
+    lastName: String
+    email: String
+    profileImage: String
+  ): User
   }
   
   input RaceInput {

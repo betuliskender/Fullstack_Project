@@ -63,6 +63,10 @@ const resolvers = {
     skills: async () => {
       return await Skill.find();
     },
+    user: async (_, __, { user }) => {
+      if (!user) throw new Error("Authentication required");
+      return await User.findById(user.id);
+    },
   },
 
   Mutation: {
@@ -237,6 +241,18 @@ const resolvers = {
       console.log("Updated Map after adding pin:", updatedMap);
 
       return updatedMap;
+    },
+    updateUserProfile: async (_, { firstName, lastName, email, profileImage }, { user }) => {
+      if (!user) throw new Error("Authentication required");
+  
+      const updatedData = { firstName, lastName, email };
+      if (profileImage) updatedData.profileImage = profileImage;
+  
+      const updatedUser = await User.findByIdAndUpdate(user.id, updatedData, {
+        new: true,
+      });
+  
+      return updatedUser;
     },
   },
 };

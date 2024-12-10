@@ -136,3 +136,15 @@ query Query($id: ID!) {
   }
 }`;
 
+export const GET_PROFILE = gql`
+  query Query($id: ID!) {
+  user(_id: $id) {
+    _id
+    firstName
+    lastName
+    userName
+    email
+    profileImage
+  }
+}
+`;

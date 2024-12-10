@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { HStack, Button, useDisclosure } from "@chakra-ui/react";
+import { HStack, Button, useDisclosure, IconButton } from "@chakra-ui/react";
 import ColorModeSwitch from "./ColorModeSwitch";
-import LogIn from "./LogIn"; // Import the LogIn modal component
-import RegisterModal from "./Register"; // Import the Register modal component
+import LogIn from "./LogIn"; // Import LogIn modal component
+import RegisterModal from "./Register"; // Import Register modal component
+import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 
 interface NavbarProps {
   isLoggedIn: boolean;
@@ -14,6 +15,27 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
   const { isOpen: isLoginOpen, onOpen: onLoginOpen, onClose: onLoginClose } = useDisclosure();
   const { isOpen: isRegisterOpen, onOpen: onRegisterOpen, onClose: onRegisterClose } = useDisclosure();
+
+  // Music-controller
+  const [isPlaying, setIsPlaying] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
+  }, []);
 
   return (
     <HStack spacing={4} justify="space-between">
@@ -45,14 +67,11 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
       </HStack>
       <HStack spacing={4}>
         {isLoggedIn ? (
-          
           <>
             <Button colorScheme="teal" variant="solid" onClick={onLogout}>
               Logout
             </Button>
-            <ColorModeSwitch />
           </>
-          
         ) : (
           <>
             <Button colorScheme="teal" variant="solid" onClick={onLoginOpen}>
@@ -61,13 +80,26 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
             <Button colorScheme="teal" variant="solid" onClick={onRegisterOpen}>
               Register
             </Button>
-            <ColorModeSwitch />
-            {/* Login Modal */}
+            {/* LogIn Modal */}
             <LogIn isOpen={isLoginOpen} onClose={onLoginClose} onLogin={onLogin} />
             {/* Register Modal */}
             <RegisterModal isOpen={isRegisterOpen} onClose={onRegisterClose} />
           </>
         )}
+        <ColorModeSwitch />
+        {/* Music-button */}
+        <IconButton
+          aria-label="Toggle Music"
+          icon={isPlaying ? <FaVolumeUp /> : <FaVolumeMute />}
+          colorScheme="teal"
+          size="sm"
+          onClick={toggleMusic}
+        />
+        {/* Audio Element */}
+        <audio ref={audioRef} loop>
+          <source src="/assets/401_Feast_of_Crispian.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
       </HStack>
     </HStack>
   );
