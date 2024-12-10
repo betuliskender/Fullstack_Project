@@ -33,11 +33,7 @@ import {
   Select,
   Grid,
   GridItem,
-  Accordion,
-  AccordionItem,
-  AccordionButton,
-  AccordionIcon,
-  AccordionPanel,
+  Flex,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { addPinToMap } from "../utility/apiservice";
@@ -327,7 +323,7 @@ const CampaignDetails = () => {
       }}
       templateColumns={{
         base: "1fr",
-        lg: "3fr 1fr",
+        lg: "3fr auto",
       }}
       templateRows="1fr"
       gap={4}
@@ -422,129 +418,108 @@ const CampaignDetails = () => {
       {/* Right side: Carousel for Maps */}
       <GridItem area="side" p={4}>
       <VStack align="flex-start" spacing={4}>
-        <Heading as="h1">{campaign?.name}</Heading>
-        <Text>{campaign?.description}</Text>
+        <Heading maxWidth="30ch" overflowWrap="break-word"  as="h1">{campaign?.name}</Heading>
+        <Text maxWidth="50ch" overflowWrap="break-word">{campaign?.description}</Text>
 
-        {/* Accordion for collapsible sections */}
-        <Accordion allowMultiple>
-          {/* Section 3 & 4: Characters in Campaign */}
-          <AccordionItem>
-            <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left">
-                  Characters
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-            </h2>
-            <AccordionPanel>
-              {/* Dropdown for selecting a character */}
-              <Select
-                placeholder="Select a character"
-                onChange={(e) => setSelectedCharacter(e.target.value)}
-              >
-                {campaign?.characters.map((character) => (
-                  <option key={character._id} value={character._id}>
-                    {character.name}
-                  </option>
-                ))}
-              </Select>
-
-              <UnorderedList>
-                {campaign?.characters.map((character) => (
-                  <ListItem key={character._id}>
-                    {character.name}
-                    <HStack spacing={2} mt={2}>
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          character._id && handleCharacterEdit(character._id)
-                        }
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorScheme="red"
-                        onClick={() =>
-                          character._id && handleCharacterRemove(character._id)
-                        }
-                      >
-                        Remove
-                      </Button>
-                    </HStack>
-                  </ListItem>
-                ))}
-              </UnorderedList>
-
-            <AddCharacterToCampaign
-              campaignId={campaign ? campaign._id || "" : ""}
-              allCampaigns={campaign ? [campaign] : []}
-              refetchCampaigns={() => {}}
-              onCharacterAdded={handleCharacterAdded}
-            />
-            </AccordionPanel>
-          </AccordionItem>
+        <Heading as="h3" size="md">
+          Characters
+        </Heading>
 
 
-       {/* Section 6: Session Logs */}
-       <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left">
-                Sessions Log
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel>
-            <SessionForm
-              campaign={campaign!}
-              onSessionCreated={handleSessionCreated}
-            />
-            {campaign?.sessions && campaign.sessions.length > 0 ? (
-              <UnorderedList>
-                {campaign.sessions.map((session) => (
-                  <ListItem key={session._id}>
-                    <Text>
-                      <strong>Date:</strong> {formatDate(session.sessionDate)}
-                      <br />
-                      <strong>Log:</strong> {session.logEntry}
-                    </Text>
-                    <HStack spacing={2} mt={2}>
-                      <Button size="sm" onClick={() => handleSessionEdit(session)}>
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorScheme="red"
-                        onClick={() =>
-                          session._id && handleSessionDeleted(session._id)
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </HStack>
-                  </ListItem>
-                ))}
-              </UnorderedList>
-            ) : (
-              <Text>No sessions found for this campaign.</Text>
-            )}
-          </AccordionPanel>
-        </AccordionItem>
+        <UnorderedList>
+          {campaign?.characters.map((character) => (
+            <ListItem key={character._id} mb={2}>
+              <Flex alignItems="center" justifyContent="space-between" gap={4} wrap="nowrap">
+                {/* Character Name */}
+                <Text isTruncated>{character.name}</Text>
 
-        {/* Section 7: Upload Map */}
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box flex="1" textAlign="left">
-                Maps
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-        <AccordionPanel>
+                {/* Buttons */}
+                <HStack spacing={2}>
+                  <Button
+                    size="sm"
+                    onClick={() => character._id && handleCharacterEdit(character._id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() =>
+                      character._id && handleCharacterRemove(character._id)
+                    }
+                  >
+                    Remove
+                  </Button>
+                </HStack>
+              </Flex>
+            </ListItem>
+          ))}
+        </UnorderedList>
+
+
+
+        <AddCharacterToCampaign
+          campaignId={campaign ? campaign._id || "" : ""}
+          allCampaigns={campaign ? [campaign] : []}
+          refetchCampaigns={() => {}}
+          onCharacterAdded={handleCharacterAdded}
+        />
+
+        <Divider />
+
+        {/* Dropdown for selecting a character */}
+        <Select
+          placeholder="Select character to pin on the map"
+          onChange={(e) => setSelectedCharacter(e.target.value)}
+        >
+          {campaign?.characters.map((character) => (
+            <option key={character._id} value={character._id}>
+              {character.name}
+            </option>
+          ))}
+        </Select>
+
+        <Divider />
+
+        {/* Session Form */}
+        <SessionForm
+          campaign={campaign!}
+          onSessionCreated={handleSessionCreated}
+        />
+
+        <Heading as="h3" size="md">
+          Sessions for this campaign:
+        </Heading>
+        {campaign?.sessions && campaign.sessions.length > 0 ? (
+          <UnorderedList>
+            {campaign.sessions.map((session) => (
+              <ListItem key={session._id}>
+                <Text>
+                  <strong>Date:</strong> {formatDate(session.sessionDate)}
+                  <br />
+                  <strong>Log:</strong> {session.logEntry}
+                </Text>
+                <HStack spacing={2} mt={2}>
+                  <Button size="sm" onClick={() => handleSessionEdit(session)}>
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() =>
+                      session._id && handleSessionDeleted(session._id)
+                    }
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              </ListItem>
+            ))}
+          </UnorderedList>
+        ) : (
+          <Text>No sessions found for this campaign.</Text>
+        )}
+
         {/* MapUpload Component */}
         {campaign && token && (
           <MapUpload
@@ -553,9 +528,6 @@ const CampaignDetails = () => {
           onMapUploaded={handleMapUploaded}
           />
         )}
-        </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
       </VStack>
       <RollDice />
       </GridItem>
