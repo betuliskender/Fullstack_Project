@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "install": "npm install --prefix backend && npm install --prefix client",
-    "start": "npm start --prefix backend",
-    "dev": "npm start --prefix backend & npm run dev --prefix client"
+  "install": "npm install --prefix backend && npm install --prefix client",
+  "start": "npm start --prefix backend",
+  "build": "npm run build --prefix client",
+  "dev": "npm start --prefix backend & npm run dev --prefix client"
 }
 }
