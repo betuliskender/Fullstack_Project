@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { AuthContext } from "../utility/authContext";
@@ -38,7 +38,11 @@ import {
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { addPinToMap } from "../utility/apiservice";
 
-const CampaignDetails = () => {
+interface ProfilePageProps {
+  isLoggedIn: boolean;
+}
+
+const CampaignDetails: React.FC<ProfilePageProps> = ({isLoggedIn}) => {
   const { id } = useParams<{ id: string }>();
   const { token } = useContext(AuthContext);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
@@ -86,6 +90,18 @@ const CampaignDetails = () => {
       setCampaign(campaignData.campaign);
     }
   }, [campaignData]);
+
+  if (!isLoggedIn) {
+    return (
+      <Flex justify="center" align="center" h="100vh">
+        <Box textAlign="center">
+          <Heading size="lg" mb={4}>
+            You need to log in to view this page
+          </Heading>
+        </Box>
+      </Flex>
+    );
+  }
 
   const handleMapUploaded = (uploadedMap: Map) => {
     setCampaign((prevCampaign) => {
