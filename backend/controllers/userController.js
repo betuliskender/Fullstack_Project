@@ -19,6 +19,7 @@ export const registerUser = async (req, res) => {
       lastName,
       userName,
       email,
+      profileImage: req.file.path,
       password: hashedPassword,
     });
     await user.save();
@@ -58,6 +59,7 @@ export const login = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         userName: user.userName,
+        profileImage: user.profileImage,
         _id: user._id,
       },
     });

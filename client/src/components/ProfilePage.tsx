@@ -15,7 +15,11 @@ import {
 import { AuthContext } from "../utility/authContext";
 import { updateUser } from "../utility/apiservice";
 
-const ProfilePage: React.FC = () => {
+interface ProfilePageProps {
+  isLoggedIn: boolean;
+}
+
+const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { user, setUser, token } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
@@ -24,7 +28,6 @@ const ProfilePage: React.FC = () => {
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
   const toast = useToast();
 
   useEffect(() => {
@@ -34,10 +37,6 @@ const ProfilePage: React.FC = () => {
       email: user?.email || "",
     });
   }, [user]);
-
-  useEffect(() => {
-    setIsLoggedIn(!!token);
-  }, [token]);
 
   if (!isLoggedIn) {
     return (
