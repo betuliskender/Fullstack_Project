@@ -1,4 +1,6 @@
 import express from "express";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 import path from "path";
 import {
@@ -14,38 +16,29 @@ import {
 } from "../controllers/campaignController.js";
 import { authMiddleware } from "../utility/authMiddleware.js";
 import Map from "../models/mapModel.js";
+import Campaign from "../models/campaignModel.js";
 
 const router = express.Router();
 
-// Set up storage with Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads/"); // Save files to the "uploads" folder
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // Use unique name for each file
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "dnd-maps",
+    allowed_formats: ["jpg", "png", "jpeg"],
+    public_id: (req, file) => {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      return uniqueSuffix + path.extname(file.originalname);
+    },
   },
 });
 
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 1024 * 1024 * 5 },
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png/;
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error("Only images are allowed"));
-    }
-  },
-});
+const upload = multer({ storage: storage });
 
 router.post("/", authMiddleware, createCampaign);
 router.post("/:campaignId/characters", authMiddleware, addCharacterToCampaign);
@@ -68,7 +61,36 @@ router.post(
   "/:campaignId/upload-map",
   authMiddleware,
   upload.single("mapImage"),
-  uploadMapToCampaign
+  async (req, res) => {
+    try {
+      const mapUrl = req.file.path; // Cloudinary URL
+      const campaignId = req.params.campaignId;
+
+      const campaign = await Campaign.findById(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      const newMap = new Map({
+        imageURL: mapUrl,
+        pins: [],
+        campaign: campaignId,
+      });
+
+      await newMap.save();
+
+      campaign.maps.push(newMap._id);
+      await campaign.save();
+
+      res.status(200).json({
+        message: "Map uploaded successfully",
+        map: newMap,
+      });
+    } catch (error) {
+      console.error("Error uploading map:", error);
+      res.status(500).json({ message: "Error uploading map" });
+    }
+  }
 );
 
 router.post("/:campaignId/maps/:mapId/pins", authMiddleware, async (req, res) => {
