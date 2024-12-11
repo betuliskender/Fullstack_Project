@@ -23,7 +23,7 @@ interface RegisterModalProps {
 }
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
-  const [user, setUser] = useState<User>({ firstName: "", lastName: "", userName: "", email: "", password: "" });
+  const [user, setUser] = useState<User>({ firstName: "", lastName: "", userName: "", email: "", password: "", profileImage: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -51,8 +51,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
     try {
       const response = await registerUser(user); // Call registerUser API function
       setSuccessMessage(response.message); // Display success message
-      setUser({ firstName: "", lastName: "", userName: "", email: "", password: "" }); // Clear form
-    } catch (error) {
+      setUser({ firstName: "", lastName: "", userName: "", email: "", password: "", profileImage: "" }); // Clear form
+    } catch {
       setError("Error registering user. Please try again.");
     } finally {
       setLoading(false); // Stop loading

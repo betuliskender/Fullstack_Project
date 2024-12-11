@@ -28,6 +28,14 @@ const ProfilePage: React.FC = () => {
   const toast = useToast();
 
   useEffect(() => {
+    setFormData({
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+    });
+  }, [user]);
+
+  useEffect(() => {
     setIsLoggedIn(!!token);
   }, [token]);
 
@@ -122,7 +130,7 @@ const ProfilePage: React.FC = () => {
         <VStack spacing={4} align="center">
           <Avatar
             size="xl"
-            src={user?.profileImage ? `http://localhost:5000${user.profileImage}` : undefined}
+            src={user?.profileImage || undefined}
             name={user?.firstName}
             bg="teal.500"
           />
