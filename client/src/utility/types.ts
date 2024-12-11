@@ -44,7 +44,7 @@ export interface User {
   lastName?: string;
   userName?: string;
   email: string;
-  profileImage: string;
+  profileImage?: string;
   password: string;
 }
 
