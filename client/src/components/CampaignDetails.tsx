@@ -16,6 +16,7 @@ import {
 import "../styles/campaignDetails.css";
 import RollDice from "./RollDice";
 import { deleteMapFromCampaign } from "../utility/apiservice";
+import { updateCampaignField } from "../utility/updateCampaignFields";
 
 // Chakra UI imports
 import {
@@ -104,41 +105,17 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     );
   }
 
-  const handleMapUploaded = (uploadedMap: Map) => {
-    setCampaign((prevCampaign) => {
-      if (prevCampaign) {
-        return {
-          ...prevCampaign,
-          maps: [...(prevCampaign.maps ?? []), uploadedMap],
-        };
-      }
-      return prevCampaign;
-    });
-  };
+const handleMapUploaded = (uploadedMap: Map) => {
+  updateCampaignField("maps", uploadedMap, setCampaign);
+};
 
-  const handleSessionCreated = (newSession: Session) => {
-    setCampaign((prevCampaign) => {
-      if (prevCampaign) {
-        return {
-          ...prevCampaign,
-          sessions: [...(prevCampaign.sessions || []), newSession],
-        };
-      }
-      return prevCampaign;
-    });
-  };
+const handleSessionCreated = (newSession: Session) => {
+  updateCampaignField("sessions", newSession, setCampaign);
+};
 
-  const handleCharacterAdded = (newCharacter: Character) => {
-    setCampaign((prevCampaign) => {
-      if (prevCampaign) {
-        return {
-          ...prevCampaign,
-          characters: [...prevCampaign.characters, newCharacter],
-        };
-      }
-      return prevCampaign;
-    });
-  };
+const handleCharacterAdded = (newCharacter: Character) => {
+  updateCampaignField("characters", newCharacter, setCampaign);
+};
 
   const handleCharacterEdit = (characterId: string) => {
     setCurrentCharacterId(characterId);
@@ -197,7 +174,6 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     if (!campaign || !token) return;
   
     try {
-      // Kald backend API for at slette map
       const response = await deleteMapFromCampaign(campaign._id!, mapId, token);
       if (response.message === "Map deleted successfully") {
         setCampaign((prevCampaign) => {
@@ -205,7 +181,6 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   
           const updatedMaps = prevCampaign.maps?.filter((map) => map._id !== mapId) || [];
   
-          // Juster currentSlide, hvis nødvendigt
           if (currentSlide >= updatedMaps.length) {
             setCurrentSlide((prev) => Math.max(0, prev - 1));
           }
