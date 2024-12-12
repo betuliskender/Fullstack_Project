@@ -65,6 +65,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     loading: campaignLoading,
     error: campaignError,
     data: campaignData,
+    refetch,
   } = useQuery(GET_CAMPAIGN_BY_ID, {
     variables: { id },
     context: {
@@ -105,9 +106,14 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     );
   }
 
-const handleMapUploaded = (uploadedMap: Map) => {
-  updateCampaignField("maps", uploadedMap, setCampaign);
-};
+  const handleMapUploaded = async (uploadedMap: Map) => {
+    try {
+      updateCampaignField("maps", uploadedMap, setCampaign);
+      await refetch();
+    } catch (error) {
+      console.error("Error refetching campaign data after upload:", error);
+    }
+  };
 
 const handleSessionCreated = (newSession: Session) => {
   updateCampaignField("sessions", newSession, setCampaign);

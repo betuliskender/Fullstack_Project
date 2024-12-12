@@ -81,12 +81,11 @@ const MapUpload: React.FC<MapUploadProps> = ({
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            {/* Flyt ModalFooter inde i form */}
             <form onSubmit={handleUpload}>
               <FormControl mb={4}>
                 <FormLabel htmlFor="map-upload">Select a map image</FormLabel>
                 <Input
-                  ref={fileInputRef} // Attach the ref here
+                  ref={fileInputRef}
                   type="file"
                   accept="image/*"
                   id="map-upload"
@@ -100,7 +99,6 @@ const MapUpload: React.FC<MapUploadProps> = ({
               )}
               {isUploading && <Spinner size="sm" color="teal.500" mt={2} />}
 
-              {/* Flyt ModalFooter ind i form-elementet */}
               <ModalFooter>
                 <Button
                   type="submit"
