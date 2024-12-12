@@ -11,7 +11,7 @@ import {
   VStack,
   Text,
   useToast,
-  useColorMode, // Importer useColorMode
+  useColorMode,
 } from "@chakra-ui/react";
 import { AuthContext } from "../utility/authContext";
 import { updateUser } from "../utility/apiservice";
@@ -30,10 +30,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const toast = useToast();
-  const { colorMode } = useColorMode(); // Hent colorMode fra useColorMode
+  const { colorMode } = useColorMode();
 
-  const backgroundColor = colorMode === "dark" ? "gray.700" : "white"; // Dynamisk baggrundsfarve
-  const textColor = colorMode === "dark" ? "white" : "black"; // Dynamisk tekstfarve
+  const backgroundColor = colorMode === "dark" ? "gray.700" : "white";
+  const textColor = colorMode === "dark" ? "white" : "black";
 
   useEffect(() => {
     setFormData({
@@ -130,11 +130,11 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     <Flex justify="center" align="center" h="100vh">
       <Box
         w="400px"
-        bg={backgroundColor} // Dynamisk baggrundsfarve
+        bg={backgroundColor}
         p={6}
         borderRadius="lg"
         boxShadow="lg"
-        color={textColor} // Dynamisk tekstfarve
+        color={textColor}
       >
         <VStack spacing={4} align="center">
           <Avatar
