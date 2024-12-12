@@ -388,3 +388,24 @@ export const addSpellsToCharacter = async (
     throw error;
   }
 };
+
+export const deleteMapFromCampaign = async (
+  campaignId: string,
+  mapId: string,
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/campaigns/${campaignId}/maps/${mapId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting map from campaign:", error);
+    throw error;
+  }
+};

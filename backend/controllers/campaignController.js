@@ -265,3 +265,24 @@ export const uploadMapToCampaign = async (req, res) => {
     res.status(500).json({ message: "Failed to upload map", error });
   }
 };
+
+export const deleteMapFromCampaign = async (req, res) => {
+  const { campaignId, mapId } = req.params;
+
+  try {
+    const deletedMap = await Map.findByIdAndDelete(mapId);
+
+    if (!deletedMap) {
+      return res.status(404).json({ message: "Map not found" });
+    }
+
+    await Campaign.findByIdAndUpdate(campaignId, {
+      $pull: { maps: mapId },
+    });
+
+    res.status(200).json({ message: "Map deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting map:", error);
+    res.status(500).json({ message: "Failed to delete map", error });
+  }
+};
