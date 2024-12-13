@@ -15,7 +15,7 @@ interface SessionLogsProps {
   sessions: Session[];
   onEditSession: (session: Session) => void;
   onDeleteSession: (sessionId: string) => void;
-  formatDate: (sessionDate: string) => string; // Til visning
+  formatDate: (sessionDate: string) => string;
 }
 
 const SessionLogs: React.FC<SessionLogsProps> = ({
@@ -30,11 +30,10 @@ const SessionLogs: React.FC<SessionLogsProps> = ({
     setSelectedSessionId(event.target.value);
   };
 
-  // Sortér sessioner efter deres originale dato (ikke formateret)
   const sortedSessions = [...sessions].sort((a, b) => {
-    const dateA = new Date(a.sessionDate).getTime(); // Brug den originale dato
+    const dateA = new Date(a.sessionDate).getTime();
     const dateB = new Date(b.sessionDate).getTime();
-    return dateB - dateA; // Nyeste først
+    return dateB - dateA;
   });
 
   const selectedSession = sortedSessions.find(

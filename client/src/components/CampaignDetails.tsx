@@ -550,7 +550,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
             sessions={campaign?.sessions || []}
             onEditSession={handleSessionEdit}
             onDeleteSession={handleSessionDeleted}
-            formatDate={formatDate} // Pass formatDate som prop
+            formatDate={formatDate}
           />
 
           {/* MapUpload Component */}
