@@ -2,27 +2,40 @@ import { gql } from "@apollo/client";
 
 export const GETALLCHARACTERS = gql`
   query Characters {
-    characters {
-      _id
-      name
-      level
-      race {
+      characters {
+        _id
         name
+        level
+        race{
+          name
         }
-      class {
-        name}
-      background
-      imageURL
-      attributes {
-        strength
-        dexterity
-        constitution
-        intelligence
-        wisdom
-        charisma
+        class{
+          name
+        }
+        background
+        imageURL
+        attributes {
+          strength
+          dexterity
+          constitution
+          intelligence
+          wisdom
+          charisma
+        }
+        spells {
+          name
+          level
+          description
+          damage
+          duration
+        }
+        skills {
+          name
+          desc
+          abilityScore
+        }
       }
     }
-  }
 `;
 
 export const GET_ALL_SPELLS = gql`

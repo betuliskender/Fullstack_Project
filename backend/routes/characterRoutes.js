@@ -5,7 +5,8 @@ import {
   editCharacter,
   getAllCharacters,
   getCharacterById,
-  addSpellsToCharacter
+  addSpellsToCharacter,
+  addSkillsToCharacter
 } from "../controllers/characterController.js";
 import { authMiddleware } from "../utility/authMiddleware.js";
 
@@ -23,6 +24,9 @@ characterRoutes.get("/", authMiddleware, getAllCharacters);
 
 // Add spells to a character
 characterRoutes.post("/:characterId/spells", authMiddleware, addSpellsToCharacter);
+
+// Add skills to a character
+characterRoutes.post("/:characterId/skills", authMiddleware, addSkillsToCharacter);
 
 export default characterRoutes;
 

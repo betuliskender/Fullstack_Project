@@ -1,6 +1,8 @@
 import Character from "../models/characterModel.js";
 import Spell from "../models/spellModel.js";
 import CharacterSpell from "../models/characterSpellModel.js";
+import CharacterSkill from "../models/characteSkillModel.js";
+import Skill from "../models/skillModel.js";
 
 export const createCharacter = async (req, res) => {
   const {
@@ -159,6 +161,59 @@ export const addSpellsToCharacter = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+//add skills to character
+export const addSkillsToCharacter = async (req, res) => {
+  const { characterId } = req.params;
+  const { skills } = req.body; 
+
+  try {
+    if (!Array.isArray(skills) || skills.length === 0) {
+      return res.status(400).json({ success: false, message: "Skills array is invalid or empty" });
+    }
+
+    const character = await Character.findById(characterId);
+    if (!character) {
+      return res.status(404).json({ success: false, message: "Character not found" });
+    }
+
+    const skillIDs = skills.map((skill) => skill._id);
+
+    const matchedSkills = await Skill.find({ _id: { $in: skillIDs } });
+
+    if (matchedSkills.length !== skillIDs.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Some skills could not be found in the database",
+      });
+    }
+
+    const existingRelations = await CharacterSkill.find({
+      character: characterId,
+      skill: { $in: skillIDs },
+    });
+
+    const newRelations = matchedSkills
+      .filter((skill) => !existingRelations.some((rel) => rel.skill.equals(skill._id)))
+      .map((skill) => ({
+        character: characterId,
+        skill: skill._id,
+      }));
+
+    if (newRelations.length > 0) {
+      await CharacterSkill.insertMany(newRelations);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Skills added to character successfully",
+      addedSkills: newRelations.map((relation) => relation.skill),
+    });
+  } catch (error) {
+    console.error("Error in addSkillsToCharacter:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };

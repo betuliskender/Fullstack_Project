@@ -388,3 +388,25 @@ export const addSpellsToCharacter = async (
     throw error;
   }
 };
+
+export const addSkillsToCharacter = async (
+  characterId: string,
+  skills: { name: string }[],
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/characters/${characterId}/skills`,
+      { skills }, // Send skill data as expected by the backend
+      {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include Bearer token for authentication
+        },
+      }
+    );
+    return response.data; // Return response data from the server
+  } catch (error) {
+    console.error("Error adding skills to character:", error);
+    throw error;
+  }
+};

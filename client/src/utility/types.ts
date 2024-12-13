@@ -36,6 +36,23 @@ export interface Character {
   imageURL: string;
   attributes: Attributes;
   user: string;
+  spells?: Spell[];
+  skills?: Skill[];
+}
+export interface Spell {
+  _id?: string;
+  name: string;
+  level: number;
+  description: string;
+  damage: string;
+  duration: string;
+}
+
+export interface Skill {
+  _id?: string;
+  name: string;
+  desc: string;
+  abilityScore: string;
 }
 
 export interface User {

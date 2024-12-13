@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ChangeEvent, useContext } from "react";
-import { addSpellsToCharacter, createCharacter } from "../utility/apiservice";
+import { addSkillsToCharacter, addSpellsToCharacter, createCharacter } from "../utility/apiservice";
 import { Character as CharacterType } from "../utility/types";
 import { AuthContext } from "../utility/authContext";
 import {
@@ -21,6 +21,8 @@ import {
   Grid
 } from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
+import { GET_ALL_SKILLS } from "../graphql/queries";
+import { useQuery } from "@apollo/client";
 // import { useQuery } from '@apollo/client';
 // import { GET_ALL_SPELLS, GET_ALL_SKILLS } from '../graphql/queries';
 // import { GET_ALL_SKILLS } from '../graphql/queries';
@@ -35,11 +37,14 @@ interface CharacterModalProps {
 
 const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLoggedIn, onCharacterCreated }) => {
   const { user, token } = useContext(AuthContext);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  // const { data: spellsData, loading: spellsLoading, error: spellsError } = useQuery(GET_ALL_SPELLS);
-  // const { data: skillsData, loading: skillsLoading, error: skillsError } = useQuery(GET_ALL_SKILLS);
+  const { data: skillsData, loading: skillsLoading} = useQuery(GET_ALL_SKILLS);
   const [selectedSpells, setSelectedSpells] = useState<{ name: string; description: string }[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<{ _id: string; name: string; abilityScore: string }[]>([]);
 
+  const [isTraitsVisible, setIsTraitsVisible] = useState(false);
+  const [isClassDetailsVisible, setIsClassDetailsVisible] = useState(false);
+  const [classSpells, setClassSpells] = useState<{ index: string; name: string, desc: string }[]>([]);
+  const [classSpellsLoading, setClassSpellsLoading] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [character, setCharacter] = useState<CharacterType>({
@@ -82,10 +87,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
     proficiencies: { index: string; name: string }[];
     starting_equipment: { equipment: { name: string } }[];
   } | null>(null);
-  const [isTraitsVisible, setIsTraitsVisible] = useState(false);
-  const [isClassDetailsVisible, setIsClassDetailsVisible] = useState(false);
-  const [classSpells, setClassSpells] = useState<{ index: string; name: string, desc: string }[]>([]);
-  const [classSpellsLoading, setClassSpellsLoading] = useState(false);
 
   const fetchClassSpells = (classIndex: string) => {
     setClassSpellsLoading(true);
@@ -167,6 +168,38 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       }
     });
   };
+
+  const resetModal = () => {
+    setCharacter({
+      name: "",
+      level: 1,
+      race: {
+        name: "",
+        traits: [],
+        languages: [],
+      },
+      class: {
+        name: "",
+        proficiencies: [],
+        starting_equipment: [],
+      },
+      background: "",
+      imageURL: "",
+      attributes: {
+        strength: 0,
+        dexterity: 0,
+        constitution: 0,
+        intelligence: 0,
+        wisdom: 0,
+        charisma: 0,
+      },
+      user: user?._id || "",
+    });
+    setSelectedSkills([]);
+    setSelectedSpells([]);
+    setCurrentStep(1);
+  };
+  
   
 
   // Fetch selected class details
@@ -198,6 +231,16 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       .catch((error) => console.error("Error fetching class details:", error));
   };
   
+  const handleSkillClick = (skill: { _id: string; name: string; abilityScore: string }) => {
+    setSelectedSkills((prev) => {
+      const isSelected = prev.find((s) => s._id === skill._id);
+      if (isSelected) {
+        return prev.filter((s) => s._id !== skill._id);
+      } else {
+        return [...prev, skill];
+      }
+    });
+  };
   
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -229,48 +272,33 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
     try {
       if (token) {
         const newCharacter = await createCharacter(character, token);
-        setSuccessMessage("Character created successfully");
-
-        // Save selected spells to the database
-        if (selectedSpells.length > 0) {
-          await addSpellsToCharacter(newCharacter._id, selectedSpells, token); // Adjust addSpellsToCharacter to accept spell objects
+  
+        // Tjek for succes
+        if (newCharacter) {
+  
+          // Tilføj spells og skills, hvis de findes
+          if (selectedSpells.length > 0) {
+            await addSpellsToCharacter(newCharacter._id, selectedSpells, token);
+          }
+          if (selectedSkills.length > 0) {
+            await addSkillsToCharacter(newCharacter._id, selectedSkills, token);
+          }
+  
+          // Opdater listen i den overordnede komponent
+          onCharacterCreated(newCharacter);
+  
+          // Luk modal
+          resetModal(); // Nulstil tilstanden
+          onClose(); // Luk modal
+        } else {
+          console.error("Failed to create character");
         }
-
-        setCharacter({
-          name: "",
-          level: 1,
-          race: {
-            name: "",
-            traits: [],
-            languages: [],
-          },
-          class: {
-            name: "",
-            proficiencies: [],
-            starting_equipment: [],
-          },
-          background: "",
-          imageURL: "",
-          attributes: {
-            strength: 0,
-            dexterity: 0,
-            constitution: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0,
-          },
-          user: user?._id || "",
-        });
-
-        onCharacterCreated(newCharacter);
-        onClose();
-      } else {
-        console.error("Token is null or undefined");
       }
     } catch (error) {
       console.error("Error creating character:", error);
     }
   };
+  
 
   return (
     <>
@@ -282,7 +310,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
               <ModalHeader>Create Character</ModalHeader>
               <ModalCloseButton />
               <ModalBody>
-                {successMessage && <Text color="green">{successMessage}</Text>}
                 {currentStep === 1 && (
                 <>
                   <Input placeholder="Name" name="name" value={character.name} onChange={handleChange} mb={3} />
@@ -349,43 +376,44 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
 
                </Box>
               )}
-              {/* {currentStep === 3 && (
+              
+              {currentStep === 3 && (
                 <Box>
-                <Heading as="h2" size="lg" mb={4}>
-                  Select Skills
-                </Heading>
-                {skillsLoading && (
-                  <Box textAlign="center" my={4}>
-                    <Spinner size="lg" />
-                    <Text>Loading Skills...</Text>
-                  </Box>
-                )}
-                {skillsError && (
-                  <Text color="red.500">Error loading skills: {skillsError.message}</Text>
-                )}
-                {skillsData && (
-                  <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
-                    {skillsData.skills.map((skill: { _id: string; name: string; abilityScore: string }) => (
-                      <Box
-                        key={skill._id}
-                        border="1px solid"
-                        borderColor="gray.200"
-                        borderRadius="md"
-                        p={4}
-                        shadow="md"
-                      >
-                        <Heading as="h3" size="md" mb={2}>
-                          {skill.name}
-                        </Heading>
-                        <Text fontSize="sm" color="gray.600">
-                          Ability Score: {skill.abilityScore}
-                        </Text>
-                      </Box>
-                    ))}
-                  </Grid>
-                )} */
-              /* </Box>
-              )} */}
+                  <Heading as="h2" size="lg" mb={4}>
+                    Select Skills
+                  </Heading>
+                  {skillsLoading && (
+                    <Box textAlign="center" my={4}>
+                      <Spinner size="lg" />
+                      <Text>Loading Skills...</Text>
+                    </Box>
+                  )}
+                  {!skillsLoading && skillsData && skillsData.skills.length > 0 && (
+                    <Grid templateColumns="repeat(auto-fit, minmax(250px, 1fr))" gap={6}>
+                      {skillsData.skills.map((skill: { _id: string; name: string; abilityScore: string }) => (
+                        <Box
+                          key={skill._id}
+                          border="1px solid"
+                          borderColor={selectedSkills.some((s) => s._id === skill._id) ? "blue.500" : "gray.200"}
+                          borderRadius="md"
+                          p={4}
+                          shadow="md"
+                          cursor="pointer"
+                          onClick={() => handleSkillClick(skill)}
+                        >
+                          <Heading as="h3" size="md" mb={2}>
+                            {skill.name}
+                          </Heading>
+                          <Text fontSize="sm" color="gray.600">
+                            {skill.abilityScore}
+                          </Text>
+                        </Box>
+                      ))}
+                    </Grid>
+                  )}
+                </Box>
+              )}
+
 
               </ModalBody>
               <ModalFooter>

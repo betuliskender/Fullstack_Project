@@ -14,7 +14,6 @@ export const typeDefs = gql`
   type Skill {
     _id: ID!
     name: String!
-    level: Int
     desc: String
     abilityScore: String
   }
@@ -38,6 +37,8 @@ export const typeDefs = gql`
     imageURL: String!
     attributes: Attributes
     user: User
+    spells: [Spell]
+    skills: [Skill]
   }
 
   type Race {

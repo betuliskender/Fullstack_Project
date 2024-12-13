@@ -6,6 +6,8 @@ import Campaign from "../models/campaignModel.js";
 import Session from "../models/sessionModel.js";
 import Skill from "../models/skillModel.js";
 import Spell from "../models/spellModel.js";
+import CharacterSpell from "../models/characterSpellModel.js";
+import CharacterSkill from "../models/characteSkillModel.js";
 
 const resolvers = {
   Query: {
@@ -255,6 +257,28 @@ const resolvers = {
       return updatedUser;
     },
   },
+
+  Character: {
+    spells: async (parent) => {
+      try {
+        const characterSpells = await CharacterSpell.find({ character: parent._id }).populate('spell');
+        return characterSpells.map((cs) => cs.spell);
+      } catch (error) {
+        console.error("Error fetching spells for character:", error);
+        throw new Error("Failed to fetch spells.");
+      }
+    },
+    skills: async (parent) => {
+      try {
+        const characterSkills = await CharacterSkill.find({ character: parent._id }).populate('skill');
+        return characterSkills.map((cs) => cs.skill);
+      } catch (error) {
+        console.error("Error fetching skills for character:", error);
+        throw new Error("Failed to fetch skills.");
+      }
+    },
+  },
+
 };
 
 export default resolvers;
