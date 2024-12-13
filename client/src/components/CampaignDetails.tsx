@@ -17,6 +17,7 @@ import "../styles/campaignDetails.css";
 import RollDice from "./RollDice";
 import { deleteMapFromCampaign } from "../utility/apiservice";
 import { updateCampaignField } from "../utility/updateCampaignFields";
+import SessionLogs from "./SessionLogs";
 
 // Chakra UI imports
 import {
@@ -115,13 +116,13 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     }
   };
 
-const handleSessionCreated = (newSession: Session) => {
-  updateCampaignField("sessions", newSession, setCampaign);
-};
+  const handleSessionCreated = (newSession: Session) => {
+    updateCampaignField("sessions", newSession, setCampaign);
+  };
 
-const handleCharacterAdded = (newCharacter: Character) => {
-  updateCampaignField("characters", newCharacter, setCampaign);
-};
+  const handleCharacterAdded = (newCharacter: Character) => {
+    updateCampaignField("characters", newCharacter, setCampaign);
+  };
 
   const handleCharacterEdit = (characterId: string) => {
     setCurrentCharacterId(characterId);
@@ -178,25 +179,26 @@ const handleCharacterAdded = (newCharacter: Character) => {
 
   const handleMapDelete = async (mapId: string) => {
     if (!campaign || !token) return;
-  
+
     try {
       const response = await deleteMapFromCampaign(campaign._id!, mapId, token);
       if (response.message === "Map deleted successfully") {
         setCampaign((prevCampaign) => {
           if (!prevCampaign) return null;
-  
-          const updatedMaps = prevCampaign.maps?.filter((map) => map._id !== mapId) || [];
-  
+
+          const updatedMaps =
+            prevCampaign.maps?.filter((map) => map._id !== mapId) || [];
+
           if (currentSlide >= updatedMaps.length) {
             setCurrentSlide((prev) => Math.max(0, prev - 1));
           }
-  
+
           return {
             ...prevCampaign,
             maps: updatedMaps,
           };
         });
-  
+
         toast({
           title: "Map deleted successfully.",
           status: "success",
@@ -213,7 +215,7 @@ const handleCharacterAdded = (newCharacter: Character) => {
         isClosable: true,
       });
     }
-  };  
+  };
 
   const handleMapClick = async (
     event: React.MouseEvent<HTMLImageElement>,
@@ -545,7 +547,7 @@ const handleCharacterAdded = (newCharacter: Character) => {
             onSessionCreated={handleSessionCreated}
           />
 
-          <Heading as="h3" size="md">
+          {/* <Heading as="h3" size="md">
             Sessions for this campaign:
           </Heading>
           {campaign?.sessions && campaign.sessions.length > 0 ? (
@@ -586,7 +588,16 @@ const handleCharacterAdded = (newCharacter: Character) => {
             </UnorderedList>
           ) : (
             <Text>No sessions found for this campaign.</Text>
-          )}
+          )} */}
+          <Heading as="h3" size="md">
+            Sessions for this campaign:
+          </Heading>
+          <SessionLogs
+            sessions={campaign?.sessions || []}
+            onEditSession={handleSessionEdit}
+            onDeleteSession={handleSessionDeleted}
+            formatDate={formatDate} // Pass formatDate som prop
+          />
 
           {/* MapUpload Component */}
           {campaign && token && (
