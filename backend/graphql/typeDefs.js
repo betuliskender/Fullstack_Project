@@ -93,6 +93,7 @@ export const typeDefs = gql`
 
   type Session {
     _id: ID!
+    title: String!
     sessionDate: String!
     logEntry: String!
     campaign: Campaign!
@@ -182,11 +183,12 @@ export const typeDefs = gql`
 
     createSession(
       campaignId: ID!
+      title: String!
       sessionDate: String
       logEntry: String!
     ): Session
 
-    editSession(_id: ID!, sessionDate: String, logEntry: String): Session
+    editSession(_id: ID!, title: String, sessionDate: String, logEntry: String): Session
 
     deleteSession(_id: ID!): Session
 

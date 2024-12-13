@@ -546,52 +546,6 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
             campaign={campaign!}
             onSessionCreated={handleSessionCreated}
           />
-
-          {/* <Heading as="h3" size="md">
-            Sessions for this campaign:
-          </Heading>
-          {campaign?.sessions && campaign.sessions.length > 0 ? (
-            <UnorderedList>
-              {campaign.sessions.map((session) => (
-                <ListItem key={session._id}>
-                  <Flex
-                    alignItems="center"
-                    justifyContent="space-between"
-                    gap={4}
-                    wrap="nowrap"
-                  >
-                    <Text maxWidth="50ch" overflowWrap="break-word">
-                      <strong>Date:</strong> {formatDate(session.sessionDate)}
-                      <br />
-                      <strong>Log:</strong> {session.logEntry}
-                    </Text>
-                    <HStack spacing={2}>
-                      <Button
-                        size="sm"
-                        onClick={() => handleSessionEdit(session)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        colorScheme="red"
-                        onClick={() =>
-                          session._id && handleSessionDeleted(session._id)
-                        }
-                      >
-                        Delete
-                      </Button>
-                    </HStack>
-                  </Flex>
-                </ListItem>
-              ))}
-            </UnorderedList>
-          ) : (
-            <Text>No sessions found for this campaign.</Text>
-          )} */}
-          <Heading as="h3" size="md">
-            Sessions for this campaign:
-          </Heading>
           <SessionLogs
             sessions={campaign?.sessions || []}
             onEditSession={handleSessionEdit}

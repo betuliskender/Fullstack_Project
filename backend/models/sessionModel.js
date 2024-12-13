@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const sessionSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
   sessionDate: {
     type: Date,
     required: true,

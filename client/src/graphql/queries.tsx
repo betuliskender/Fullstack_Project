@@ -117,6 +117,7 @@ query Query($id: ID!) {
     }
     sessions {
       _id
+      title
       sessionDate
       logEntry
     }

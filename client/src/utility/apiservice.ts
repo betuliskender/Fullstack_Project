@@ -237,7 +237,7 @@ export const removeCharacterFromCampaign = async (
 
 export const createSession = async (
   campaignId: string,
-  sessionData: { sessionDate: string; logEntry: string },
+  sessionData: { title:string, sessionDate: string; logEntry: string },
   token: string
 ) => {
   try {
@@ -258,7 +258,7 @@ export const createSession = async (
 export const editSession = async (
   campaignId: string,
   sessionId: string,
-  sessionData: { sessionDate: string; logEntry: string },
+  sessionData: { title:string, sessionDate: string; logEntry: string },
   token: string
 ) => {
   try {
