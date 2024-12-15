@@ -5,9 +5,11 @@ export interface Attributes {
   intelligence: number;
   wisdom: number;
   charisma: number;
+  [key: string]: number;
 }
 
 export interface CreateRace {
+  index?: string;
   name: string;
   traits: string[];
   languages: string[];
@@ -18,6 +20,7 @@ export interface Races {
 }
 
 export interface CreateClass {
+  index?: string;
   name: string;
   proficiencies: string[];
   starting_equipment: string[];

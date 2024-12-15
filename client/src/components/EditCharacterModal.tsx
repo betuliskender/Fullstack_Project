@@ -9,6 +9,8 @@ import {
   ModalCloseButton,
   Input,
   Button,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { Character } from "../utility/types";
 
@@ -59,35 +61,48 @@ const EditCharacterModal: React.FC<EditCharacterModalProps> = ({
         <ModalBody>
           {character && (
             <form onSubmit={handleFormSubmit}>
-              <Input
-                placeholder="Name"
-                name="name"
-                value={character.name}
-                onChange={handleInputChange}
-                mb={3}
-              />
-              <Input
-                placeholder="Level"
-                type="number"
-                name="level"
-                value={character.level}
-                onChange={handleInputChange}
-                mb={3}
-              />            
-              <Input
-                placeholder="Background"
-                name="background"
-                value={character.background}
-                onChange={handleInputChange}
-                mb={3}
-              />
-              <Input
-                placeholder="Image URL"
-                name="imageURL"
-                value={character.imageURL}
-                onChange={handleInputChange}
-                mb={3}
-              />
+              <FormControl>
+                <FormLabel>Name</FormLabel>
+                <Input
+                  placeholder="Name"
+                  name="name"
+                  value={character.name}
+                  onChange={handleInputChange}
+                  mb={3}
+
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Level</FormLabel>
+                <Input
+                  placeholder="Level"
+                  name="level"
+                  value={character.level}
+                  onChange={handleInputChange}
+                  mb={3}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Background</FormLabel>
+                <Input
+                  placeholder="Background"
+                  name="background"
+                  value={character.background}
+                  onChange={handleInputChange}
+                  mb={3}
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel>Image URL</FormLabel>
+                <Input
+                  placeholder="Image URL"
+                  name="imageURL"
+                  value={character.imageURL}
+                  onChange={handleInputChange}
+                  mb={3}
+                />
+              </FormControl>
+
             </form>
           )}
         </ModalBody>

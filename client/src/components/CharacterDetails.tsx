@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
-import { Character } from "../utility/types";
+import { Character, Spell } from "../utility/types";
+import { editCharacter } from "../utility/apiservice";
+import { AuthContext } from "../utility/authContext";
 import {
   Box,
   Heading,
@@ -23,21 +25,64 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  useToast 
 } from "@chakra-ui/react";
 
 const CharacterDetails: React.FC = () => {
   const location = useLocation();
   const character = location.state?.character as Character;
-
+  const {token} = useContext(AuthContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedItem, setSelectedItem] = useState<{ type: "spell" | "skill"; name: string; details: any } | null>(null);
+  const [spell, setSpell] = useState<Spell | null>(null);
+  const [attributes, setAttributes] = useState(character.attributes);
+  const toast = useToast();
+
+
+  const updateAttribute = (key: string, delta: number) => {
+    setAttributes((prevAttributes) => ({
+      ...prevAttributes,
+      [key]: prevAttributes[key] + delta,
+    }));
+  };
+
+  const saveAttributes = async () => {
+    try {
+      const updatedCharacter = await editCharacter(character._id!, {
+        ...character,
+        attributes,
+      }, token!);
+
+      console.log("Character successfully updated:", updatedCharacter);
+
+      // Show a success toast
+      toast({
+        title: "Attributes updated.",
+        description: "Your character's attributes have been successfully saved.",
+        status: "success",
+        duration: 3000, // Message disappears after 3 seconds
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Failed to save attributes:", error);
+
+      // Show an error toast
+      toast({
+        title: "Error updating attributes.",
+        description: "Something went wrong. Please try again.",
+        status: "error",
+        duration: 3000, // Message disappears after 3 seconds
+        isClosable: true,
+      });
+    }
+  };
+
 
   if (!character) {
     return <p>No character data available.</p>;
   }
 
-  const handleCardClick = (type: "spell" | "skill", name: string, details: any) => {
-    setSelectedItem({ type, name, details });
+  const handleCardClick = (spell: Spell) => {
+    setSpell(spell);
     onOpen();
   };
 
@@ -61,21 +106,43 @@ const CharacterDetails: React.FC = () => {
           boxShadow="lg"
         />
 
-        {/* Attributes */}
-        <VStack align="start" spacing={3}>
-          <Heading as="h2" size="md" mb={3}>
-            Attributes
-          </Heading>
-          <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-            {Object.entries(character.attributes).map(([key, value]) => (
+      <VStack align="start" spacing={4}>
+        <Heading as="h2" size="md" mb={4}>
+          Attributes
+        </Heading>
+        <Grid templateColumns="repeat(2, 1fr)" gap={4} width="100%">
+          {Object.entries(attributes)
+            .filter(([key]) => key !== "__typename") // Exclude __typename
+            .map(([key, value]) => (
               <GridItem key={key}>
-                <Text fontSize="lg">
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {value}
-                </Text>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Text fontSize="lg" flex="1">
+                    <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>
+                  </Text>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Button
+                      size="sm"
+                      onClick={() => updateAttribute(key, -1)}
+                      disabled={value <= 0} // Prevent negative values
+                    >
+                      -
+                    </Button>
+                    <Text minWidth="30px" textAlign="center">{value}</Text>
+                    <Button size="sm" onClick={() => updateAttribute(key, 1)}>
+                      +
+                    </Button>
+                  </Box>
+                </Box>
               </GridItem>
             ))}
-          </Grid>
-        </VStack>
+        </Grid>
+        <HStack justifyContent="flex-end" width="100%">
+          <Button colorScheme="blue" size="xs" onClick={saveAttributes}>
+            Update Attributes
+          </Button>
+        </HStack>
+      </VStack>
+
       </HStack>
 
 
@@ -99,7 +166,7 @@ const CharacterDetails: React.FC = () => {
             key={spell.name}
             boxShadow="md"
             borderRadius="md"
-            onClick={() => handleCardClick("spell", spell.name, spell)}
+            onClick={() => handleCardClick(spell)}
             cursor="pointer"
           >
             <CardHeader>
@@ -108,10 +175,14 @@ const CharacterDetails: React.FC = () => {
               </Heading>
             </CardHeader>
             <CardBody>
-              <Text>
+              <Text >
                 <strong>Level:</strong> {spell.level}
               </Text>
+              <Text paddingTop={2}>
+                  <strong>Duration: </strong> {spell.duration}
+              </Text>
               <Text mt={2}>
+                <strong>Description:</strong>{" "}
                 {spell.description.length > 100
                   ? `${spell.description.substring(0, 100)}...`
                   : spell.description}
@@ -133,7 +204,6 @@ const CharacterDetails: React.FC = () => {
             key={skill.name}
             boxShadow="md"
             borderRadius="md"
-            onClick={() => handleCardClick("skill", skill.name, skill)}
             cursor="pointer"
           >
             <CardHeader>
@@ -151,27 +221,27 @@ const CharacterDetails: React.FC = () => {
       </Grid>
 
       {/* Modal for Spell Details */}
-        {selectedItem && selectedItem.type === "spell" && (
+        {spell && (
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-            <ModalHeader>{selectedItem.name}</ModalHeader>
+            <ModalHeader>{spell.name}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
                 <Text>
-                <strong>Level:</strong> {selectedItem.details.level}
+                <strong>Level:</strong> {spell.level}
                 </Text>
+                {spell.duration && (
                 <Text mt={2}>
-                <strong>Description:</strong> {selectedItem.details.description}
-                </Text>
-                {selectedItem.details.duration && (
-                <Text mt={2}>
-                    <strong>Duration:</strong> {selectedItem.details.duration}
+                    <strong>Duration:</strong> {spell.duration}
                 </Text>
                 )}
-                {selectedItem.details.damage && (
                 <Text mt={2}>
-                    <strong>Damage:</strong> {selectedItem.details.damage}
+                <strong>Description:</strong> {spell.description}
+                </Text>
+                {spell.damage && (
+                <Text mt={2}>
+                    <strong>Damage:</strong> {spell.damage}
                 </Text>
                 )}
             </ModalBody>

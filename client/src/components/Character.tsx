@@ -39,7 +39,6 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     },
   });
 
-  
   useEffect(() => {
     let timer: NodeJS.Timeout;
     
@@ -137,11 +136,11 @@ return (
         <Box mt={5} display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6} >
           {characters.map((char: Character) => (
             <Card key={char._id}>
-              <Link to={`/character/${char._id}`} state={{ character: char }}>
               <CardHeader>
                 <Heading size="md">{char.name}</Heading>
               </CardHeader>
               <CardBody>
+                <Link to={`/character/${char._id}`} state={{ character: char }}>
                 <Image
                   src={char.imageURL}
                   alt={char.name}
@@ -150,16 +149,11 @@ return (
                   objectFit="cover"
                   borderRadius="md"
                 />
-                <Text>Level: {char.level}</Text>
-                <Text>Race: {char.race.name}</Text>
-                <Text>Class: {char.class.name}</Text>
-                <Text>Background: {char.background}</Text>
-                <Text>Strength: {char.attributes.strength}</Text>
-                <Text>Dexterity: {char.attributes.dexterity}</Text>
-                <Text>Constitution: {char.attributes.constitution}</Text>
-                <Text>Intelligence: {char.attributes.intelligence}</Text>
-                <Text>Wisdom: {char.attributes.wisdom}</Text>
-                <Text>Charisma: {char.attributes.charisma}</Text>
+                <Text mt={2}><strong>Level:</strong> {char.level}</Text>
+                <Text mt={2}><strong>Race:</strong> {char.race.name}</Text>
+                <Text mt={2}><strong>Class:</strong> {char.class.name}</Text>
+                <Text mt={2}><strong>Background:</strong> {char.background}</Text>
+                </Link>
                 <Button mt={3} colorScheme="red" onClick={() => char._id && handleDelete(char._id)}>
                   Delete
                 </Button>
@@ -167,7 +161,6 @@ return (
                   Edit
                 </Button>
               </CardBody>
-              </Link>
             </Card>
           ))}
         </Box>
