@@ -11,6 +11,7 @@ import {
   VStack,
   Text,
   useToast,
+  useColorMode,
 } from "@chakra-ui/react";
 import { AuthContext } from "../utility/authContext";
 import { updateUser } from "../utility/apiservice";
@@ -29,6 +30,10 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const toast = useToast();
+  const { colorMode } = useColorMode();
+
+  const backgroundColor = colorMode === "dark" ? "gray.700" : "white";
+  const textColor = colorMode === "dark" ? "white" : "black";
 
   useEffect(() => {
     setFormData({
@@ -80,7 +85,12 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         form.append("profileImage", profileImage);
       }
 
-      if (form.has("firstName") || form.has("lastName") || form.has("email") || form.has("profileImage")) {
+      if (
+        form.has("firstName") ||
+        form.has("lastName") ||
+        form.has("email") ||
+        form.has("profileImage")
+      ) {
         if (token) {
           const updatedUser = await updateUser(form, token);
           setUser(updatedUser);
@@ -115,16 +125,16 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
       setIsUpdating(false);
     }
   };
-  
+
   return (
     <Flex justify="center" align="center" h="100vh">
       <Box
         w="400px"
-        bg="gray.900"
+        bg={backgroundColor}
         p={6}
         borderRadius="lg"
         boxShadow="lg"
-        color="white"
+        color={textColor}
       >
         <VStack spacing={4} align="center">
           <Avatar

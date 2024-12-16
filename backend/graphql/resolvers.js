@@ -187,11 +187,12 @@ const resolvers = {
 
     createSession: async (
       _,
-      { campaignId, sessionDate, logEntry },
+      { campaignId, title, sessionDate, logEntry },
       { user }
     ) => {
       if (!user) throw new Error("Authentication required");
       const newSession = new Session({
+        title,
         campaign: campaignId,
         sessionDate,
         logEntry,
@@ -199,11 +200,11 @@ const resolvers = {
       return await newSession.save();
     },
 
-    editSession: async (_, { id, sessionDate, logEntry }, { user }) => {
+    editSession: async (_, { id, title, sessionDate, logEntry }, { user }) => {
       if (!user) throw new Error("Authentication required");
       return await Session.findByIdAndUpdate(
         id,
-        { sessionDate, logEntry },
+        { title, sessionDate, logEntry },
         { new: true }
       );
     },

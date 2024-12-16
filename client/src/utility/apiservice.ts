@@ -237,7 +237,7 @@ export const removeCharacterFromCampaign = async (
 
 export const createSession = async (
   campaignId: string,
-  sessionData: { sessionDate: string; logEntry: string },
+  sessionData: { title:string, sessionDate: string; logEntry: string },
   token: string
 ) => {
   try {
@@ -258,7 +258,7 @@ export const createSession = async (
 export const editSession = async (
   campaignId: string,
   sessionId: string,
-  sessionData: { sessionDate: string; logEntry: string },
+  sessionData: { title:string, sessionDate: string; logEntry: string },
   token: string
 ) => {
   try {
@@ -407,6 +407,26 @@ export const addSkillsToCharacter = async (
     return response.data; // Return response data from the server
   } catch (error) {
     console.error("Error adding skills to character:", error);
+    throw error;
+  }
+};
+export const deleteMapFromCampaign = async (
+  campaignId: string,
+  mapId: string,
+  token: string
+): Promise<{ message: string }> => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/campaigns/${campaignId}/maps/${mapId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting map from campaign:", error);
     throw error;
   }
 };

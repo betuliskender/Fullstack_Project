@@ -13,6 +13,7 @@ import {
   getAllCampaigns,
   getCampaignById,
   uploadMapToCampaign,
+  deleteMapFromCampaign,
 } from "../controllers/campaignController.js";
 import { authMiddleware } from "../utility/authMiddleware.js";
 import Map from "../models/mapModel.js";
@@ -126,5 +127,12 @@ router.post("/:campaignId/maps/:mapId/pins", authMiddleware, async (req, res) =>
     res.status(500).json({ message: "Failed to add pin", error });
   }
 });
+
+router.delete(
+  "/:campaignId/maps/:mapId",
+  authMiddleware,
+  deleteMapFromCampaign
+);
+
 
 export default router;

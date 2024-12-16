@@ -66,7 +66,7 @@ const App: React.FC = () => {
                 <Route path="/skills" element={<Skills />} />
                 <Route path="/character/:id" element={<CharacterDetails />} />
                 <Route path="/campaign" element={<CampaignType isLoggedIn={isLoggedIn} />} />
-                <Route path="/campaign/:id" element={<CampaignDetails />} />
+                <Route path="/campaign/:id" element={<CampaignDetails isLoggedIn={isLoggedIn}/>} />
               </Routes>
             </GridItem>
           </Grid>

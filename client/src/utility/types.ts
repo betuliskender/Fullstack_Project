@@ -90,6 +90,7 @@ export interface Campaign {
 
 export interface Session {
   _id?: string;
+  title: string;
   sessionDate: string;
   logEntry: string;
   campaign: string;

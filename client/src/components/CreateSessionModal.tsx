@@ -25,6 +25,7 @@ interface SessionFormProps {
 
 const SessionForm: React.FC<SessionFormProps> = ({ campaign, onSessionCreated }) => {
   const { token } = useContext(AuthContext);
+  const [title, setTitle] = useState("");
   const [sessionDate, setSessionDate] = useState("");
   const [logEntry, setLogEntry] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -34,7 +35,8 @@ const SessionForm: React.FC<SessionFormProps> = ({ campaign, onSessionCreated })
 
     try {
       if (token && campaign._id) {
-        const newSession = await createSession(campaign._id, { sessionDate, logEntry }, token);
+        const newSession = await createSession(campaign._id, { title, sessionDate, logEntry }, token);
+        setTitle("");
         setSessionDate("");
         setLogEntry("");
         onSessionCreated(newSession); // Call the parent component with the new session
@@ -69,7 +71,16 @@ const SessionForm: React.FC<SessionFormProps> = ({ campaign, onSessionCreated })
                   required
                 />
               </FormControl>
-
+              <FormControl mb={4}>
+                <FormLabel>Title:</FormLabel>
+                <Input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Enter a title for the session"
+                  required
+                />
+              </FormControl>
               <FormControl mb={4}>
                 <FormLabel>Log Entry:</FormLabel>
                 <Textarea

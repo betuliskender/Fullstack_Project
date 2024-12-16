@@ -13,7 +13,7 @@ const theme = extendTheme({
         padding: 0,
         boxSizing: "border-box",
         height: "100%",
-        width: "100%",
+        width: "100%",        
       },
     },
   },

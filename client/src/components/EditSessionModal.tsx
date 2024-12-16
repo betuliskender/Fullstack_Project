@@ -43,10 +43,12 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
 
   const [sessionDate, setSessionDate] = useState(parseSessionDate(session.sessionDate));
   const [logEntry, setLogEntry] = useState(session.logEntry);
+  const [title, setTitle] = useState(session.title || "");
   const [isSaving, setIsSaving] = useState(false); // Track saving state
 
   // Keep the modal state updated whenever the session changes
   useEffect(() => {
+    setTitle(session.title || "");
     setSessionDate(parseSessionDate(session.sessionDate));
     setLogEntry(session.logEntry);
   }, [session]);
@@ -61,7 +63,7 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
         const updatedSession = await editSession(
           campaign._id,
           session._id,
-          { sessionDate, logEntry },
+          { title, sessionDate, logEntry },
           token
         );
 
@@ -94,7 +96,16 @@ const EditSessionModal: React.FC<EditSessionModalProps> = ({
                 required
               />
             </FormControl>
-
+            <FormControl mb={4}>
+  <FormLabel>Title:</FormLabel>
+  <Input
+    type="text"
+    value={title}
+    onChange={(e) => setTitle(e.target.value)}
+    placeholder="Enter session title"
+    required
+  />
+</FormControl>
             <FormControl mb={4}>
               <FormLabel>Log Entry:</FormLabel>
               <Textarea

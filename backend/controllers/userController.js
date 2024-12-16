@@ -19,7 +19,7 @@ export const registerUser = async (req, res) => {
       lastName,
       userName,
       email,
-      profileImage: req.file.path,
+      profileImage: req.file ? req.file.path : null,
       password: hashedPassword,
     });
     await user.save();

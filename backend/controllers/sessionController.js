@@ -4,7 +4,7 @@ import Campaign from "../models/campaignModel.js";
 // Create a new session
 export const createSession = async (req, res) => {
   const { campaignId } = req.params;
-  const { sessionDate, logEntry } = req.body;
+  const { title, sessionDate, logEntry } = req.body;
 
   try {
     const campaign = await Campaign.findById(campaignId);
@@ -17,6 +17,7 @@ export const createSession = async (req, res) => {
     const currentSessionDate = sessionDate ? new Date(sessionDate) : new Date();
 
     const newSession = new Session({
+      title,
       sessionDate: currentSessionDate,
       logEntry,
       campaign: campaign._id,
@@ -37,7 +38,7 @@ export const createSession = async (req, res) => {
 // Edit an existing session
 export const editSession = async (req, res) => {
   const { sessionId } = req.params;
-  const { sessionDate, logEntry } = req.body;
+  const { title, sessionDate, logEntry } = req.body;
 
   try {
     const session = await Session.findById(sessionId);
@@ -47,6 +48,7 @@ export const editSession = async (req, res) => {
     }
 
     // Convert sessionDate to a Date object only if provided
+    session.title = title || session.title;
     session.sessionDate = sessionDate ? new Date(sessionDate) : session.sessionDate;
     session.logEntry = logEntry || session.logEntry;
 
