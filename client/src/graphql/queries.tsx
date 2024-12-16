@@ -56,6 +56,7 @@ export const GET_ALL_SKILLS = gql`
     skills {
       _id
       name
+      desc
       abilityScore
     }
   }

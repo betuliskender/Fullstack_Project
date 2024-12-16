@@ -62,6 +62,16 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
                 Characters
               </Button>
             </Link>
+            <Link to="/spells">
+              <Button colorScheme="teal" variant="ghost">
+                Spells
+              </Button>
+            </Link>
+            <Link to="/skills">
+              <Button colorScheme="teal" variant="ghost">
+                Skills
+              </Button>
+            </Link>
           </>
         )}
       </HStack>

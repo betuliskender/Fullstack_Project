@@ -10,6 +10,8 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import CampaignType from "./components/Campaign";
 import CampaignDetails from "./components/CampaignDetails";
 import CharacterDetails from "./components/CharacterDetails";
+import Skills from "./components/Skills";
+import Spells from "./components/Spells";
 
 const client = new ApolloClient({
   uri: "http://localhost:5000/graphql",
@@ -60,6 +62,8 @@ const App: React.FC = () => {
                 <Route
                   path="/character"
                   element={<Character isLoggedIn={isLoggedIn} />}/>
+                <Route path="/spells" element={<Spells />} />
+                <Route path="/skills" element={<Skills />} />
                 <Route path="/character/:id" element={<CharacterDetails />} />
                 <Route path="/campaign" element={<CampaignType isLoggedIn={isLoggedIn} />} />
                 <Route path="/campaign/:id" element={<CampaignDetails />} />

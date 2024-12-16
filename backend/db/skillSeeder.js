@@ -19,18 +19,20 @@ export const populateSkills = async () => {
     }
 
     console.log(`Found ${data.results.length} skills. Fetching details...`);
-
+    
+    
+    
     for (const skill of data.results) {
       const skillDetailsResponse = await fetch(`https://www.dnd5eapi.co${skill.url}`);
       const skillDetails = await skillDetailsResponse.json();
-
+      
       const newSkill = new Skill({
         name: skillDetails.name,
         level: skillDetails.level,
-        description: skillDetails.desc,
+        desc: skillDetails.desc.join(" "),
         abilityScore: skillDetails.ability_score.name,
       });
-
+      
       await newSkill.save();
     }
 

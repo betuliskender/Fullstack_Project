@@ -33,7 +33,7 @@ const CharacterDetails: React.FC = () => {
   const character = location.state?.character as Character;
   const {token} = useContext(AuthContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [spell, setSpell] = useState<Spell | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Spell | { name: string; desc: string; abilityScore: string } | null>(null);
   const [attributes, setAttributes] = useState(character.attributes);
   const toast = useToast();
 
@@ -81,8 +81,8 @@ const CharacterDetails: React.FC = () => {
     return <p>No character data available.</p>;
   }
 
-  const handleCardClick = (spell: Spell) => {
-    setSpell(spell);
+  const handleCardClick = (item: Spell | { name: string; desc: string; abilityScore: string }) => {
+    setSelectedItem(item);
     onOpen();
   };
 
@@ -161,35 +161,25 @@ const CharacterDetails: React.FC = () => {
         Spells
       </Heading>
       <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-        {character.spells?.map((spell) => (
-          <Card
-            key={spell.name}
-            boxShadow="md"
-            borderRadius="md"
-            onClick={() => handleCardClick(spell)}
-            cursor="pointer"
-          >
-            <CardHeader>
-              <Heading as="h3" size="md">
-                {spell.name}
-              </Heading>
-            </CardHeader>
-            <CardBody>
-              <Text >
-                <strong>Level:</strong> {spell.level}
-              </Text>
-              <Text paddingTop={2}>
-                  <strong>Duration: </strong> {spell.duration}
-              </Text>
-              <Text mt={2}>
-                <strong>Description:</strong>{" "}
-                {spell.description.length > 100
-                  ? `${spell.description.substring(0, 100)}...`
-                  : spell.description}
-              </Text>
-            </CardBody>
-          </Card>
-        ))}
+      {character.spells?.map((spell) => (
+        <Card
+          key={spell.name}
+          boxShadow="md"
+          borderRadius="md"
+          onClick={() => handleCardClick(spell)} // Bruger den samme funktion
+          cursor="pointer"
+        >
+          <CardHeader>
+            <Heading as="h3" size="md">{spell.name}</Heading>
+          </CardHeader>
+          <CardBody>
+            <Text mb={2}><strong>Level:</strong> {spell.level}</Text>
+            <Text mb={2}><strong>Duration:</strong> {spell.duration}</Text>
+            <Text mb={2}><strong>Description:</strong> {spell.description.length > 100 ? `${spell.description.substring(0, 100)}...` : spell.description}</Text>
+          </CardBody>
+        </Card>
+      ))}
+
       </Grid>
 
       <Divider my={5} />
@@ -199,60 +189,62 @@ const CharacterDetails: React.FC = () => {
         Skills
       </Heading>
       <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-        {character.skills?.map((skill) => (
-          <Card
-            key={skill.name}
-            boxShadow="md"
-            borderRadius="md"
-            cursor="pointer"
-          >
-            <CardHeader>
-              <Heading as="h3" size="md">
-                {skill.name}
-              </Heading>
-            </CardHeader>
-            <CardBody>
-              <Text>
-                <strong>Ability Score:</strong> {skill.abilityScore}
-              </Text>  
-            </CardBody>
-          </Card>
-        ))}
+      {character.skills?.map((skill) => (
+        <Card
+          key={skill.name}
+          boxShadow="md"
+          borderRadius="md"
+          onClick={() => handleCardClick(skill)} // Bruger samme funktion
+          cursor="pointer"
+        >
+          <CardHeader>
+            <Heading as="h3" size="md">{skill.name}</Heading>
+          </CardHeader>
+          <CardBody>
+            <Text mb={2}><strong>Ability Score:</strong> {skill.abilityScore}</Text>
+            <Text mb={2}><strong>Description:</strong> {skill.desc.length > 100 ? `${skill.desc.substring(0, 100)}...` : skill.desc}</Text>
+          </CardBody>
+        </Card>
+      ))}
+
       </Grid>
 
       {/* Modal for Spell Details */}
-        {spell && (
+      {selectedItem && (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-            <ModalHeader>{spell.name}</ModalHeader>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>{selectedItem.name}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
+              {/* Viser Level kun hvis det er en Spell */}
+              {"level" in selectedItem && (
                 <Text>
-                <strong>Level:</strong> {spell.level}
+                  <strong>Level:</strong> {selectedItem.level}
                 </Text>
-                {spell.duration && (
+              )}
+
+              {/* Viser Ability Score kun hvis det er en Skill */}
+              {"abilityScore" in selectedItem && (
                 <Text mt={2}>
-                    <strong>Duration:</strong> {spell.duration}
+                  <strong>Ability Score:</strong> {selectedItem.abilityScore}
                 </Text>
-                )}
-                <Text mt={2}>
-                <strong>Description:</strong> {spell.description}
-                </Text>
-                {spell.damage && (
-                <Text mt={2}>
-                    <strong>Damage:</strong> {spell.damage}
-                </Text>
-                )}
+              )}
+
+              {/* Viser Description */}
+              <Text mt={2}>
+                <strong>Description:</strong> {"description" in selectedItem ? selectedItem.description : selectedItem.desc}
+              </Text>
             </ModalBody>
             <ModalFooter>
-                <Button onClick={onClose} colorScheme="blue">
+              <Button onClick={onClose} colorScheme="blue">
                 Close
-                </Button>
+              </Button>
             </ModalFooter>
-            </ModalContent>
+          </ModalContent>
         </Modal>
-        )}
+      )}
+
 
     </Box>
   );
