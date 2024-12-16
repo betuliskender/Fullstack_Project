@@ -19,6 +19,11 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
 } from "@chakra-ui/react";
 
 interface Spell {
@@ -42,7 +47,7 @@ const Spells: React.FC = () => {
     const fetchSpells = async () => {
       try {
         setLoading(true);
-  
+
         // Check if cached data exists
         const cachedSpells = localStorage.getItem("spellsData");
         if (cachedSpells) {
@@ -50,11 +55,11 @@ const Spells: React.FC = () => {
           setLoading(false);
           return;
         }
-  
+
         // Fetch spells from API
         const response = await fetch("https://www.dnd5eapi.co/api/spells");
         const data = await response.json();
-  
+
         if (data.results) {
           const detailedSpells = await Promise.all(
             data.results.map(async (spell: { index: string; url: string }) => {
@@ -64,7 +69,7 @@ const Spells: React.FC = () => {
               return await spellDetailsResponse.json();
             })
           );
-  
+
           // Group spells by class
           const groupedSpells: { [className: string]: Spell[] } = {};
           detailedSpells.forEach((spell: Spell) => {
@@ -75,7 +80,7 @@ const Spells: React.FC = () => {
               groupedSpells[classItem.name].push(spell);
             });
           });
-  
+
           // Cache the data
           localStorage.setItem("spellsData", JSON.stringify(groupedSpells));
           setSpellsByClass(groupedSpells);
@@ -88,10 +93,9 @@ const Spells: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchSpells();
   }, []);
-  
 
   const handleCardClick = (spell: Spell) => {
     setSelectedSpell(spell);
@@ -112,45 +116,53 @@ const Spells: React.FC = () => {
       <Heading as="h1" size="2xl" mb={5}>
         Spells by Class
       </Heading>
-      {Object.entries(spellsByClass).map(([className, spells]) => (
-        <Box key={className} mb={10}>
-          <Heading as="h2" size="lg" mb={3}>
-            {className}
-          </Heading>
-          <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-            {spells.map((spell) => (
-              <Card
-                key={spell.index}
-                boxShadow="md"
-                borderRadius="md"
-                cursor="pointer"
-                onClick={() => handleCardClick(spell)}
-              >
-                <CardHeader>
-                  <Heading as="h3" size="md">
-                    {spell.name}
-                  </Heading>
-                </CardHeader>
-                <CardBody>
-                  <Text>
-                    <strong>Level:</strong> {spell.level}
-                  </Text>
-                  <Text>
-                    <strong>Duration:</strong> {spell.duration}
-                  </Text>
-                  <Text mt={2}>
-                    {spell.desc && spell.desc.length > 0
-                      ? spell.desc[0].length > 100
-                        ? `${spell.desc[0].substring(0, 100)}...`
-                        : spell.desc[0]
-                      : "No description available"}
-                  </Text>
-                </CardBody>
-              </Card>
-            ))}
-          </Grid>
-        </Box>
-      ))}
+      <Tabs variant="enclosed">
+        {/* Render a tab for each class */}
+        <TabList>
+          {Object.keys(spellsByClass).map((className) => (
+            <Tab key={className}>{className}</Tab>
+          ))}
+        </TabList>
+
+        <TabPanels>
+          {Object.entries(spellsByClass).map(([className, spells]) => (
+            <TabPanel key={className}>
+              <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
+                {spells.map((spell) => (
+                  <Card
+                    key={spell.index}
+                    boxShadow="md"
+                    borderRadius="md"
+                    cursor="pointer"
+                    onClick={() => handleCardClick(spell)}
+                  >
+                    <CardHeader>
+                      <Heading as="h3" size="md">
+                        {spell.name}
+                      </Heading>
+                    </CardHeader>
+                    <CardBody>
+                      <Text>
+                        <strong>Level:</strong> {spell.level}
+                      </Text>
+                      <Text>
+                        <strong>Duration:</strong> {spell.duration}
+                      </Text>
+                      <Text mt={2}>
+                        {spell.desc && spell.desc.length > 0
+                          ? spell.desc[0].length > 100
+                            ? `${spell.desc[0].substring(0, 100)}...`
+                            : spell.desc[0]
+                          : "No description available"}
+                      </Text>
+                    </CardBody>
+                  </Card>
+                ))}
+              </Grid>
+            </TabPanel>
+          ))}
+        </TabPanels>
+      </Tabs>
 
       {/* Modal to display full spell details */}
       {selectedSpell && (
