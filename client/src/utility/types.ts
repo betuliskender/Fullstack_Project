@@ -113,3 +113,17 @@ export interface Map {
     };
   }[];
 }
+
+/* Modal State Types */
+export interface EditCharacterData {
+  characterId: string;
+}
+
+export interface EditSessionData {
+  session: Session;
+}
+
+export type ModalStateType =
+  | { type: "editCharacter"; data: EditCharacterData }
+  | { type: "editSession"; data: EditSessionData }
+  | { type: null; data: null };

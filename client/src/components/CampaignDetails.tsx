@@ -19,6 +19,7 @@ import SessionLogs from "./SessionLogs";
 import { useCampaignDetails } from "../hooks/useCampaignDetails";
 import { useCharacters } from "../hooks/useCharacters";
 import CharacterList from "./CharacterList";
+import { ModalStateType } from "../utility/types";
 
 // Chakra UI imports
 import {
@@ -50,13 +51,15 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     id || "",
     token
   );
-  const { characters, loading: charactersLoading, error: charactersError } = useCharacters(token);
-  const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
-  const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
-  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
-    null
-  );
-  const [currentSession, setCurrentSession] = useState<Session | null>(null);
+  const {
+    characters,
+    loading: charactersLoading,
+    error: charactersError,
+  } = useCharacters(token);
+  const [modalState, setModalState] = useState<ModalStateType>({
+    type: null,
+    data: null,
+  });
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
     null
@@ -94,8 +97,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleCharacterEdit = (characterId: string) => {
-    setCurrentCharacterId(characterId);
-    setIsCharacterModalOpen(true);
+    setModalState({ type: "editCharacter", data: { characterId } });
   };
 
   const handleCharacterRemove = async (characterId: string) => {
@@ -244,8 +246,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleSessionEdit = (session: Session) => {
-    setCurrentSession(session);
-    setIsEditSessionModalOpen(true);
+    setModalState({ type: "editSession", data: { session } });
   };
 
   const handleSessionDeleted = async (sessionId: string) => {
@@ -287,10 +288,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleModalClose = () => {
-    setIsCharacterModalOpen(false);
-    setIsEditSessionModalOpen(false);
-    setCurrentCharacterId(null);
-    setCurrentSession(null);
+    setModalState({ type: null, data: null });
   };
 
   const formatDate = (sessionDate: string) => {
@@ -502,23 +500,24 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         <RollDice />
       </GridItem>
 
-      {isCharacterModalOpen && currentCharacterId && campaign && (
+      {modalState.type === "editCharacter" && campaign && (
         <ChangeCharacterModal
-        isOpen={isCharacterModalOpen}
-        onClose={handleModalClose}
-        campaign={campaign}
-        currentCharacterId={currentCharacterId}
-        availableCharacters={characters}
-        refetchCampaigns={() => {}}
-        setCampaign={setCampaign}
-      />
-      )}
-      {isEditSessionModalOpen && currentSession && (
-        <EditSessionModal
-          isOpen={isEditSessionModalOpen}
+          isOpen
           onClose={handleModalClose}
-          campaign={campaign!}
-          session={currentSession}
+          campaign={campaign}
+          currentCharacterId={modalState.data?.characterId}
+          availableCharacters={characters}
+          refetchCampaigns={() => {}}
+          setCampaign={setCampaign}
+        />
+      )}
+
+      {modalState.type === "editSession" && campaign && (
+        <EditSessionModal
+          isOpen
+          onClose={handleModalClose}
+          campaign={campaign}
+          session={modalState.data?.session}
           onSessionUpdated={handleSessionUpdated}
         />
       )}
