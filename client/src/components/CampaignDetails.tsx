@@ -50,7 +50,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     id || "",
     token
   );
-  const { loading: charactersLoading, error: charactersError, characters: charactersData } = useCharacters(token);
+  const { characters, loading: charactersLoading, error: charactersError } = useCharacters(token);
   const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
   const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
   const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
@@ -504,14 +504,14 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
 
       {isCharacterModalOpen && currentCharacterId && campaign && (
         <ChangeCharacterModal
-          isOpen={isCharacterModalOpen}
-          onClose={handleModalClose}
-          campaign={campaign}
-          currentCharacterId={currentCharacterId}
-          availableCharacters={charactersData || []}
-          refetchCampaigns={() => {}}
-          setCampaign={setCampaign}
-        />
+        isOpen={isCharacterModalOpen}
+        onClose={handleModalClose}
+        campaign={campaign}
+        currentCharacterId={currentCharacterId}
+        availableCharacters={characters}
+        refetchCampaigns={() => {}}
+        setCampaign={setCampaign}
+      />
       )}
       {isEditSessionModalOpen && currentSession && (
         <EditSessionModal
