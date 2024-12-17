@@ -357,15 +357,23 @@ export const getSkills = async () => {
 };
 
 // get all spells
-export const getSpells = async () => {
+
+export const getSpells = async (page: number = 1, limit: number = 20) => {
   try {
-    const response = await axios.get(`${API_URL}/spells`);
-    return response.data;
+    const response = await axios.get(`${API_URL}/spells`, {
+      params: {
+        page,
+        limit,
+      },
+    });
+    return response.data; // Returner de paginerede resultater
   } catch (error) {
     console.error("Error getting spells:", error);
     throw error;
   }
 };
+
+
 
 export const addSpellsToCharacter = async (
   characterId: string,

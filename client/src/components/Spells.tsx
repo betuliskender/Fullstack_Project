@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Heading,
-  Grid,
-  Card,
-  CardHeader,
-  CardBody,
-  Text,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
   Spinner,
   Alert,
   AlertIcon,
@@ -19,152 +19,147 @@ import {
   ModalBody,
   ModalFooter,
   Button,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
+  Text,
 } from "@chakra-ui/react";
-
-interface Spell {
-  index: string;
-  name: string;
-  level: number;
-  duration: string;
-  desc: string[];
-  classes: { name: string }[];
-}
+import SpellGrid from "./SpellGrid";
+import Pagination from "./Pagination";
+import { getSpells } from "../utility/apiservice";
+import { APISpell } from "../utility/types";
 
 const Spells: React.FC = () => {
-  const [spellsByClass, setSpellsByClass] = useState<{ [className: string]: Spell[] }>({});
+  const [classes, setClasses] = useState<string[]>([]); // Unikke klassenavne
+  const [allSpells, setAllSpells] = useState<APISpell[]>([]); // Hent alle spells
+  const [filteredSpells, setFilteredSpells] = useState<APISpell[]>([]); // Filtrerede spells
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
+  const [selectedSpell, setSelectedSpell] = useState<APISpell | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const spellsPerPage = 20;
 
-  // Fetch spells and organize by class
+  
+  // Hent alle spells og udtræk klassenavne
   useEffect(() => {
-    const fetchSpells = async () => {
+    const fetchAllSpells = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-
-        // Check if cached data exists
-        const cachedSpells = localStorage.getItem("spellsData");
-        if (cachedSpells) {
-          setSpellsByClass(JSON.parse(cachedSpells));
-          setLoading(false);
-          return;
-        }
-
-        // Fetch spells from API
-        const response = await fetch("https://www.dnd5eapi.co/api/spells");
-        const data = await response.json();
-
-        if (data.results) {
-          const detailedSpells = await Promise.all(
-            data.results.map(async (spell: { index: string; url: string }) => {
-              const spellDetailsResponse = await fetch(
-                `https://www.dnd5eapi.co${spell.url}`
-              );
-              return await spellDetailsResponse.json();
-            })
-          );
-
-          // Group spells by class
-          const groupedSpells: { [className: string]: Spell[] } = {};
-          detailedSpells.forEach((spell: Spell) => {
-            spell.classes.forEach((classItem) => {
-              if (!groupedSpells[classItem.name]) {
-                groupedSpells[classItem.name] = [];
-              }
-              groupedSpells[classItem.name].push(spell);
-            });
+        console.log("Fetching spells...");
+        const data = await getSpells(1, 20); // Henter alle spells med høj limit
+        console.log("All spells fetched:", data.spells);
+        
+        setAllSpells(data.spells);
+        
+        // Udtræk unikke klassenavne
+        const classSet = new Set<string>();
+        data.spells.forEach((spell: APISpell) => {
+          console.log("Spell classes:", spell.classes); // Debug log
+          
+          spell.classes?.forEach((className: string) => {
+            console.log("Class name:", className); // Log hver class
+            classSet.add(className); // Tilføj className direkte til sættet
           });
-
-          // Cache the data
-          localStorage.setItem("spellsData", JSON.stringify(groupedSpells));
-          setSpellsByClass(groupedSpells);
-        } else {
-          throw new Error("No spells found.");
-        }
+        });
+        
+        const uniqueClasses = Array.from(classSet);
+        console.log("Extracted classes:", uniqueClasses); // Bekræft unikke klassenavne
+        setClasses(uniqueClasses);
       } catch (err: any) {
-        setError(err.message);
+        console.error("Error fetching spells:", err);
+        setError("Failed to load spells.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchSpells();
+    
+    fetchAllSpells();
   }, []);
 
-  const handleCardClick = (spell: Spell) => {
+  useEffect(() => {
+    if (classes.length > 0) {
+      console.log("Auto-selecting first class:", classes[0]);
+      handleTabChange(0); // Vælg den første klasse ved indlæsning
+    }
+  }, [classes]);
+  
+  const handleTabChange = (index: number) => {
+    const selectedClass = classes[index];
+    console.log("Selected class:", selectedClass);
+    
+    // Filtrer spells ved at sammenligne strings direkte
+    const filtered = allSpells.filter((spell) =>
+      spell.classes.includes(selectedClass)
+    );
+  
+    console.log("Filtered spells for class:", selectedClass, filtered);
+    setFilteredSpells(filtered);
+    setCurrentPage(1); // Nulstil siden
+  };
+  
+  
+
+  // Pagination
+  const paginatedSpells = filteredSpells.slice(
+    (currentPage - 1) * spellsPerPage,
+    currentPage * spellsPerPage
+  );
+  console.log("Paginated spells:", paginatedSpells);
+
+  // Håndter klik på en spell
+  const handleCardClick = (spell: APISpell) => {
+    console.log("Clicked spell:", spell);
     setSelectedSpell(spell);
     onOpen();
   };
-
-  if (loading) return <Spinner size="xl" />;
-  if (error)
-    return (
-      <Alert status="error">
-        <AlertIcon />
-        Failed to load spells: {error}
-      </Alert>
-    );
 
   return (
     <Box p={5}>
       <Heading as="h1" size="2xl" mb={5}>
         Spells by Class
       </Heading>
-      <Tabs variant="enclosed">
-        {/* Render a tab for each class */}
-        <TabList>
-          {Object.keys(spellsByClass).map((className) => (
-            <Tab key={className}>{className}</Tab>
-          ))}
-        </TabList>
 
-        <TabPanels>
-          {Object.entries(spellsByClass).map(([className, spells]) => (
-            <TabPanel key={className}>
-              <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-                {spells.map((spell) => (
-                  <Card
-                    key={spell.index}
-                    boxShadow="md"
-                    borderRadius="md"
-                    cursor="pointer"
-                    onClick={() => handleCardClick(spell)}
-                  >
-                    <CardHeader>
-                      <Heading as="h3" size="md">
-                        {spell.name}
-                      </Heading>
-                    </CardHeader>
-                    <CardBody>
-                      <Text>
-                        <strong>Level:</strong> {spell.level}
-                      </Text>
-                      <Text>
-                        <strong>Duration:</strong> {spell.duration}
-                      </Text>
-                      <Text mt={2}>
-                        {spell.desc && spell.desc.length > 0
-                          ? spell.desc[0].length > 100
-                            ? `${spell.desc[0].substring(0, 100)}...`
-                            : spell.desc[0]
-                          : "No description available"}
-                      </Text>
-                    </CardBody>
-                  </Card>
-                ))}
-              </Grid>
-            </TabPanel>
-          ))}
-        </TabPanels>
-      </Tabs>
+      {error && (
+        <Alert status="error">
+          <AlertIcon />
+          {error}
+        </Alert>
+      )}
 
-      {/* Modal to display full spell details */}
+      {loading ? (
+        <Spinner size="xl" />
+      ) : (
+        <Tabs onChange={handleTabChange}>
+          {/* Dynamisk genererede tabs */}
+          <TabList>
+            {classes.map((className) => (
+              <Tab key={className}>{className}</Tab>
+            ))}
+          </TabList>
+
+          <TabPanels>
+            {classes.map((className) => (
+              <TabPanel key={className}>
+                {paginatedSpells.length > 0 ? (
+                  <>
+                    <SpellGrid
+                      spells={paginatedSpells}
+                      onCardClick={handleCardClick}
+                    />
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={Math.ceil(filteredSpells.length / spellsPerPage)}
+                      onPageChange={(page) => setCurrentPage(page)}
+                    />
+                  </>
+                ) : (
+                  <Text>No spells found for this class.</Text>
+                )}
+              </TabPanel>
+            ))}
+          </TabPanels>
+        </Tabs>
+      )}
+
+      {/* Modal til detaljer om en spell */}
       {selectedSpell && (
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
@@ -175,12 +170,11 @@ const Spells: React.FC = () => {
               <Text>
                 <strong>Level:</strong> {selectedSpell.level}
               </Text>
-              <Text mt={2}>
+              <Text>
                 <strong>Duration:</strong> {selectedSpell.duration}
               </Text>
-              <Text mt={4}>
-                <strong>Description:</strong>{" "}
-                {selectedSpell.desc ? selectedSpell.desc.join(" ") : "No description available"}
+              <Text>
+                <strong>Description:</strong> {selectedSpell.desc.join(" ")}
               </Text>
             </ModalBody>
             <ModalFooter>

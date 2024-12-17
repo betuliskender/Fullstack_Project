@@ -49,6 +49,30 @@ export interface Spell {
   description: string;
   damage: string;
   duration: string;
+  classes?: {
+    name: string;
+  }[];
+}
+
+export interface APISpell {
+  index: string;
+  name: string;
+  desc: string[];
+  higher_level?: string[];
+  range: string;
+  components: string[];
+  material?: string;
+  ritual: boolean;
+  duration: string;
+  concentration: boolean;
+  casting_time: string;
+  level: number;
+  school: {
+    name: string;
+  };
+  classes: {
+    name: string;
+  }[];
 }
 
 export interface Skill {
