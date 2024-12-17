@@ -1,8 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@apollo/client";
 import { AuthContext } from "../utility/authContext";
-import { GETALLCHARACTERS } from "../graphql/queries";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./CreateSessionModal";
@@ -19,6 +17,7 @@ import { deleteMapFromCampaign } from "../utility/apiservice";
 import { updateCampaignField } from "../utility/updateCampaignFields";
 import SessionLogs from "./SessionLogs";
 import { useCampaignDetails } from "../hooks/useCampaignDetails";
+import { useCharacters } from "../hooks/useCharacters";
 import CharacterList from "./CharacterList";
 
 // Chakra UI imports
@@ -51,6 +50,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     id || "",
     token
   );
+  const { loading: charactersLoading, error: charactersError, characters: charactersData } = useCharacters(token);
   const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
   const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
   const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
@@ -63,18 +63,6 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   );
 
   const toast = useToast();
-
-  const {
-    loading: charactersLoading,
-    error: charactersError,
-    data: charactersData,
-  } = useQuery(GETALLCHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
-      },
-    },
-  });
 
   if (!isLoggedIn) {
     return (
@@ -520,7 +508,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           onClose={handleModalClose}
           campaign={campaign}
           currentCharacterId={currentCharacterId}
-          availableCharacters={charactersData?.characters || []}
+          availableCharacters={charactersData || []}
           refetchCampaigns={() => {}}
           setCampaign={setCampaign}
         />
