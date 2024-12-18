@@ -3,6 +3,8 @@ import { useLocation } from "react-router-dom";
 import { Character, Spell } from "../utility/types";
 import { editCharacter } from "../utility/apiservice";
 import { AuthContext } from "../utility/authContext";
+import InfoCard from "./InfoCard";
+import DetailsModal from "./DetailsModal";
 import {
   Box,
   Heading,
@@ -13,18 +15,8 @@ import {
   Grid,
   GridItem,
   Divider,
-  Card,
-  CardBody,
-  CardHeader,
   Button,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
   useToast 
 } from "@chakra-ui/react";
 
@@ -161,25 +153,18 @@ const CharacterDetails: React.FC = () => {
         Spells
       </Heading>
       <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-      {character.spells?.map((spell) => (
-        <Card
-          key={spell.name}
-          boxShadow="md"
-          borderRadius="md"
-          onClick={() => handleCardClick(spell)} // Bruger den samme funktion
-          cursor="pointer"
-        >
-          <CardHeader>
-            <Heading as="h3" size="md">{spell.name}</Heading>
-          </CardHeader>
-          <CardBody>
-            <Text mb={2}><strong>Level:</strong> {spell.level}</Text>
-            <Text mb={2}><strong>Duration:</strong> {spell.duration}</Text>
-            <Text mb={2}><strong>Description:</strong> {spell.description.length > 100 ? `${spell.description.substring(0, 100)}...` : spell.description}</Text>
-          </CardBody>
-        </Card>
-      ))}
-
+        {character.spells?.map((spell) => (
+          <InfoCard
+            key={spell.name}
+            title={spell.name}
+            details={{
+              Level: spell.level,
+              Duration: spell.duration,
+            }}
+            description={spell.description}
+            onClick={() => handleCardClick(spell)}
+          />
+        ))}
       </Grid>
 
       <Divider my={5} />
@@ -189,62 +174,18 @@ const CharacterDetails: React.FC = () => {
         Skills
       </Heading>
       <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-      {character.skills?.map((skill) => (
-        <Card
-          key={skill.name}
-          boxShadow="md"
-          borderRadius="md"
-          onClick={() => handleCardClick(skill)} // Bruger samme funktion
-          cursor="pointer"
-        >
-          <CardHeader>
-            <Heading as="h3" size="md">{skill.name}</Heading>
-          </CardHeader>
-          <CardBody>
-            <Text mb={2}><strong>Ability Score:</strong> {skill.abilityScore}</Text>
-            <Text mb={2}><strong>Description:</strong> {skill.desc.length > 100 ? `${skill.desc.substring(0, 100)}...` : skill.desc}</Text>
-          </CardBody>
-        </Card>
-      ))}
-
+        {character.skills?.map((skill) => (
+          <InfoCard
+            key={skill.name}
+            title={skill.name}
+            details={{ "Ability Score": skill.abilityScore }}
+            description={skill.desc}
+            onClick={() => handleCardClick(skill)}
+          />
+        ))}
       </Grid>
 
-      {/* Modal for Spell Details */}
-      {selectedItem && (
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>{selectedItem.name}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              {/* Viser Level kun hvis det er en Spell */}
-              {"level" in selectedItem && (
-                <Text>
-                  <strong>Level:</strong> {selectedItem.level}
-                </Text>
-              )}
-
-              {/* Viser Ability Score kun hvis det er en Skill */}
-              {"abilityScore" in selectedItem && (
-                <Text mt={2}>
-                  <strong>Ability Score:</strong> {selectedItem.abilityScore}
-                </Text>
-              )}
-
-              {/* Viser Description */}
-              <Text mt={2}>
-                <strong>Description:</strong> {"description" in selectedItem ? selectedItem.description : selectedItem.desc}
-              </Text>
-            </ModalBody>
-            <ModalFooter>
-              <Button onClick={onClose} colorScheme="blue">
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
-
+      <DetailsModal isOpen={isOpen} onClose={onClose} item={selectedItem} />
 
     </Box>
   );

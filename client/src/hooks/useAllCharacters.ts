@@ -1,14 +1,10 @@
 import { useQuery } from "@apollo/client";
 import { GETALLCHARACTERS } from "../graphql/queries";
+import { Character } from "../utility/types";
 
-export const useCharacters = (token: string | null) => {
-  const { loading, data, error } = useQuery(GETALLCHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
-      },
-    },
+export const useAllCharacters = (token: string | null) => {
+  return useQuery<{ characters: Character[] }>(GETALLCHARACTERS, {
+    context: { headers: { Authorization: token } }, 
+    fetchPolicy: "network-only",
   });
-
-  return { loading, characters: data?.characters || [], error };
 };

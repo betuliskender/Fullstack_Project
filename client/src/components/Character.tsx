@@ -1,22 +1,20 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useQuery } from "@apollo/client";
 import { AuthContext } from "../utility/authContext";
-import { GETALLCHARACTERS } from "../graphql/queries";
 import { Character } from "../utility/types";
 import { deleteCharacter, editCharacter } from "../utility/apiservice";
 import CreateCharacterModal from "./CreateCharacterModal";
 import { Link } from "react-router-dom";
 import EditCharacterModal from "./EditCharacterModal";
+import { useAllCharacters } from "../hooks/useAllCharacters";
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Heading,
   Image,
   Text,
 } from "@chakra-ui/react";
+import CardContainer from "./CardContainer";
+
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
@@ -29,15 +27,7 @@ const Characters: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-
-  const { loading, error, data, refetch } = useQuery(GETALLCHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
-      },
-    },
-  });
+  const { data, loading, error, refetch } = useAllCharacters(token);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -134,33 +124,44 @@ return (
       
         <Box mt={5} display="grid" gridTemplateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6} >
           {characters.map((char: Character) => (
-            <Card key={char._id}>
-              <CardHeader>
-                <Heading size="md">{char.name}</Heading>
-              </CardHeader>
-              <CardBody>
-                <Link to={`/character/${char._id}`} state={{ character: char }}>
-                <Image
-                  src={char.imageURL}
-                  alt={char.name}
-                  width="100%"
-                  height="200px"
-                  objectFit="cover"
-                  borderRadius="md"
-                />
-                <Text mt={2}><strong>Level:</strong> {char.level}</Text>
-                <Text mt={2}><strong>Race:</strong> {char.race.name}</Text>
-                <Text mt={2}><strong>Class:</strong> {char.class.name}</Text>
-                <Text mt={2}><strong>Background:</strong> {char.background}</Text>
-                </Link>
-                <Button mt={3} colorScheme="red" onClick={() => char._id && handleDelete(char._id)}>
+            <CardContainer
+            key={char._id}
+            title={char.name}
+            actions={
+              <>
+                <Button colorScheme="red" onClick={() => handleDelete(char._id || "")}>
                   Delete
                 </Button>
-                <Button mt={3} ml={3} colorScheme="blue" onClick={() => handleEdit(char)}>
+                <Button colorScheme="blue" ml={3} onClick={() => handleEdit(char)}>
                   Edit
                 </Button>
-              </CardBody>
-            </Card>
+              </>
+            }
+          >
+            <Link to={`/character/${char._id}`} state={{ character: char }}>
+              <Image
+                src={char.imageURL}
+                alt={char.name}
+                width="100%"
+                height="200px"
+                objectFit="cover"
+                borderRadius="md"
+                mb={3}
+              />
+              <Text>
+                <strong>Level:</strong> {char.level}
+              </Text>
+              <Text>
+                <strong>Race:</strong> {char.race.name}
+              </Text>
+              <Text>
+                <strong>Class:</strong> {char.class.name}
+              </Text>
+              <Text>
+                <strong>Background:</strong> {char.background}
+              </Text>
+            </Link>
+          </CardContainer>
           ))}
         </Box>
 

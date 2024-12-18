@@ -9,7 +9,7 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@chakra-ui/react";
-import { useCharacters } from "../hooks/useAllCharacters";
+import { useCharacters } from "../hooks/useCharacters";
 import ModalWrapper from "./ModalWrapper";
 import CharacterSelection from "./CharacterSelection";
 
