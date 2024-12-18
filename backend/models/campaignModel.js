@@ -27,6 +27,11 @@ const campaignSchema = new mongoose.Schema({
       ref: "Map",
     },
   ],
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  }
 }, { timestamps: true });
 
 const Campaign = mongoose.model("Campaign", campaignSchema);

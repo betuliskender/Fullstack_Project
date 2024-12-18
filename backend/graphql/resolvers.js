@@ -21,7 +21,10 @@ const resolvers = {
     },
     campaigns: async (_, __, { user }) => {
       if (!user) throw new Error("Authentication required");
-      return await Campaign.find().populate("characters").populate("sessions");
+
+      return await Campaign.find({ owner: user.id })
+        .populate("characters")
+        .populate("sessions");
     },
     campaign: async (_, { _id }, { user }) => {
       if (!user) throw new Error("Authentication required");
@@ -176,12 +179,15 @@ const resolvers = {
 
     createCampaign: async (_, { name, description }, { user }) => {
       if (!user) throw new Error("Authentication required");
+
       const newCampaign = new Campaign({
         name,
         description,
+        owner: user.id,
         characters: [],
         sessions: [],
       });
+
       return await newCampaign.save();
     },
 
@@ -245,16 +251,20 @@ const resolvers = {
 
       return updatedMap;
     },
-    updateUserProfile: async (_, { firstName, lastName, email, profileImage }, { user }) => {
+    updateUserProfile: async (
+      _,
+      { firstName, lastName, email, profileImage },
+      { user }
+    ) => {
       if (!user) throw new Error("Authentication required");
-  
+
       const updatedData = { firstName, lastName, email };
       if (profileImage) updatedData.profileImage = profileImage;
-  
+
       const updatedUser = await User.findByIdAndUpdate(user.id, updatedData, {
         new: true,
       });
-  
+
       return updatedUser;
     },
   },
@@ -262,7 +272,9 @@ const resolvers = {
   Character: {
     spells: async (parent) => {
       try {
-        const characterSpells = await CharacterSpell.find({ character: parent._id }).populate('spell');
+        const characterSpells = await CharacterSpell.find({
+          character: parent._id,
+        }).populate("spell");
         return characterSpells.map((cs) => cs.spell);
       } catch (error) {
         console.error("Error fetching spells for character:", error);
@@ -271,7 +283,9 @@ const resolvers = {
     },
     skills: async (parent) => {
       try {
-        const characterSkills = await CharacterSkill.find({ character: parent._id }).populate('skill');
+        const characterSkills = await CharacterSkill.find({
+          character: parent._id,
+        }).populate("skill");
         return characterSkills.map((cs) => cs.skill);
       } catch (error) {
         console.error("Error fetching skills for character:", error);
@@ -279,7 +293,6 @@ const resolvers = {
       }
     },
   },
-
 };
 
 export default resolvers;

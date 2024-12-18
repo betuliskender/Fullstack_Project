@@ -12,6 +12,7 @@ export const createCampaign = async (req, res) => {
     const newCampaign = new Campaign({
       name,
       description,
+      owner: req.user.id,
     });
 
     const savedCampaign = await newCampaign.save();
@@ -27,19 +28,17 @@ export const editCampaign = async (req, res) => {
   const { name, description } = req.body;
 
   try {
-    const updatedCampaign = await Campaign.findByIdAndUpdate(
-      campaignId,
+    const campaign = await Campaign.findOneAndUpdate(
+      { _id: campaignId, owner: req.user.id },
       { name, description },
       { new: true, runValidators: true }
     );
 
-    if (!updatedCampaign) {
-      return res
-        .status(404)
-        .json({ message: "Could not find a campaign with that ID" });
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found or unauthorized" });
     }
 
-    res.status(200).json(updatedCampaign);
+    res.status(200).json(campaign);
   } catch (error) {
     console.log("Error updating the campaign", error);
     res.status(500).json({ message: "Failed to update the campaign", error });
@@ -50,19 +49,17 @@ export const deleteCampaign = async (req, res) => {
   const { campaignId } = req.params;
 
   try {
-    const deletedCampaign = await Campaign.findByIdAndDelete(campaignId);
+    const campaign = await Campaign.findOneAndDelete({
+      _id: campaignId,
+      owner: req.user.id,
+    });
 
-    if (!deletedCampaign) {
-      return res
-        .status(404)
-        .json({ message: "Could not find a campaign with that ID" });
+    if (!campaign) {
+      return res.status(404).json({ message: "Campaign not found or unauthorized" });
     }
 
-    // This deletes all the characters from the campaign
     await CampaignCharacter.deleteMany({ campaign: campaignId });
-
     await Session.deleteMany({ campaign: campaignId });
-
     await Map.deleteMany({ campaign: campaignId });
 
     res.status(200).json({ message: "Campaign deleted successfully" });
@@ -72,17 +69,22 @@ export const deleteCampaign = async (req, res) => {
   }
 };
 
+
 export const getCampaignById = async (req, res) => {
   const { campaignId } = req.params;
 
   try {
-    const campaign = await Campaign.findById(campaignId);
+    const campaign = await Campaign.findOne({
+      _id: campaignId,
+      owner: req.user.id,
+    })
+      .populate("characters")
+      .populate("sessions");
 
     if (!campaign) {
-      return res
-        .status(404)
-        .json({ message: "Could not find a campaign with that ID" });
+      return res.status(404).json({ message: "Campaign not found or unauthorized" });
     }
+
     res.status(200).json(campaign);
   } catch (error) {
     console.log("Error getting the campaign", error);
@@ -90,17 +92,19 @@ export const getCampaignById = async (req, res) => {
   }
 };
 
+
 export const getAllCampaigns = async (req, res) => {
   try {
-    const campaigns = await Campaign.find()
-    .populate("characters")
-    .populate("sessions");
+    const campaigns = await Campaign.find({ owner: req.user.id })
+      .populate("characters")
+      .populate("sessions");
     res.status(200).json(campaigns);
   } catch (error) {
     console.log("Error getting all campaigns", error);
     res.status(500).json({ message: "Failed to get all campaigns", error });
   }
 };
+
 
 export const addCharacterToCampaign = async (req, res) => {
   const { campaignId } = req.params;
