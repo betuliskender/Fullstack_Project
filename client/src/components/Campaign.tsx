@@ -21,7 +21,7 @@ import { useCampaigns } from "../hooks/useCampaign";
 interface ProfilePageProps {
   isLoggedIn: boolean;
 }
-
+ 
 const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { token } = useContext(AuthContext);
   const { data, loading, error, refetch } = useCampaigns(token || "");

@@ -1,40 +1,24 @@
+import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
 import {
   Box,
   Heading,
   Grid,
-  Card,
-  CardHeader,
-  CardBody,
-  Text,
   Spinner,
   Alert,
   AlertIcon,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Button,
 } from "@chakra-ui/react";
 import { GET_ALL_SKILLS } from "../graphql/queries";
-import React, { useState } from "react";
-
-interface Skill {
-  name: string;
-  abilityScore: string;
-  desc: string;
-}
+import DetailsModal from "./DetailsModal";
+import { Skill } from "../utility/types";
+import InfoCard from "./InfoCard";
 
 const Skills: React.FC = () => {
   const { loading, error, data } = useQuery(GET_ALL_SKILLS);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
 
-  // Åbn modal med valgt skill
   const handleCardClick = (skill: Skill) => {
     setSelectedSkill(skill);
     onOpen();
@@ -49,65 +33,26 @@ const Skills: React.FC = () => {
       </Alert>
     );
 
-  return (
-    <Box p={5}>
-      <Heading as="h1" size="2xl" mb={5}>
-        Skills
-      </Heading>
-      <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
-        {data.skills.map((skill: Skill) => (
-          <Card
-            key={skill.name}
-            boxShadow="md"
-            borderRadius="md"
-            cursor="pointer"
-            onClick={() => handleCardClick(skill)} // Åbn modal ved klik
-          >
-            <CardHeader>
-              <Heading as="h3" size="md">
-                {skill.name}
-              </Heading>
-            </CardHeader>
-            <CardBody>
-              <Text>
-                <strong>Ability Score:</strong> {skill.abilityScore}
-              </Text>
-              <Text mt={2}>
-                {/* Vis kun kort desc */}
-                {skill.desc.length > 100
-                  ? `${skill.desc.substring(0, 100)}...`
-                  : skill.desc}
-              </Text>
-            </CardBody>
-          </Card>
-        ))}
-      </Grid>
-
-      {/* Modal til at vise fuld description */}
-      {selectedSkill && (
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>{selectedSkill.name}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Text>
-                <strong>Ability Score:</strong> {selectedSkill.abilityScore}
-              </Text>
-              <Text mt={4}>
-                <strong>Description:</strong> {selectedSkill.desc}
-              </Text>
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme="blue" onClick={onClose}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
-    </Box>
-  );
-};
-
+    return (
+      <Box p={5}>
+        <Heading as="h1" size="2xl" mb={5}>
+          Skills
+        </Heading>
+        <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
+          {data.skills.map((skill: Skill) => (
+            <InfoCard
+              key={skill.name}
+              title={skill.name}
+              details={{ "Ability Score": skill.abilityScore }}
+              description={skill.desc}
+              onClick={() => handleCardClick(skill)} // Åbn modal ved klik
+            />
+          ))}
+        </Grid>
+  
+        {/* Genbruger DetailsModal */}
+        <DetailsModal isOpen={isOpen} onClose={onClose} item={selectedSkill} />
+      </Box>
+    );
+  };
 export default Skills;
