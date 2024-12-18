@@ -20,7 +20,7 @@ const CharacterDetailsStep: React.FC<Props> = ({ character, races, classes, onCh
     </FormControl>
     <FormControl>
       <FormLabel>Race</FormLabel>
-      <Select name="race" value={character.race.name} onChange={onChange} mb={3}>
+      <Select placeholder={character.race.name} name="race" value={character.race.name} onChange={onChange} mb={3}>
         {races.map((race) => (
           <option key={race.index} value={race.index}>
             {race.name}
@@ -30,7 +30,7 @@ const CharacterDetailsStep: React.FC<Props> = ({ character, races, classes, onCh
     </FormControl>
     <FormControl>
       <FormLabel>Class</FormLabel>
-      <Select name="class" value={character.class.name} onChange={onChange} mb={3}>
+      <Select placeholder={character.class.name} name="class" value={character.class.name} onChange={onChange} mb={3}>
         {classes.map((cls) => (
           <option key={cls.index} value={cls.index}>
             {cls.name}
