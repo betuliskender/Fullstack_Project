@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent, useContext } from "react";
+import React, { useState, useEffect, ChangeEvent, useContext, useCallback } from "react";
 import { addSkillsToCharacter, addSpellsToCharacter, createCharacter } from "../utility/apiservice";
 import { Character as CharacterType } from "../utility/types";
 import { AuthContext } from "../utility/authContext";
@@ -99,6 +99,39 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
       .finally(() => setClassSpellsLoading(false));
   };
 
+  const resetModal = useCallback(() => {
+    setCharacter({
+      name: "",
+      level: 1,
+      race: {
+        name: "",
+        traits: [],
+        languages: [],
+      },
+      class: {
+        name: "",
+        proficiencies: [],
+        starting_equipment: [],
+      },
+      background: "",
+      imageURL: "",
+      attributes: {
+        strength: 0,
+        dexterity: 0,
+        constitution: 0,
+        intelligence: 0,
+        wisdom: 0,
+        charisma: 0,
+      },
+      user: user?._id || "",
+    });
+    setSelectedSkills([]);
+    setSelectedSpells([]);
+    setCurrentStep(1);
+    setIsTraitsVisible(false);
+    setIsClassDetailsVisible(false);
+  }, [user?._id]);
+
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => prev - 1);
 
@@ -124,9 +157,11 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
           setClasses(data.results);
         })
         .catch((error) => console.error("Error fetching classes:", error));
+    } else {
+      resetModal();
     }
-  }, [isOpen]);
-
+  }, [isOpen, resetModal]);
+  
   // Fetch selected race details
   const fetchRaceDetails = (raceIndex: string) => {
     fetch(`https://www.dnd5eapi.co/api/races/${raceIndex}`, {
@@ -223,38 +258,6 @@ const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose, isLogg
     } else {
       setCharacter((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  
-  const resetModal = () => {
-    setCharacter({
-      name: "",
-      level: 1,
-      race: {
-        name: "",
-        traits: [],
-        languages: [],
-      },
-      class: {
-        name: "",
-        proficiencies: [],
-        starting_equipment: [],
-      },
-      background: "",
-      imageURL: "",
-      attributes: {
-        strength: 0,
-        dexterity: 0,
-        constitution: 0,
-        intelligence: 0,
-        wisdom: 0,
-        charisma: 0,
-      },
-      user: user?._id || "",
-    });
-    setSelectedSkills([]);
-    setSelectedSpells([]);
-    setCurrentStep(1);
   };
 
   const handleSubmit = async () => {
