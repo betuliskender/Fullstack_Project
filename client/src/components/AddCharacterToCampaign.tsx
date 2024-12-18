@@ -1,25 +1,17 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useMemo } from "react";
 import { addCharacterToCampaign } from "../utility/apiservice";
 import { AuthContext } from "../utility/authContext";
-import { useQuery } from "@apollo/client";
-import { GETALLCHARACTERS } from "../graphql/queries";
 import { Character, Campaign } from "../utility/types";
 import {
   Button,
-  FormControl,
-  FormLabel,
-  Select,
   Spinner,
   Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
   ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
 } from "@chakra-ui/react";
+import { useCharacters } from "../hooks/useCharacters";
+import ModalWrapper from "./ModalWrapper";
+import CharacterSelection from "./CharacterSelection";
 
 interface AddCharacterToCampaignProps {
   campaignId: string;
@@ -35,63 +27,45 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({
   onCharacterAdded,
 }) => {
   const { token } = useContext(AuthContext);
+  const { loading, characters, error } = useCharacters(token);
+
   const [selectedCharacter, setSelectedCharacter] = useState<string>("");
-  const { loading: charactersLoading, data: charactersData, error } = useQuery(
-    GETALLCHARACTERS,
-    {
-      context: {
-        headers: {
-          Authorization: token ? `${token}` : "",
-        },
-      },
-    }
-  );
-  
-  const { isOpen, onOpen, onClose } = useDisclosure(); // Chakra's modal control
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const allAssignedCharacterIds = allCampaigns.flatMap((campaign) =>
-    campaign.characters.map((c) => c._id)
+  const allAssignedCharacterIds = useMemo(
+    () => allCampaigns.flatMap((campaign) => campaign.characters.map((c) => c._id)),
+    [allCampaigns]
   );
 
-  const handleCharacterSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCharacter(e.target.value);
-  };
+  const availableCharacters = useMemo(
+    () => characters.filter((character: Character) => !allAssignedCharacterIds.includes(character._id)),
+    [characters, allAssignedCharacterIds]
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (selectedCharacter && token) {
       try {
-        const response = await addCharacterToCampaign(
+        await addCharacterToCampaign(
           campaignId,
           selectedCharacter,
           token
         );
-        console.log(response.message);
 
-        const newCharacter = charactersData.characters.find(
-          (character: Character) => character._id === selectedCharacter
-        );
+        const newCharacter = characters.find((c: Character) => c._id === selectedCharacter);
+        if (newCharacter) onCharacterAdded(newCharacter);
 
-        if (newCharacter) {
-          onCharacterAdded(newCharacter);
-        }
-
-        setSelectedCharacter("");
         refetchCampaigns();
-        onClose(); // Close modal after submission
+        onClose();
       } catch (error) {
-        console.error("Error adding character to campaign:", error);
+        console.error("Error adding character:", error);
       }
     }
   };
 
-  if (charactersLoading) return <Spinner />;
-  if (error) return <Text color="red.500">Error loading characters: {error.message}</Text>;
-
-  const availableCharacters = charactersData.characters.filter(
-    (character: Character) => !allAssignedCharacterIds.includes(character._id)
-  );
+  if (loading) return <Spinner />;
+  if (error) return <Text color="red.500">Error: {error.message}</Text>;
 
   return (
     <>
@@ -99,38 +73,21 @@ const AddCharacterToCampaign: React.FC<AddCharacterToCampaignProps> = ({
         Add Character to Campaign
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Add a Character</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <form onSubmit={handleSubmit}>
-              <FormControl mb={4} isRequired>
-                <FormLabel>Select a Character:</FormLabel>
-                <Select
-                  placeholder="Select a character"
-                  value={selectedCharacter}
-                  onChange={handleCharacterSelect}
-                >
-                  {availableCharacters.map((character: Character) => (
-                    <option key={character._id} value={character._id}>
-                      {character.name}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-              <ModalFooter>
-                <Button colorScheme="teal" type="submit" isDisabled={!selectedCharacter}>
-                  Add Character
-                </Button>
-              </ModalFooter>
-            </form>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+      <ModalWrapper isOpen={isOpen} onClose={onClose} onSubmit={handleSubmit}>
+        <CharacterSelection
+          availableCharacters={availableCharacters}
+          selectedCharacter={selectedCharacter}
+          onSelect={setSelectedCharacter}
+        />
+        <ModalFooter>
+          <Button colorScheme="teal" type="submit" isDisabled={!selectedCharacter}>
+            Add Character
+          </Button>
+        </ModalFooter>
+      </ModalWrapper>
     </>
   );
 };
+
 
 export default AddCharacterToCampaign;

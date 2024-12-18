@@ -3,44 +3,26 @@ import {
   Box,
   Heading,
   Grid,
-  Card,
-  CardHeader,
-  CardBody,
-  Text,
   Spinner,
   Alert,
   AlertIcon,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Button,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
 } from "@chakra-ui/react";
-
-interface Spell {
-  index: string;
-  name: string;
-  level: number;
-  duration: string;
-  desc: string[];
-  classes: { name: string }[];
-}
+import InfoCard from "./InfoCard"; // Importer InfoCard
+import DetailsModal from "./DetailsModal"; // Importer DetailsModal
+import { APISpell } from "../utility/types";
 
 const Spells: React.FC = () => {
-  const [spellsByClass, setSpellsByClass] = useState<{ [className: string]: Spell[] }>({});
+  const [spellsByClass, setSpellsByClass] = useState<{ [className: string]: APISpell[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
+  const [selectedSpell, setSelectedSpell] = useState<APISpell | null>(null);
 
   // Fetch spells and organize by class
   useEffect(() => {
@@ -71,8 +53,8 @@ const Spells: React.FC = () => {
           );
 
           // Group spells by class
-          const groupedSpells: { [className: string]: Spell[] } = {};
-          detailedSpells.forEach((spell: Spell) => {
+          const groupedSpells: { [className: string]: APISpell[] } = {};
+          detailedSpells.forEach((spell: APISpell) => {
             spell.classes.forEach((classItem) => {
               if (!groupedSpells[classItem.name]) {
                 groupedSpells[classItem.name] = [];
@@ -97,7 +79,7 @@ const Spells: React.FC = () => {
     fetchSpells();
   }, []);
 
-  const handleCardClick = (spell: Spell) => {
+  const handleCardClick = (spell: APISpell) => {
     setSelectedSpell(spell);
     onOpen();
   };
@@ -129,34 +111,20 @@ const Spells: React.FC = () => {
             <TabPanel key={className}>
               <Grid templateColumns="repeat(auto-fill, minmax(250px, 1fr))" gap={6}>
                 {spells.map((spell) => (
-                  <Card
+                  <InfoCard
                     key={spell.index}
-                    boxShadow="md"
-                    borderRadius="md"
-                    cursor="pointer"
-                    onClick={() => handleCardClick(spell)}
-                  >
-                    <CardHeader>
-                      <Heading as="h3" size="md">
-                        {spell.name}
-                      </Heading>
-                    </CardHeader>
-                    <CardBody>
-                      <Text>
-                        <strong>Level:</strong> {spell.level}
-                      </Text>
-                      <Text>
-                        <strong>Duration:</strong> {spell.duration}
-                      </Text>
-                      <Text mt={2}>
-                        {spell.desc && spell.desc.length > 0
-                          ? spell.desc[0].length > 100
-                            ? `${spell.desc[0].substring(0, 100)}...`
-                            : spell.desc[0]
-                          : "No description available"}
-                      </Text>
-                    </CardBody>
-                  </Card>
+                    title={spell.name}
+                    details={{
+                      Level: spell.level,
+                      Duration: spell.duration,
+                    }}
+                    description={
+                      spell.desc && spell.desc.length > 0
+                        ? spell.desc[0]
+                        : "No description available"
+                    }
+                    onClick={() => handleCardClick(spell)} // Åbn modal ved klik
+                  />
                 ))}
               </Grid>
             </TabPanel>
@@ -164,33 +132,8 @@ const Spells: React.FC = () => {
         </TabPanels>
       </Tabs>
 
-      {/* Modal to display full spell details */}
-      {selectedSpell && (
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>{selectedSpell.name}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Text>
-                <strong>Level:</strong> {selectedSpell.level}
-              </Text>
-              <Text mt={2}>
-                <strong>Duration:</strong> {selectedSpell.duration}
-              </Text>
-              <Text mt={4}>
-                <strong>Description:</strong>{" "}
-                {selectedSpell.desc ? selectedSpell.desc.join(" ") : "No description available"}
-              </Text>
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme="blue" onClick={onClose}>
-                Close
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
+      {/* Genbrug DetailsModal */}
+      <DetailsModal isOpen={isOpen} onClose={onClose} item={selectedSpell} />
     </Box>
   );
 };

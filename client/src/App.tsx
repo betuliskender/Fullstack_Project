@@ -6,17 +6,14 @@ import Navbar from "./components/Navbar";
 import { AuthContext, AuthProvider } from "./utility/authContext";
 import { Grid, GridItem } from "@chakra-ui/react";
 import { useContext, useState } from "react";
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
+import { ApolloProvider } from '@apollo/client';
+import client from "./utility/apolloClient";
 import CampaignType from "./components/Campaign";
 import CampaignDetails from "./components/CampaignDetails";
 import CharacterDetails from "./components/CharacterDetails";
 import Skills from "./components/Skills";
 import Spells from "./components/Spells";
 
-const client = new ApolloClient({
-  uri: "http://localhost:5000/graphql",
-  cache: new InMemoryCache()
-});
 
 const App: React.FC = () => {
   const { setUser, setToken } = useContext(AuthContext);

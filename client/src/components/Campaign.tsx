@@ -1,8 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../utility/authContext";
-import { GET_CAMPAIGNS_WITH_CHARACTERS } from "../graphql/queries";
 import { deleteCampaign, editCampaign } from "../utility/apiservice";
 import { Campaign } from "../utility/types";
 import CreateCampaignModal from "./CreateCampaignModal";
@@ -18,30 +16,20 @@ import {
   Text,
 } from "@chakra-ui/react";
 import EditCampaignModal from "./EditCampaignModal";
+import { useCampaigns } from "../hooks/useCampaign";
 
 interface ProfilePageProps {
   isLoggedIn: boolean;
 }
-
+ 
 const CampaignType: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { token } = useContext(AuthContext);
+  const { data, loading, error, refetch } = useCampaigns(token || "");
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [currentCampaign, setCurrentCampaign] = useState<Campaign | null>(null);
   const navigate = useNavigate();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-
-  const { loading, error, data, refetch } = useQuery(
-    GET_CAMPAIGNS_WITH_CHARACTERS,
-    {
-      context: {
-        headers: {
-          Authorization: token ? `${token}` : "",
-        },
-      },
-      fetchPolicy: "network-only",
-    }
-  );
 
   useEffect(() => {
     if (isLoggedIn && token) {

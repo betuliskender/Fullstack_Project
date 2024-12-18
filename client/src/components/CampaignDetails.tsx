@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@apollo/client";
 import { AuthContext } from "../utility/authContext";
-import { GET_CAMPAIGN_BY_ID, GETALLCHARACTERS } from "../graphql/queries";
 import AddCharacterToCampaign from "./AddCharacterToCampaign";
 import ChangeCharacterModal from "./ChangeCharacterModal";
 import SessionForm from "./CreateSessionModal";
 import EditSessionModal from "./EditSessionModal";
 import MapUpload from "./MapUpload";
-import { Campaign, Session, Character, Map } from "../utility/types";
+import { Session, Character, Map } from "../utility/types";
 import {
   removeCharacterFromCampaign,
   deleteSession,
@@ -18,6 +16,10 @@ import RollDice from "./RollDice";
 import { deleteMapFromCampaign } from "../utility/apiservice";
 import { updateCampaignField } from "../utility/updateCampaignFields";
 import SessionLogs from "./SessionLogs";
+import { useCampaignDetails } from "../hooks/useCampaignDetails";
+import { useCharacters } from "../hooks/useCharacters";
+import CharacterList from "./CharacterList";
+import { ModalStateType } from "../utility/types";
 
 // Chakra UI imports
 import {
@@ -25,11 +27,8 @@ import {
   Button,
   Heading,
   Text,
-  UnorderedList,
-  ListItem,
   useToast,
   VStack,
-  HStack,
   Divider,
   IconButton,
   Image,
@@ -48,52 +47,25 @@ interface ProfilePageProps {
 const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   const { id } = useParams<{ id: string }>();
   const { token } = useContext(AuthContext);
-  const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [isCharacterModalOpen, setIsCharacterModalOpen] = useState(false);
-  const [isEditSessionModalOpen, setIsEditSessionModalOpen] = useState(false);
-  const [currentCharacterId, setCurrentCharacterId] = useState<string | null>(
-    null
+  const { campaign, setCampaign, loading, error, refetch } = useCampaignDetails(
+    id || "",
+    token
   );
-  const [currentSession, setCurrentSession] = useState<Session | null>(null);
+  const {
+    characters,
+    loading: charactersLoading,
+    error: charactersError,
+  } = useCharacters(token);
+  const [modalState, setModalState] = useState<ModalStateType>({
+    type: null,
+    data: null,
+  });
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(
     null
   );
 
   const toast = useToast();
-
-  const {
-    loading: campaignLoading,
-    error: campaignError,
-    data: campaignData,
-    refetch,
-  } = useQuery(GET_CAMPAIGN_BY_ID, {
-    variables: { id },
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
-      },
-    },
-    fetchPolicy: "network-only",
-  });
-
-  const {
-    loading: charactersLoading,
-    error: charactersError,
-    data: charactersData,
-  } = useQuery(GETALLCHARACTERS, {
-    context: {
-      headers: {
-        Authorization: token ? `${token}` : "",
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (campaignData && campaignData.campaign) {
-      setCampaign(campaignData.campaign);
-    }
-  }, [campaignData]);
 
   if (!isLoggedIn) {
     return (
@@ -125,8 +97,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleCharacterEdit = (characterId: string) => {
-    setCurrentCharacterId(characterId);
-    setIsCharacterModalOpen(true);
+    setModalState({ type: "editCharacter", data: { characterId } });
   };
 
   const handleCharacterRemove = async (characterId: string) => {
@@ -275,8 +246,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleSessionEdit = (session: Session) => {
-    setCurrentSession(session);
-    setIsEditSessionModalOpen(true);
+    setModalState({ type: "editSession", data: { session } });
   };
 
   const handleSessionDeleted = async (sessionId: string) => {
@@ -318,10 +288,7 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
   };
 
   const handleModalClose = () => {
-    setIsCharacterModalOpen(false);
-    setIsEditSessionModalOpen(false);
-    setCurrentCharacterId(null);
-    setCurrentSession(null);
+    setModalState({ type: null, data: null });
   };
 
   const formatDate = (sessionDate: string) => {
@@ -348,10 +315,10 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
     }
   };
 
-  if (campaignLoading || charactersLoading)
+  if (loading || charactersLoading)
     return <Text>Loading campaign details...</Text>;
-  if (campaignError)
-    return <Text>Error loading campaign details: {campaignError.message}</Text>;
+  if (error)
+    return <Text>Error loading campaign details: {error.message}</Text>;
   if (charactersError)
     return <Text>Error loading characters: {charactersError.message}</Text>;
 
@@ -480,43 +447,11 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
           <Heading as="h3" size="md">
             Characters
           </Heading>
-
-          <UnorderedList>
-            {campaign?.characters.map((character) => (
-              <ListItem key={character._id} mb={2}>
-                <Flex
-                  alignItems="center"
-                  justifyContent="space-between"
-                  gap={4}
-                  wrap="nowrap"
-                >
-                  {/* Character Name */}
-                  <Text isTruncated>{character.name}</Text>
-
-                  {/* Buttons */}
-                  <HStack spacing={2}>
-                    <Button
-                      size="sm"
-                      onClick={() =>
-                        character._id && handleCharacterEdit(character._id)
-                      }
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      colorScheme="red"
-                      onClick={() =>
-                        character._id && handleCharacterRemove(character._id)
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </HStack>
-                </Flex>
-              </ListItem>
-            ))}
-          </UnorderedList>
+          <CharacterList
+            characters={campaign?.characters || []}
+            onEdit={handleCharacterEdit}
+            onRemove={handleCharacterRemove}
+          />
 
           <AddCharacterToCampaign
             campaignId={campaign ? campaign._id || "" : ""}
@@ -565,23 +500,24 @@ const CampaignDetails: React.FC<ProfilePageProps> = ({ isLoggedIn }) => {
         <RollDice />
       </GridItem>
 
-      {isCharacterModalOpen && currentCharacterId && campaign && (
+      {modalState.type === "editCharacter" && campaign && (
         <ChangeCharacterModal
-          isOpen={isCharacterModalOpen}
+          isOpen
           onClose={handleModalClose}
           campaign={campaign}
-          currentCharacterId={currentCharacterId}
-          availableCharacters={charactersData?.characters || []}
+          currentCharacterId={modalState.data?.characterId}
+          availableCharacters={characters}
           refetchCampaigns={() => {}}
           setCampaign={setCampaign}
         />
       )}
-      {isEditSessionModalOpen && currentSession && (
+
+      {modalState.type === "editSession" && campaign && (
         <EditSessionModal
-          isOpen={isEditSessionModalOpen}
+          isOpen
           onClose={handleModalClose}
-          campaign={campaign!}
-          session={currentSession}
+          campaign={campaign}
+          session={modalState.data?.session}
           onSessionUpdated={handleSessionUpdated}
         />
       )}

@@ -51,6 +51,27 @@ export interface Spell {
   duration: string;
 }
 
+export interface APISpell {
+  index: string;
+  name: string;
+  desc: string | string[];
+  higher_level?: string[];
+  range: string;
+  components: string[];
+  material?: string;
+  ritual: boolean;
+  duration: string;
+  concentration: boolean;
+  casting_time: string;
+  level: number;
+  school: {
+    name: string;
+  };
+  classes: {
+    name: string;
+  }[];
+}
+
 export interface Skill {
   _id?: string;
   name: string;
@@ -113,3 +134,17 @@ export interface Map {
     };
   }[];
 }
+
+/* Modal State Types */
+export interface EditCharacterData {
+  characterId: string;
+}
+
+export interface EditSessionData {
+  session: Session;
+}
+
+export type ModalStateType =
+  | { type: "editCharacter"; data: EditCharacterData }
+  | { type: "editSession"; data: EditSessionData }
+  | { type: null; data: null };
