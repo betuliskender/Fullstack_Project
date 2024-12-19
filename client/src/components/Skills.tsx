@@ -8,13 +8,22 @@ import {
   Alert,
   AlertIcon,
   useDisclosure,
+  Flex,
 } from "@chakra-ui/react";
 import { GET_ALL_SKILLS } from "../graphql/queries";
 import DetailsModal from "./DetailsModal";
 import { Skill } from "../utility/types";
 import InfoCard from "./InfoCard";
 
-const Skills: React.FC = () => {
+interface SkillsProps {
+
+  isLoggedIn: boolean;
+
+}
+
+
+
+const Skills: React.FC<SkillsProps> = ({ isLoggedIn }) => {
   const { loading, error, data } = useQuery(GET_ALL_SKILLS);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
@@ -32,6 +41,19 @@ const Skills: React.FC = () => {
         Failed to load skills: {error.message}
       </Alert>
     );
+
+    
+  if (!isLoggedIn) {
+      return (
+        <Flex justify="center" align="center" h="100vh">
+          <Box textAlign="center">
+            <Heading size="lg" mb={4}>
+              You need to log in to view this page
+            </Heading>
+          </Box>
+        </Flex>
+      );
+    }
 
     return (
       <Box p={5}>

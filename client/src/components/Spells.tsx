@@ -12,12 +12,19 @@ import {
   TabPanels,
   Tab,
   TabPanel,
+  Flex,
 } from "@chakra-ui/react";
 import InfoCard from "./InfoCard"; // Importer InfoCard
 import DetailsModal from "./DetailsModal"; // Importer DetailsModal
 import { APISpell } from "../utility/types";
 
-const Spells: React.FC = () => {
+interface SpellsProps {
+  isLoggedIn: boolean;
+
+}
+
+
+const Spells: React.FC<SpellsProps> = ({ isLoggedIn }) => {
   const [spellsByClass, setSpellsByClass] = useState<{ [className: string]: APISpell[] }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +99,18 @@ const Spells: React.FC = () => {
         Failed to load spells: {error}
       </Alert>
     );
+
+    if (!isLoggedIn) {
+        return (
+          <Flex justify="center" align="center" h="100vh">
+            <Box textAlign="center">
+              <Heading size="lg" mb={4}>
+                You need to log in to view this page
+              </Heading>
+            </Box>
+          </Flex>
+        );
+      }
 
   return (
     <Box p={5}>

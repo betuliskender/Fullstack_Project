@@ -1,10 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { HStack, Button, useDisclosure, IconButton } from "@chakra-ui/react";
+import {
+  HStack,
+  VStack,
+  Button,
+  useDisclosure,
+  IconButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import ColorModeSwitch from "./ColorModeSwitch";
 import LogIn from "./LogIn"; // Import LogIn modal component
 import RegisterModal from "./Register"; // Import Register modal component
-import { FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { FaVolumeMute, FaVolumeUp, FaBars } from "react-icons/fa";
 
 interface NavbarProps {
   isLoggedIn: boolean;
@@ -15,10 +28,12 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
   const { isOpen: isLoginOpen, onOpen: onLoginOpen, onClose: onLoginClose } = useDisclosure();
   const { isOpen: isRegisterOpen, onOpen: onRegisterOpen, onClose: onRegisterClose } = useDisclosure();
-
-  // Music-controller
+  const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Responsive check for small screens
+  const [isSmallScreen] = useMediaQuery("(max-width: 768px)");
 
   const toggleMusic = () => {
     if (audioRef.current) {
@@ -37,51 +52,67 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
     }
   }, []);
 
+  const NavLinks = () => (
+    <>
+      <Link to="/">
+        <Button colorScheme="teal" variant="ghost" w="full">
+          Home
+        </Button>
+      </Link>
+      {isLoggedIn && (
+        <>
+          <Link to="/profile">
+            <Button colorScheme="teal" variant="ghost" w="full">
+              Profile
+            </Button>
+          </Link>
+          <Link to="/campaign">
+            <Button colorScheme="teal" variant="ghost" w="full">
+              Campaign
+            </Button>
+          </Link>
+          <Link to="/character">
+            <Button colorScheme="teal" variant="ghost" w="full">
+              Characters
+            </Button>
+          </Link>
+          <Link to="/spells">
+            <Button colorScheme="teal" variant="ghost" w="full">
+              Spells
+            </Button>
+          </Link>
+          <Link to="/skills">
+            <Button colorScheme="teal" variant="ghost" w="full">
+              Skills
+            </Button>
+          </Link>
+        </>
+      )}
+    </>
+  );
+
   return (
-    <HStack spacing={4} justify="space-between">
-      <HStack spacing={4}>
-        <Link to="/">
-          <Button colorScheme="teal" variant="ghost">
-            Home
-          </Button>
-        </Link>
-        {isLoggedIn && (
-          <>
-            <Link to="/profile">
-              <Button colorScheme="teal" variant="ghost">
-                Profile
-              </Button>
-            </Link>
-            <Link to="/campaign">
-              <Button colorScheme="teal" variant="ghost">
-                Campaign
-              </Button>
-            </Link>
-            <Link to="/character">
-              <Button colorScheme="teal" variant="ghost">
-                Characters
-              </Button>
-            </Link>
-            <Link to="/spells">
-              <Button colorScheme="teal" variant="ghost">
-                Spells
-              </Button>
-            </Link>
-            <Link to="/skills">
-              <Button colorScheme="teal" variant="ghost">
-                Skills
-              </Button>
-            </Link>
-          </>
-        )}
-      </HStack>
+    <HStack spacing={4} justify="space-between" p={4}>
+      {/* Left: Hamburger or Links */}
+      {isSmallScreen ? (
+        <IconButton
+          aria-label="Open Menu"
+          icon={<FaBars />}
+          colorScheme="teal"
+          onClick={onDrawerOpen}
+        />
+      ) : (
+        <HStack spacing={4}>
+          <NavLinks />
+        </HStack>
+      )}
+
+      {/* Right: Login/Logout and settings */}
       <HStack spacing={4}>
         {isLoggedIn ? (
-          <>
-            <Button colorScheme="teal" variant="solid" onClick={onLogout}>
-              Logout
-            </Button>
-          </>
+          <Button colorScheme="teal" variant="solid" onClick={onLogout}>
+            Logout
+          </Button>
         ) : (
           <>
             <Button colorScheme="teal" variant="solid" onClick={onLoginOpen}>
@@ -97,7 +128,6 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
           </>
         )}
         <ColorModeSwitch />
-        {/* Music-button */}
         <IconButton
           aria-label="Toggle Music"
           icon={isPlaying ? <FaVolumeUp /> : <FaVolumeMute />}
@@ -105,12 +135,25 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, onLogin, onLogout }) => {
           size="sm"
           onClick={toggleMusic}
         />
-        {/* Audio Element */}
         <audio ref={audioRef} loop>
           <source src="/assets/401_Feast_of_Crispian.mp3" type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
       </HStack>
+
+      {/* Drawer for mobile */}
+      <Drawer isOpen={isDrawerOpen} placement="left" onClose={onDrawerClose}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Menu</DrawerHeader>
+          <DrawerBody>
+            <VStack align="start">
+              <NavLinks />
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </HStack>
   );
 };

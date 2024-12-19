@@ -59,8 +59,8 @@ const App: React.FC = () => {
                 <Route
                   path="/character"
                   element={<Character isLoggedIn={isLoggedIn} />}/>
-                <Route path="/spells" element={<Spells />} />
-                <Route path="/skills" element={<Skills />} />
+                <Route path="/spells" element={<Spells isLoggedIn={isLoggedIn} />} />
+                <Route path="/skills" element={<Skills isLoggedIn={isLoggedIn}/>} />
                 <Route path="/character/:id" element={<CharacterDetails />} />
                 <Route path="/campaign" element={<CampaignType isLoggedIn={isLoggedIn} />} />
                 <Route path="/campaign/:id" element={<CampaignDetails isLoggedIn={isLoggedIn}/>} />
