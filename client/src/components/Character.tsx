@@ -96,6 +96,7 @@ const handleEditSubmit = async (updatedCharacter: Character) => {
 };
 
 const handleCharacterCreated = (newCharacter: Character) => {
+  refetch();
   setCharacters((prevCharacters) => [...prevCharacters, newCharacter]);
   setSuccessMessage("Character created successfully");
 };
